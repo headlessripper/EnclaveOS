@@ -23,6 +23,12 @@
   system.image.id = "enclave";
   system.image.version = "1";
 
+  # A second generation (adds htop), baked into the image so rollback can be
+  # demonstrated entirely offline (no network, no KVM) on the booted VM.
+  specialisation.withHtop.configuration = {
+    environment.systemPackages = [ pkgs.htop ];
+  };
+
   image.repart = {
     name = "enclave";
     partitions = {
