@@ -1,9 +1,12 @@
 # Enclave UI — Surfaces Tracker
 
 Every surface of the Enclave experience to design and build, so none is missed.
-Mature, Windows-11/12-familiar, unmistakably Enclave (dark glass + orange `#FF6A13`,
-logo, control bubble). Widgets, popups, notifications, menus all share **one glass
-card system**.
+Direction (locked 2026-11-14): **warm vibrant glass** — an orange→coral→magenta
+bloom wallpaper, glossy frosted light-glass panels, a bold rounded orange taskbar,
+the glossy launcher that fuses apps + widgets + recents + greeting. Windows-11/12
+bones, unmistakably Enclave (orange `#FF7A3D` / coral `#F2506E`, logo, control
+bubble). Widgets, popups, notifications, menus all share **one glass card system**.
+Design system artifact: https://claude.ai/artifact/J6dtnG722icKTzUqFADo43
 
 Status: ⬜ todo · 🟧 designing · ✅ design signed off · 🏗️ building · ✔️ shipped
 
@@ -14,18 +17,15 @@ Status: ⬜ todo · 🟧 designing · ✅ design signed off · 🏗️ building 
 - ⬜ Sounds (startup, notification) — later
 
 ## Core surfaces
-- 🟧 Lock screen (clock, date, notifications, media, unlock)
-- ⬜ Login / greeter (SDDM, user, avatar, power)
-- 🟧 Desktop (wallpaper, desktop icons, right-click menu)
-- 🟧 Widgets board (Win11-style glass board: clock, calendar, weather, photos, to-do, system, AI)
-- 🟧 Start / launcher (search + AI, pinned, recommended, user, power)
-- ⬜ Global search / command palette (apps, files, actions, ask AI)
-- 🟧 Taskbar (floating island, pinned, running indicators, system tray)
+- 🟧 Desktop + launcher (bloom wallpaper, desktop icons, glossy launcher = apps+widgets+recents+greeting)
+- 🟧 Lock screen (clock, date, assistant brief, media, unlock)
+- 🟧 Login / greeter (avatar, name, password, power)
+- 🟧 Settings app (frosted sidebar + panes, accent/glass/transparency controls)
 - 🟧 Quick settings / Control center (toggles, sliders, AI pilot) — popup system
-- ⬜ Notification center + toasts — popup system (same cards)
+- 🟧 Notification center + toasts — popup system (same cards)
+- 🟧 Window chrome + floating control bubble (frameless, drag, AI, split, min/max/close)
+- ⬜ Global search / command palette (apps, files, actions, ask AI)
 - ⬜ Context menus / popups (unified glass menu) — popup system
-- 🟧 Window chrome + floating control bubble (frameless, drag, min/max/close, AI, pin, split)
-- ⬜ Settings app (sidebar + panes, Enclave-styled)
 - ⬜ File manager (Files)
 - ⬜ AI Assistant surface (window + voice HUD, OpenVox)
 - ⬜ System dialogs (power, auth/password, confirm)
