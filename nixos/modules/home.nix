@@ -13,7 +13,10 @@
     users.enclave = { pkgs, ... }: {
       imports = [ inputs.plasma-manager.homeManagerModules.plasma-manager ];
       home.stateVersion = "26.05";
-      home.packages = [ (pkgs.callPackage ../pkgs/enclave-icons.nix { }) ];
+      home.packages = [
+        (pkgs.callPackage ../pkgs/enclave-icons.nix { })
+        (pkgs.callPackage ../pkgs/enclave-paper-colors.nix { }) # selectable "Enclave Paper" light theme
+      ];
 
       programs.plasma = {
         enable = true;

@@ -55,6 +55,7 @@
 
         # Branding packages (exposed for testing/reuse).
         enclave-icons = nixpkgs.legacyPackages.${system}.callPackage ./nixos/pkgs/enclave-icons.nix { };
+        enclave-paper = nixpkgs.legacyPackages.${system}.callPackage ./nixos/pkgs/enclave-paper-colors.nix { };
       };
     };
 }
