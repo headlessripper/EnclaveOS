@@ -17,6 +17,17 @@ check() { # name  option-path  expected-json
   fi
 }
 
+checkSet() { # name  option-path   -> passes when value is set (not null/err/empty)
+  local got
+  got=$("$NIX" eval --json "$cfg.$2" 2>/dev/null || echo '<err>')
+  if [ "$got" != "<err>" ] && [ "$got" != "null" ] && [ -n "$got" ]; then
+    echo "PASS $1 (set: $got)"
+  else
+    echo "FAIL $1 ($2 = $got)"
+    fail=1
+  fi
+}
+
 # Task 1 — desktop
 check plasma6        "services.desktopManager.plasma6.enable"   "true"
 check sddm           "services.displayManager.sddm.enable"      "true"
@@ -27,5 +38,9 @@ check defaultsession "services.displayManager.defaultSession"   '"plasma"'
 # Task 2 — home-manager + plasma-manager
 check hm-user   "home-manager.users.enclave.home.stateVersion"       '"26.05"'
 check hm-plasma "home-manager.users.enclave.programs.plasma.enable"  "true"
+
+# Task 3 — theme
+check    colorscheme "home-manager.users.enclave.programs.plasma.workspace.colorScheme" '"BreezeDark"'
+checkSet wallpaper   "home-manager.users.enclave.programs.plasma.workspace.wallpaper"
 
 exit $fail
