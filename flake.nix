@@ -6,23 +6,33 @@
     url = "github:nix-community/nixos-generators";
     inputs.nixpkgs.follows = "nixpkgs";
   };
+  inputs.home-manager = {
+    url = "github:nix-community/home-manager/release-26.05";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
+  inputs.plasma-manager = {
+    url = "github:nix-community/plasma-manager";
+    inputs.nixpkgs.follows = "nixpkgs";
+    inputs.home-manager.follows = "home-manager";
+  };
 
-  outputs = { self, nixpkgs, nixos-generators }:
+  outputs = inputs@{ self, nixpkgs, nixos-generators, home-manager, plasma-manager }:
     let
       system = "x86_64-linux";
+      specialArgs = { inherit inputs; };
     in {
       nixosConfigurations.enclave = nixpkgs.lib.nixosSystem {
-        inherit system;
+        inherit system specialArgs;
         modules = [ ./nixos/configuration.nix ];
       };
 
       nixosConfigurations.enclave-iso = nixpkgs.lib.nixosSystem {
-        inherit system;
+        inherit system specialArgs;
         modules = [ ./nixos/iso.nix ];
       };
 
       nixosConfigurations.enclave-diskimage = nixpkgs.lib.nixosSystem {
-        inherit system;
+        inherit system specialArgs;
         modules = [ ./nixos/image.nix ];
       };
 
@@ -30,7 +40,7 @@
         iso = self.nixosConfigurations.enclave-iso.config.system.build.isoImage;
         default = self.nixosConfigurations.enclave-iso.config.system.build.isoImage;
 
-        # Pre-installed, ready-to-boot VMware disk image (no in-VM install needed).
+        # KVM-free pre-installed VMware image (nixos-generators; needs KVM to build).
         vmdk = nixos-generators.nixosGenerate {
           inherit system;
           format = "vmware";

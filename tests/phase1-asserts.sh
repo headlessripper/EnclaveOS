@@ -24,4 +24,8 @@ check sddm-wayland   "services.displayManager.sddm.wayland.enable" "true"
 check autologin      "services.displayManager.autoLogin.user"   '"enclave"'
 check defaultsession "services.displayManager.defaultSession"   '"plasma"'
 
+# Task 2 — home-manager + plasma-manager
+check hm-user   "home-manager.users.enclave.home.stateVersion"       '"26.05"'
+check hm-plasma "home-manager.users.enclave.programs.plasma.enable"  "true"
+
 exit $fail
