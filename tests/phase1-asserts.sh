@@ -28,6 +28,17 @@ checkSet() { # name  option-path   -> passes when value is set (not null/err/emp
   fi
 }
 
+checkApply() { # name  option-path  apply-fn  expected-json
+  local got
+  got=$("$NIX" eval --json "$cfg.$2" --apply "$3" 2>/dev/null || echo '<err>')
+  if [ "$got" = "$4" ]; then
+    echo "PASS $1 ($got)"
+  else
+    echo "FAIL $1 ($got, want $4)"
+    fail=1
+  fi
+}
+
 # Task 1 — desktop
 check plasma6        "services.desktopManager.plasma6.enable"   "true"
 check sddm           "services.displayManager.sddm.enable"      "true"
@@ -42,5 +53,11 @@ check hm-plasma "home-manager.users.enclave.programs.plasma.enable"  "true"
 # Task 3 — theme
 check    colorscheme "home-manager.users.enclave.programs.plasma.workspace.colorScheme" '"BreezeDark"'
 checkSet wallpaper   "home-manager.users.enclave.programs.plasma.workspace.wallpaper"
+
+# Task 4 — one clean bottom panel
+checkApply panels-count  "home-manager.users.enclave.programs.plasma.panels" "builtins.length" "1"
+checkApply panel-loc     "home-manager.users.enclave.programs.plasma.panels" "ps: (builtins.elemAt ps 0).location" '"bottom"'
+checkApply panel-float   "home-manager.users.enclave.programs.plasma.panels" "ps: (builtins.elemAt ps 0).floating" "true"
+checkApply panel-island  "home-manager.users.enclave.programs.plasma.panels" "ps: (builtins.elemAt ps 0).lengthMode" '"fit"'
 
 exit $fail

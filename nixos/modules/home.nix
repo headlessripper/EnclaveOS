@@ -31,6 +31,25 @@
         # Orange accent (#FF6A13 = 255,106,19); no typed option in this
         # plasma-manager, so set it via kdeglobals directly.
         configFile.kdeglobals.General.AccentColor = "255,106,19";
+
+        # Task 4 — a single clean floating-island taskbar: start menu,
+        # running apps, system tray, clock, centered and shrunk to content.
+        panels = [
+          {
+            location = "bottom";
+            floating = true;
+            lengthMode = "fit";
+            alignment = "center";
+            height = 44;
+            widgets = [
+              "org.kde.plasma.kickoff"
+              "org.kde.plasma.icontasks"
+              "org.kde.plasma.marginsseparator"
+              "org.kde.plasma.systemtray"
+              "org.kde.plasma.digitalclock"
+            ];
+          }
+        ];
       };
     };
   };
