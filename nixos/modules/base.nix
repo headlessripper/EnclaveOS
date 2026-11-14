@@ -1,8 +1,9 @@
 { lib, ... }:
-let
-  hostName = "enclave";
-in
 {
+  # Installed-system base: disk layout + bootloader. Shared settings live in
+  # common.nix; the live ISO imports common.nix directly (not this file).
+  imports = [ ./common.nix ];
+
   # --- Platform ---
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
@@ -35,26 +36,4 @@ in
     fsType = "vfat";
     options = [ "fmask=0077" "dmask=0077" ];
   };
-
-  # --- Hardware / firmware ---
-  hardware.enableRedistributableFirmware = true;
-
-  # --- Identity & locale ---
-  networking.hostName = hostName;
-  networking.networkmanager.enable = true;
-  time.timeZone = lib.mkDefault "UTC";
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  # --- User (dev default; installer / real deploy overrides the password) ---
-  users.users.enclave = {
-    isNormalUser = true;
-    description = "Enclave";
-    extraGroups = [ "wheel" "networkmanager" ];
-    initialPassword = "enclave";
-  };
-
-  # --- Nix / flakes on the installed system ---
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  system.stateVersion = "26.05";
 }

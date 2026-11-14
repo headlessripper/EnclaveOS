@@ -11,5 +11,15 @@
         inherit system;
         modules = [ ./nixos/configuration.nix ];
       };
+
+      nixosConfigurations.enclave-iso = nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [ ./nixos/iso.nix ];
+      };
+
+      packages.${system} = {
+        iso = self.nixosConfigurations.enclave-iso.config.system.build.isoImage;
+        default = self.nixosConfigurations.enclave-iso.config.system.build.isoImage;
+      };
     };
 }
