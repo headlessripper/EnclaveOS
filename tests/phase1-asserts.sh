@@ -54,11 +54,7 @@ check hm-plasma "home-manager.users.enclave.programs.plasma.enable"  "true"
 check    colorscheme "home-manager.users.enclave.programs.plasma.workspace.colorScheme" '"EnclaveGlass"'
 checkSet wallpaper   "home-manager.users.enclave.programs.plasma.workspace.wallpaper"
 
-# Task 4 — one clean bottom panel
-checkApply panels-count  "home-manager.users.enclave.programs.plasma.panels" "builtins.length" "1"
-checkApply panel-loc     "home-manager.users.enclave.programs.plasma.panels" "ps: (builtins.elemAt ps 0).location" '"bottom"'
-checkApply panel-float   "home-manager.users.enclave.programs.plasma.panels" "ps: (builtins.elemAt ps 0).floating" "true"
-checkApply panel-island  "home-manager.users.enclave.programs.plasma.panels" "ps: (builtins.elemAt ps 0).lengthMode" '"fit"'
+# Panel + wallpaper now come from the system look-and-feel (desktop.nix), not plasma-manager.
 
 # Task 5 — icon theme
 check icontheme "home-manager.users.enclave.programs.plasma.workspace.iconTheme" '"Enclave"'

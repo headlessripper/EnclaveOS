@@ -13,7 +13,6 @@
   # Boot via systemd-boot + a Unified Kernel Image on the ESP.
   boot.loader.grub.enable = false;
   boot.loader.systemd-boot.enable = lib.mkForce false;
-  boot.plymouth.enable = lib.mkForce false;
   boot.uki.name = "enclave";
 
   # Storage controller drivers so the initrd can see the disk in VMware/QEMU/etc.

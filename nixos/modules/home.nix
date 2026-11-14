@@ -43,28 +43,11 @@
           kwinrc."Plugins".blurEnabled = true;
           kwinrc."Effect-blur".BlurStrength = 12;
           kwinrc."Effect-blur".NoiseStrength = 3;
-          # Rounded window corners.
-          kwinrc."org.kde.kdecoration2".ButtonsOnLeft = "MS";
         };
 
-        # Task 4 — a single clean floating-island taskbar: start menu,
-        # running apps, system tray, clock, centered and shrunk to content.
-        panels = [
-          {
-            location = "bottom";
-            floating = true;
-            lengthMode = "fit";
-            alignment = "center";
-            height = 44;
-            widgets = [
-              "org.kde.plasma.kickoff"
-              "org.kde.plasma.icontasks"
-              "org.kde.plasma.marginsseparator"
-              "org.kde.plasma.systemtray"
-              "org.kde.plasma.digitalclock"
-            ];
-          }
-        ];
+        # The panel + wallpaper come from the system-wide Enclave Glass
+        # look-and-feel (desktop.nix), so they apply on first boot. plasma-manager
+        # here only reinforces the per-user colour scheme, accent, icons and fonts.
       };
     };
   };

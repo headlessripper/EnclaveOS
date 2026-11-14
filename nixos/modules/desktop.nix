@@ -18,12 +18,38 @@
   # --- VMware guest integration (clipboard, resize, video) ---
   virtualisation.vmware.guest.enable = true;
 
-  # --- Core desktop apps (Plasma ships these; kept explicit) ---
-  environment.systemPackages = with pkgs.kdePackages; [
+  # --- Core desktop apps + Enclave theme, installed system-wide so the look
+  #     applies on first boot (not only after the first login) ---
+  environment.systemPackages = (with pkgs.kdePackages; [
     dolphin        # file manager
     systemsettings # settings
     kate           # editor
+  ]) ++ [
+    (pkgs.callPackage ../pkgs/enclave-glass-colors.nix { })
+    (pkgs.callPackage ../pkgs/enclave-paper-colors.nix { })
+    (pkgs.callPackage ../pkgs/enclave-icons.nix { })
+    (pkgs.callPackage ../pkgs/enclave-lookandfeel.nix { })
   ];
+
+  # System-wide Plasma defaults — colour scheme, icons, accent, global theme.
+  environment.etc."xdg/kdeglobals".text = ''
+    [General]
+    ColorScheme=EnclaveGlass
+    AccentColor=255,106,19
+
+    [Icons]
+    Theme=Enclave
+
+    [KDE]
+    LookAndFeelPackage=org.enclave.glass
+    widgetStyle=Breeze
+  '';
+  # No KDE splash (the Enclave plymouth covers boot).
+  environment.etc."xdg/ksplashrc".text = ''
+    [KSplash]
+    Engine=none
+    Theme=None
+  '';
 
   # --- Audio ---
   services.pipewire = {

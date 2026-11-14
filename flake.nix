@@ -58,6 +58,7 @@
         enclave-paper = nixpkgs.legacyPackages.${system}.callPackage ./nixos/pkgs/enclave-paper-colors.nix { };
         enclave-glass = nixpkgs.legacyPackages.${system}.callPackage ./nixos/pkgs/enclave-glass-colors.nix { };
         enclave-wallpaper = nixpkgs.legacyPackages.${system}.callPackage ./nixos/pkgs/enclave-wallpaper.nix { };
+        enclave-lookandfeel = nixpkgs.legacyPackages.${system}.callPackage ./nixos/pkgs/enclave-lookandfeel.nix { };
       };
     };
 }
