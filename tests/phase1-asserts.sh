@@ -51,7 +51,7 @@ check hm-user   "home-manager.users.enclave.home.stateVersion"       '"26.05"'
 check hm-plasma "home-manager.users.enclave.programs.plasma.enable"  "true"
 
 # Task 3 — theme
-check    colorscheme "home-manager.users.enclave.programs.plasma.workspace.colorScheme" '"BreezeDark"'
+check    colorscheme "home-manager.users.enclave.programs.plasma.workspace.colorScheme" '"EnclaveGlass"'
 checkSet wallpaper   "home-manager.users.enclave.programs.plasma.workspace.wallpaper"
 
 # Task 4 — one clean bottom panel

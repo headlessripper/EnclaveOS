@@ -13,18 +13,21 @@
     users.enclave = { pkgs, ... }: {
       imports = [ inputs.plasma-manager.homeManagerModules.plasma-manager ];
       home.stateVersion = "26.05";
+      # Three selectable Enclave themes: Glass (default), Paper (light), and the
+      # built-in dark. Glass is the signature warm-glass look.
       home.packages = [
         (pkgs.callPackage ../pkgs/enclave-icons.nix { })
-        (pkgs.callPackage ../pkgs/enclave-paper-colors.nix { }) # selectable "Enclave Paper" light theme
+        (pkgs.callPackage ../pkgs/enclave-glass-colors.nix { })  # default "Enclave Glass"
+        (pkgs.callPackage ../pkgs/enclave-paper-colors.nix { })  # "Enclave Paper" light
       ];
 
       programs.plasma = {
         enable = true;
 
-        # Task 3 — Enclave look: dark + orange accent, branded wallpaper, font.
+        # Enclave Glass: dark warm glass, orange accent, the bloom wallpaper.
         workspace = {
           lookAndFeel = "org.kde.breezedark.desktop";
-          colorScheme = "BreezeDark";
+          colorScheme = "EnclaveGlass";
           iconTheme = "Enclave";
           wallpaper = pkgs.callPackage ../pkgs/enclave-wallpaper.nix { };
         };
@@ -33,9 +36,16 @@
           pointSize = 10;
         };
 
-        # Orange accent (#FF6A13 = 255,106,19); no typed option in this
-        # plasma-manager, so set it via kdeglobals directly.
-        configFile.kdeglobals.General.AccentColor = "255,106,19";
+        configFile = {
+          # Orange accent (#FF6A13 = 255,106,19); no typed option in this plasma-manager.
+          kdeglobals.General.AccentColor = "255,106,19";
+          # Frosted glass: blur behind translucent panels and windows.
+          kwinrc."Plugins".blurEnabled = true;
+          kwinrc."Effect-blur".BlurStrength = 12;
+          kwinrc."Effect-blur".NoiseStrength = 3;
+          # Rounded window corners.
+          kwinrc."org.kde.kdecoration2".ButtonsOnLeft = "MS";
+        };
 
         # Task 4 — a single clean floating-island taskbar: start menu,
         # running apps, system tray, clock, centered and shrunk to content.
