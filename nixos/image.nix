@@ -14,6 +14,17 @@
   boot.plymouth.enable = lib.mkForce false;
   boot.uki.name = "enclave";
 
+  # Storage controller drivers so the initrd can see the disk in VMware/QEMU/etc.
+  # (Without these the root device never appears and boot drops to emergency mode.)
+  boot.initrd.availableKernelModules = [
+    # VMware SCSI controllers (LSI parallel/SAS, paravirtual, BusLogic)
+    "mptspi" "mptsas" "mptscsih" "vmw_pvscsi" "BusLogic" "sym53c8xx"
+    # SATA/IDE/NVMe/USB
+    "ahci" "ata_piix" "sd_mod" "sr_mod" "nvme" "xhci_pci" "ehci_pci" "uhci_hcd" "usbhid"
+    # virtio (QEMU/KVM)
+    "virtio_blk" "virtio_pci" "virtio_scsi"
+  ];
+
   # Root filesystem (matches the repart root partition label below).
   # repart's Label= sets the GPT PARTITION label, so match on by-partlabel
   # (by-label matches the filesystem label, which repart does not set here).
