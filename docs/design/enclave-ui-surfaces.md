@@ -24,11 +24,14 @@ Status: ⬜ todo · 🟧 designing · ✅ design signed off · 🏗️ building 
 - 🟧 Quick settings / Control center (toggles, sliders, AI pilot) — popup system
 - 🟧 Notification center + toasts — popup system (same cards)
 - 🟧 Window chrome + floating control bubble (frameless, drag, AI, split, min/max/close)
-- ⬜ Global search / command palette (apps, files, actions, ask AI)
-- ⬜ Context menus / popups (unified glass menu) — popup system
-- ⬜ File manager (Files)
-- ⬜ AI Assistant surface (window + voice HUD, OpenVox)
-- ⬜ System dialogs (power, auth/password, confirm)
+- 🟧 Global search / command palette (apps, files, actions, ask AI)
+- 🟧 Context menus / popups (unified glass menu) — popup system
+- 🟧 File manager (Files)
+- 🟧 AI Assistant surface (window + voice HUD, OpenVox)
+- 🟧 System dialogs (power, auth/password, confirm)
+
+All core surfaces now designed in the Glass/Dark/Paper language (design-system v4).
+Remaining design polish: icon theme redraw, finalized wallpapers. Then → build.
 
 ## Build (after design sign-off)
 - ⬜ Compile the design into a system-wide Plasma theme (applies on first boot)
