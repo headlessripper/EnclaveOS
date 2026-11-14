@@ -60,4 +60,7 @@ checkApply panel-loc     "home-manager.users.enclave.programs.plasma.panels" "ps
 checkApply panel-float   "home-manager.users.enclave.programs.plasma.panels" "ps: (builtins.elemAt ps 0).floating" "true"
 checkApply panel-island  "home-manager.users.enclave.programs.plasma.panels" "ps: (builtins.elemAt ps 0).lengthMode" '"fit"'
 
+# Task 5 — icon theme
+check icontheme "home-manager.users.enclave.programs.plasma.workspace.iconTheme" '"Enclave"'
+
 exit $fail

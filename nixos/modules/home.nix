@@ -13,6 +13,7 @@
     users.enclave = { pkgs, ... }: {
       imports = [ inputs.plasma-manager.homeManagerModules.plasma-manager ];
       home.stateVersion = "26.05";
+      home.packages = [ (pkgs.callPackage ../pkgs/enclave-icons.nix { }) ];
 
       programs.plasma = {
         enable = true;
@@ -21,6 +22,7 @@
         workspace = {
           lookAndFeel = "org.kde.breezedark.desktop";
           colorScheme = "BreezeDark";
+          iconTheme = "Enclave";
           wallpaper = pkgs.callPackage ../pkgs/enclave-wallpaper.nix { };
         };
         fonts.general = {

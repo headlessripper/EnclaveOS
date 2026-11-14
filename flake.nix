@@ -52,6 +52,9 @@
 
         # KVM-free bootable raw image via systemd-repart (no VM / no KVM).
         diskimage = self.nixosConfigurations.enclave-diskimage.config.system.build.image;
+
+        # Branding packages (exposed for testing/reuse).
+        enclave-icons = nixpkgs.legacyPackages.${system}.callPackage ./nixos/pkgs/enclave-icons.nix { };
       };
     };
 }
