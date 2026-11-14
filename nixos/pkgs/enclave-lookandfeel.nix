@@ -42,8 +42,10 @@ let
   layout = pkgs.writeText "org.kde.plasma.desktop-layout.js" ''
     var panel = new Panel;
     panel.location = "bottom";
-    panel.height = 44;
+    panel.height = 46;
     panel.floating = true;
+    panel.alignment = "center";
+    panel.lengthMode = "fit";
     panel.addWidget("org.kde.plasma.kickoff");
     panel.addWidget("org.kde.plasma.icontasks");
     panel.addWidget("org.kde.plasma.marginsseparator");
