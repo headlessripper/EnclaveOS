@@ -15,8 +15,10 @@
   boot.uki.name = "enclave";
 
   # Root filesystem (matches the repart root partition label below).
+  # repart's Label= sets the GPT PARTITION label, so match on by-partlabel
+  # (by-label matches the filesystem label, which repart does not set here).
   fileSystems."/" = {
-    device = "/dev/disk/by-label/nixos";
+    device = "/dev/disk/by-partlabel/nixos";
     fsType = "ext4";
   };
 
