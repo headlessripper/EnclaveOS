@@ -1,0 +1,39 @@
+# Enclave debloat — releng live-ISO packages to strip from the final image.
+# build-iso.sh removes any of these from the assembled packages.x86_64.
+# (Lines that aren't present in releng are harmless no-ops.)
+# Nothing here is needed to boot the Enclave desktop or install it.
+
+# --- IRC / web / shell clients not needed on a consumer desktop ---
+irssi
+lynx
+lftp
+tmux
+nmap
+
+# --- legacy dial-up / WAN / modem stacks ---
+ppp
+rp-pppoe
+wvdial
+xl2tpd
+vpnc
+linux-atm
+usb_modeswitch
+
+# --- firmware blobs for ancient/obscure wifi (not general linux-firmware) ---
+b43-fwcutter
+broadcom-wl-dkms
+ipw2100-fw
+ipw2200-fw
+
+# --- disk-imaging / recovery tools (Enclave installs via its own flow) ---
+partclone
+partimage
+fsarchiver
+ddrescue
+clonezilla
+
+# --- misc live-medium extras ---
+gpm
+darkhttpd
+refind
+livecd-sounds

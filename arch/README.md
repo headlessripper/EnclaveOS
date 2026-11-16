@@ -41,3 +41,14 @@ This runs the whole build inside the official `archlinux` container
 Docker (Docker Desktop with WSL integration, or `sudo apt install docker.io`).
 
 > It will not run on the Windows host directly — use WSL or a VM.
+
+## Keeping it lean
+
+The build strips Arch's live-ISO bloat so the image stays light:
+- `overlay/packages.remove` — niche releng packages removed from the final
+  package set (IRC/web clients, legacy dial-up stacks, obscure wifi firmware,
+  disk-imaging tools). Non-present entries are harmless no-ops.
+- `overlay/pacman.conf` `NoExtract` — drops man pages, docs, and non-English
+  locales at install time (licenses and English help are kept).
+
+The build log prints the before/after package count.

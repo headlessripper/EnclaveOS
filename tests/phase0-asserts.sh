@@ -38,6 +38,11 @@ has "$AIR/etc/sddm.conf.d/10-enclave.conf" '^User=enclave'   "sddm autologin use
 # --- branding assets ---
 exists "$A/branding/enclave-logo.svg"                        "branding: logo svg"
 
+# --- debloat ---
+has "$O/pacman.conf"       '^NoExtract = usr/share/man'  "debloat: NoExtract man/doc"
+exists "$O/packages.remove"                              "debloat: remove list present"
+has "scripts/build-iso.sh" 'packages.remove'             "debloat: build strips removed pkgs"
+
 # --- scripts are valid bash ---
 if bash -n scripts/build-iso.sh; then pass "build-iso.sh parses"; else bad "build-iso.sh parse"; fi
 if bash -n "$AIR/usr/local/bin/enclave-live-setup.sh"; then pass "live-setup parses"; else bad "live-setup parse"; fi

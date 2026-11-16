@@ -86,6 +86,19 @@ if [ -f "$OVERLAY/packages.x86_64.extra" ]; then
   } >> "$PROFILE/packages.x86_64"
 fi
 
+# --- 4b. debloat: strip niche releng live-ISO packages ---
+if [ -f "$OVERLAY/packages.remove" ]; then
+  log "removing bloat packages"
+  rmf="$(mktemp)"
+  grep -vE '^\s*(#|$)' "$OVERLAY/packages.remove" > "$rmf"
+  before="$(grep -cvE '^\s*(#|$)' "$PROFILE/packages.x86_64")"
+  grep -vxFf "$rmf" "$PROFILE/packages.x86_64" > "$PROFILE/packages.x86_64.new"
+  mv "$PROFILE/packages.x86_64.new" "$PROFILE/packages.x86_64"
+  after="$(grep -cvE '^\s*(#|$)' "$PROFILE/packages.x86_64")"
+  rm -f "$rmf"
+  log "  packages: $before -> $after"
+fi
+
 # --- 5. overlay airootfs ---
 log "overlaying airootfs"
 cp -aT "$OVERLAY/airootfs" "$PROFILE/airootfs"
