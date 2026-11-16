@@ -1,0 +1,10 @@
+[General]
+ColorScheme=EnclaveLight
+AccentColor=255,122,61
+
+[Icons]
+Theme=Enclave
+
+[KDE]
+LookAndFeelPackage=org.enclave.desktop
+widgetStyle=Breeze

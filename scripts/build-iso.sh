@@ -90,7 +90,7 @@ fi
 log "overlaying airootfs"
 cp -aT "$OVERLAY/airootfs" "$PROFILE/airootfs"
 AIR="$PROFILE/airootfs"
-chmod 0755 "$AIR/usr/local/bin/enclave-live-setup.sh"
+[ -d "$AIR/usr/local/bin" ] && chmod 0755 "$AIR"/usr/local/bin/*
 
 # --- 6. branding assets into the image ---
 if [ -d "$BRANDING" ]; then

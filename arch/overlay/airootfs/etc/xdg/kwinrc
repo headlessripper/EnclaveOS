@@ -1,0 +1,14 @@
+[org.kde.kdecoration2]
+library=org.kde.breeze
+theme=Breeze
+
+[Plugins]
+blurEnabled=true
+
+[Effect-blur]
+BlurStrength=6
+NoiseStrength=4
+
+# Note: windows keep normal Breeze decorations for now. The frameless +
+# floating-bubble standard is switched on by kwin/enclave-bubble once its
+# control overlay is functional (see arch/overlay/.../kwin/README.md).

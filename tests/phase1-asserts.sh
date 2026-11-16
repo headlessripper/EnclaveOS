@@ -1,62 +1,43 @@
 #!/usr/bin/env bash
-# Phase 1a config assertions. Run from the repo root in WSL with Nix available.
+# Enclave OS — Phase 1 (Windows-like desktop) static assertions.
+# Validates the Plasma theme overlay without a running Plasma; runs anywhere.
+# Run from the repo root:  bash tests/phase1-asserts.sh
 set -uo pipefail
-export NIX_CONFIG='experimental-features = nix-command flakes'
-NIX="/nix/var/nix/profiles/default/bin/nix"
-cfg=".#nixosConfigurations.enclave.config"
+cd "$(dirname "$0")/.." || exit 1
+
 fail=0
+pass() { echo "PASS $1"; }
+bad()  { echo "FAIL $1"; fail=1; }
+has()  { if [ -f "$1" ] && grep -qE "$2" "$1"; then pass "$3"; else bad "$3 ($1 !~ $2)"; fi; }
+exists() { if [ -e "$1" ]; then pass "$2"; else bad "$2 (missing $1)"; fi; }
 
-check() { # name  option-path  expected-json
-  local got
-  got=$("$NIX" eval --json "$cfg.$2" 2>/dev/null || echo '<err>')
-  if [ "$got" = "$3" ]; then
-    echo "PASS $1 ($2 = $got)"
-  else
-    echo "FAIL $1 ($2 = $got, want $3)"
-    fail=1
-  fi
-}
+AIR="arch/overlay/airootfs"
+LNF="$AIR/usr/share/plasma/look-and-feel/org.enclave.desktop"
 
-checkSet() { # name  option-path   -> passes when value is set (not null/err/empty)
-  local got
-  got=$("$NIX" eval --json "$cfg.$2" 2>/dev/null || echo '<err>')
-  if [ "$got" != "<err>" ] && [ "$got" != "null" ] && [ -n "$got" ]; then
-    echo "PASS $1 (set: $got)"
-  else
-    echo "FAIL $1 ($2 = $got)"
-    fail=1
-  fi
-}
+# --- look-and-feel package ---
+has "$LNF/metadata.json" '"Id": "org.enclave.desktop"'      "look-and-feel id"
+has "$LNF/contents/defaults" '^ColorScheme=EnclaveLight'    "l&f default color scheme"
+has "$LNF/contents/layouts/org.kde.plasma.desktop-layout.js" 'org.kde.plasma.kickoff' "taskbar has start (kickoff)"
+has "$LNF/contents/layouts/org.kde.plasma.desktop-layout.js" 'org.kde.plasma.icontasks' "taskbar has task icons"
 
-checkApply() { # name  option-path  apply-fn  expected-json
-  local got
-  got=$("$NIX" eval --json "$cfg.$2" --apply "$3" 2>/dev/null || echo '<err>')
-  if [ "$got" = "$4" ]; then
-    echo "PASS $1 ($got)"
-  else
-    echo "FAIL $1 ($got, want $4)"
-    fail=1
-  fi
-}
+# --- color schemes + accent ---
+has "$AIR/usr/share/color-schemes/EnclaveLight.colors" 'DecorationFocus=255,122,61' "light accent = Enclave orange"
+exists "$AIR/usr/share/color-schemes/EnclaveDark.colors"  "dark color scheme present"
 
-# Task 1 — desktop
-check plasma6        "services.desktopManager.plasma6.enable"   "true"
-check sddm           "services.displayManager.sddm.enable"      "true"
-check sddm-wayland   "services.displayManager.sddm.wayland.enable" "true"
-check autologin      "services.displayManager.autoLogin.user"   '"enclave"'
-check defaultsession "services.displayManager.defaultSession"   '"plasma"'
+# --- system defaults applied on first boot ---
+has "$AIR/etc/xdg/kdeglobals" 'LookAndFeelPackage=org.enclave.desktop' "system default look-and-feel"
+has "$AIR/etc/xdg/kdeglobals" '^AccentColor=255,122,61'     "system accent color"
+exists "$AIR/usr/share/icons/Enclave/index.theme"           "Enclave icon theme present"
+exists "$AIR/etc/skel/.config/autostart/enclave-firstrun.desktop" "first-run autostart present"
 
-# Task 2 — home-manager + plasma-manager
-check hm-user   "home-manager.users.enclave.home.stateVersion"       '"26.05"'
-check hm-plasma "home-manager.users.enclave.programs.plasma.enable"  "true"
+# --- wallpaper ---
+exists "arch/branding/wallpapers/enclave-default.svg"       "default wallpaper present"
 
-# Task 3 — theme
-check    colorscheme "home-manager.users.enclave.programs.plasma.workspace.colorScheme" '"EnclaveGlass"'
-checkSet wallpaper   "home-manager.users.enclave.programs.plasma.workspace.wallpaper"
+# --- window bubble (frameless part 1) ---
+exists "$AIR/usr/share/kwin/scripts/enclave-bubble/metadata.json"       "bubble kwin script metadata"
+has "$AIR/usr/share/kwin/scripts/enclave-bubble/contents/code/main.js" 'noBorder = true' "frameless strips decorations"
 
-# Panel + wallpaper now come from the system look-and-feel (desktop.nix), not plasma-manager.
-
-# Task 5 — icon theme
-check icontheme "home-manager.users.enclave.programs.plasma.workspace.iconTheme" '"Enclave"'
+# --- scripts parse ---
+if bash -n "$AIR/usr/local/bin/enclave-firstrun.sh"; then pass "firstrun parses"; else bad "firstrun parse"; fi
 
 exit $fail

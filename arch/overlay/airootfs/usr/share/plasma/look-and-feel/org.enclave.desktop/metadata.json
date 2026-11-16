@@ -1,0 +1,11 @@
+{
+  "KPackageStructure": "Plasma/LookAndFeel",
+  "KPlugin": {
+    "Authors": [{ "Name": "Enclave" }],
+    "Id": "org.enclave.desktop",
+    "Name": "Enclave",
+    "Description": "Windows-familiar, cleaner and calmer — the Enclave desktop.",
+    "License": "MIT",
+    "Version": "0.1.0"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "KPackageStructure": "KWin/Script",
+  "KPlugin": {
+    "Id": "enclave-bubble",
+    "Name": "Enclave Bubble",
+    "Description": "Frameless windows + the Enclave floating control bubble.",
+    "Authors": [{ "Name": "Enclave" }],
+    "License": "MIT",
+    "Version": "0.1.0"
+  },
+  "X-Plasma-API": "javascript",
+  "X-Plasma-MainScript": "code/main.js"
+}
