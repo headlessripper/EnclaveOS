@@ -60,3 +60,12 @@ lib32-vulkan-icd-loader
 lib32-gnutls
 lib32-pipewire
 vulkan-tools
+
+# --- Phase 3: advisory assistant + voice runtime (official bits only) ---
+# The assistant app (Alpha Code chat layer), the local model runner (llama.cpp),
+# and OpenVox are installed opt-in by enclave-assistant-setup (AUR/pip/heavy).
+python
+python-pip
+python-pipx
+python-virtualenv
+python-keyring

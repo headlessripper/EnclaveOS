@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Enclave Assistant launcher. Runs the installed assistant app, or points the
+# user at the opt-in setup if it isn't installed yet.
+set -euo pipefail
+APP=/usr/lib/enclave/assistant/enclave-assistant
+if [ -x "$APP" ]; then
+  exec "$APP" --config /etc/enclave/assistant.toml "$@"
+fi
+msg="Enclave Assistant isn't installed yet. Run:  enclave-assistant-setup"
+if command -v kdialog >/dev/null 2>&1; then kdialog --msgbox "$msg"; else echo "$msg"; fi
+exit 1

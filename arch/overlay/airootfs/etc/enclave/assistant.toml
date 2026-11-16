@@ -1,0 +1,31 @@
+# Enclave assistant — configuration.
+#
+# ADVISORY ONLY. The assistant answers, explains, and helps. It does NOT operate
+# the system: no settings changes, no installs, no file operations, no actions
+# on your behalf. This boundary is a product decision (see arch/assistant.md);
+# the shipped assistant has no system-control tools wired in.
+
+[assistant]
+advisory_only = true
+system_actions = false
+
+[provider]
+# "local" = bring-your-own GGUF, private, offline (the default).
+# "cloud" = opt-in Enclave cloud model (added later).
+default = "local"
+
+[local]
+runner = "llama-server"           # llama.cpp, OpenAI-compatible
+host = "127.0.0.1"
+port = 8080
+models_dir = "~/.local/share/enclave/models"
+
+[cloud]
+enabled = false
+# Endpoint/model configured when Enclave cloud ships. API tokens live in the
+# system keyring (KWallet) — never in this file.
+
+[voice]
+# OpenVox, on-device. Conversational only; same advisory boundary.
+enabled = true
+engine = "openvox"

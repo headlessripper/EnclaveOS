@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Enclave — opt-in installer for the assistant runtime: the local model runner
+# (llama.cpp / llama-server), OpenVox voice, and the model directory. Network
+# required; run as your normal user (not root).
+#
+#   enclave-assistant-setup [runtime|voice|all]
+#
+set -euo pipefail
+[ "$(id -u)" -ne 0 ] || { echo "Run as your normal user, not root." >&2; exit 1; }
+what="${1:-all}"
+
+ensure_aur_helper() {
+  command -v paru >/dev/null 2>&1 && { AUR=paru; return; }
+  command -v yay  >/dev/null 2>&1 && { AUR=yay;  return; }
+  sudo pacman -S --needed --noconfirm base-devel git
+  tmp="$(mktemp -d)"; git clone https://aur.archlinux.org/paru-bin.git "$tmp/paru"
+  ( cd "$tmp/paru" && makepkg -si --noconfirm ); rm -rf "$tmp"; AUR=paru
+}
+
+setup_runtime() {
+  echo "[enclave] installing local model runner (llama.cpp)…"
+  ensure_aur_helper
+  "$AUR" -S --needed llama.cpp     # provides llama-server (OpenAI-compatible)
+  install -d "${XDG_DATA_HOME:-$HOME/.local/share}/enclave/models"
+  echo "[enclave] add a model with:  enclave-models add hf:TheBloke/....gguf"
+}
+
+setup_voice() {
+  echo "[enclave] installing OpenVox (on-device voice)…"
+  command -v pipx >/dev/null 2>&1 || sudo pacman -S --needed --noconfirm python-pipx
+  pipx install openvox 2>/dev/null || pipx upgrade openvox || true
+  echo "[enclave] voice ready:  enclave-voice"
+}
+
+case "$what" in
+  runtime) setup_runtime ;;
+  voice)   setup_voice ;;
+  all)     setup_runtime; setup_voice ;;
+  *) echo "usage: enclave-assistant-setup [runtime|voice|all]" >&2; exit 2 ;;
+esac
+
+cat <<'NOTE'
+[enclave] runtime ready. The assistant chat app is the Alpha Code chat layer,
+packaged separately as an .enc app (extraction in progress — see
+arch/assistant.md). Until then, 'enclave-assistant' reports it isn't installed.
+NOTE
