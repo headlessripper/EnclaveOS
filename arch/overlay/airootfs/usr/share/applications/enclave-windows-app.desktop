@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Run with Enclave (Windows)
+Comment=Run a Windows program through Wine
+Exec=enclave-run-windows %f
+Icon=wine
+Terminal=false
+NoDisplay=true
+MimeType=application/x-ms-dos-executable;application/x-msdownload;application/x-msi;application/x-ms-installer;

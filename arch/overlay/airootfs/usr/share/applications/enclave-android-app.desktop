@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Install to Android (Enclave)
+Comment=Install an Android app via Waydroid
+Exec=enclave-run-android %f
+Icon=phone
+Terminal=false
+NoDisplay=true
+MimeType=application/vnd.android.package-archive;

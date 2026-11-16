@@ -44,3 +44,19 @@ ttf-dejavu
 open-vm-tools
 spice-vdagent
 qemu-guest-agent
+
+# --- Phase 2: universal apps (official + multilib only) ---
+# Linux apps:
+flatpak
+xdg-user-dirs
+# Windows apps (Wine); Proton/Steam/Waydroid are AUR/heavy -> enclave-appsetup:
+wine
+winetricks
+cabextract
+ttf-liberation
+# 32-bit runtime bits Wine/Proton need:
+lib32-mesa
+lib32-vulkan-icd-loader
+lib32-gnutls
+lib32-pipewire
+vulkan-tools

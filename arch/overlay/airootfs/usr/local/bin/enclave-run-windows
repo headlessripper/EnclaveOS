@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Enclave — run a Windows program (.exe/.msi) through Wine, in a tidy Enclave
+# prefix. Used by the file-type handler and runnable directly.
+set -euo pipefail
+
+if ! command -v wine >/dev/null 2>&1; then
+  echo "Wine is not installed." >&2
+  exit 1
+fi
+
+export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/enclave/wine}"
+export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:-mscoree=d;mshtml=d}"  # skip mono/gecko nags
+mkdir -p "$WINEPREFIX"
+
+target="${1:-}"
+[ -n "$target" ] || { echo "usage: enclave-run-windows <program.exe|installer.msi> [args...]" >&2; exit 2; }
+shift || true
+
+case "${target,,}" in
+  *.msi) exec wine msiexec /i "$target" "$@" ;;
+  *)     exec wine "$target" "$@" ;;
+esac

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Enclave — opt-in installer for app runtimes that live in the AUR or are too
+# heavy to bake into the ISO: Android (Waydroid) and Windows gaming (Proton via
+# Steam). Needs network + build tools; run as your normal user (not root).
+#
+#   enclave-appsetup [android|gaming|all]
+#
+set -euo pipefail
+
+[ "$(id -u)" -ne 0 ] || { echo "Run as your normal user, not root (makepkg refuses root)." >&2; exit 1; }
+what="${1:-all}"
+
+ensure_aur_helper() {
+  if command -v paru >/dev/null 2>&1; then AUR=paru; return; fi
+  if command -v yay  >/dev/null 2>&1; then AUR=yay;  return; fi
+  echo "[enclave] installing the 'paru' AUR helper…"
+  sudo pacman -S --needed --noconfirm base-devel git
+  tmp="$(mktemp -d)"; git clone https://aur.archlinux.org/paru-bin.git "$tmp/paru"
+  ( cd "$tmp/paru" && makepkg -si --noconfirm )
+  rm -rf "$tmp"; AUR=paru
+}
+
+setup_android() {
+  echo "[enclave] installing Waydroid (Android)…"
+  "$AUR" -S --needed waydroid
+  sudo systemctl enable --now waydroid-container.service
+  echo "[enclave] initializing Waydroid images (downloads ~1GB)…"
+  sudo waydroid init || true
+  echo "[enclave] Android ready. Open .apk files or use: waydroid app install <apk>"
+}
+
+setup_gaming() {
+  echo "[enclave] installing Steam + Proton (Windows games)…"
+  sudo pacman -S --needed --noconfirm steam
+  echo "[enclave] In Steam: Settings > Compatibility > enable Proton for all titles."
+}
+
+ensure_aur_helper
+case "$what" in
+  android) setup_android ;;
+  gaming)  setup_gaming ;;
+  all)     setup_android; setup_gaming ;;
+  *) echo "usage: enclave-appsetup [android|gaming|all]" >&2; exit 2 ;;
+esac
+echo "[enclave] done."

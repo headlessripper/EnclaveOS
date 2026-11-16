@@ -107,6 +107,8 @@ ln -sfn /usr/lib/systemd/system/NetworkManager.service \
   "$AIR/etc/systemd/system/multi-user.target.wants/NetworkManager.service"
 ln -sfn ../enclave-live-setup.service \
   "$AIR/etc/systemd/system/multi-user.target.wants/enclave-live-setup.service"
+ln -sfn ../enclave-flathub.service \
+  "$AIR/etc/systemd/system/multi-user.target.wants/enclave-flathub.service"
 # Avoid NetworkManager <-> systemd-networkd/iwd fighting over the live link.
 rm -f "$AIR/etc/systemd/system/multi-user.target.wants/systemd-networkd.service" \
       "$AIR/etc/systemd/system/multi-user.target.wants/systemd-networkd-wait-online.service" \
