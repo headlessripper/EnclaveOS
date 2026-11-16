@@ -1,28 +1,45 @@
 #!/usr/bin/env bash
-# Phase 0 config assertions. Run from the repo root in WSL with Nix available.
-# Each check evaluates one NixOS option and compares its JSON value.
+# Enclave OS — Phase 0 (Arch) static assertions.
+# Validates the archiso overlay + build script without needing Arch/mkarchiso,
+# so it runs anywhere (CI, the Windows host via Git Bash, or WSL).
+# Run from the repo root:  bash tests/phase0-asserts.sh
 set -uo pipefail
-export NIX_CONFIG='experimental-features = nix-command flakes'
-NIX="/nix/var/nix/profiles/default/bin/nix"
-cfg=".#nixosConfigurations.enclave.config"
+cd "$(dirname "$0")/.." || exit 1
+
 fail=0
+pass() { echo "PASS $1"; }
+bad()  { echo "FAIL $1"; fail=1; }
 
-check() { # name  option-path  expected-json
-  local got
-  got=$("$NIX" eval --json "$cfg.$2" 2>/dev/null || echo '<err>')
-  if [ "$got" = "$3" ]; then
-    echo "PASS $1 ($2 = $got)"
-  else
-    echo "FAIL $1 ($2 = $got, want $3)"
-    fail=1
-  fi
+has() { # file  pattern  name
+  if [ -f "$1" ] && grep -qE "$2" "$1"; then pass "$3"; else bad "$3 ($1 !~ $2)"; fi
 }
+exists() { if [ -e "$1" ]; then pass "$2"; else bad "$2 (missing $1)"; fi; }
 
-# Task 2 — base system
-check firmware      "hardware.enableRedistributableFirmware" "true"
-check systemd-boot  "boot.loader.systemd-boot.enable"        "true"
-check hostname      "networking.hostName"                    '"enclave"'
-check user          "users.users.enclave.isNormalUser"       "true"
-check stateVersion  "system.stateVersion"                    '"26.05"'
+A="arch"; O="$A/overlay"; AIR="$O/airootfs"
+
+# --- identity ---
+has "$A/profiledef.overrides" '^iso_name=enclave'            "iso name = enclave"
+has "$A/profiledef.overrides" '^install_dir=enclave'         "install dir = enclave"
+has "$AIR/etc/os-release"     '^ID=enclave'                  "os-release ID = enclave"
+has "$AIR/etc/os-release"     'NAME="Enclave OS"'            "os-release NAME = Enclave OS"
+has "$AIR/etc/hostname"       '^enclave$'                    "hostname = enclave"
+
+# --- packages / repos ---
+has "$O/packages.x86_64.extra" '^sddm$'                      "pkg: sddm"
+has "$O/packages.x86_64.extra" '^plasma-desktop$'            "pkg: plasma-desktop"
+has "$O/packages.x86_64.extra" '^networkmanager$'            "pkg: networkmanager"
+has "$O/pacman.conf"           '^\[multilib\]'               "pacman: multilib enabled"
+
+# --- live session wiring ---
+exists "$AIR/usr/local/bin/enclave-live-setup.sh"            "live-setup script present"
+has "$AIR/etc/systemd/system/enclave-live-setup.service" 'enclave-live-setup.sh' "live-setup unit runs script"
+has "$AIR/etc/sddm.conf.d/10-enclave.conf" '^User=enclave'   "sddm autologin user = enclave"
+
+# --- branding assets ---
+exists "$A/branding/enclave-logo.svg"                        "branding: logo svg"
+
+# --- scripts are valid bash ---
+if bash -n scripts/build-iso.sh; then pass "build-iso.sh parses"; else bad "build-iso.sh parse"; fi
+if bash -n "$AIR/usr/local/bin/enclave-live-setup.sh"; then pass "live-setup parses"; else bad "live-setup parse"; fi
 
 exit $fail

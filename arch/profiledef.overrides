@@ -1,0 +1,9 @@
+# Enclave OS identity — applied to releng/profiledef.sh by scripts/build-iso.sh.
+# Format: one `key=value` per line. The build script rewrites the matching
+# assignment in the copied releng profiledef.sh, so the rest of releng's
+# profiledef (file_permissions, image tool options, etc.) is preserved.
+iso_name=enclave
+iso_publisher=Enclave OS <https://github.com/headlessripper/EnclaveOS>
+iso_application=Enclave OS Live/Install medium
+install_dir=enclave
+iso_label=ENCLAVE

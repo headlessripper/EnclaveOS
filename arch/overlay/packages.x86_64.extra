@@ -1,0 +1,46 @@
+# Enclave OS — packages appended to releng/packages.x86_64 by build-iso.sh.
+# Phase 0: boot to a basic branded Plasma 6 (Wayland) session, kept lean
+# (curated Plasma, not plasma-meta). Theming/polish is Phase 1.
+
+# --- Display manager + Plasma 6 shell (Wayland) ---
+sddm
+plasma-desktop
+plasma-workspace
+kwin
+systemsettings
+kscreen
+powerdevil
+plasma-pa
+plasma-nm
+breeze
+breeze-gtk
+xdg-desktop-portal
+xdg-desktop-portal-kde
+
+# --- Core apps for a usable first session ---
+dolphin
+konsole
+ark
+
+# --- Networking ---
+networkmanager
+
+# --- Audio (PipeWire stack) ---
+pipewire
+pipewire-alsa
+pipewire-pulse
+wireplumber
+
+# --- Graphics / Mesa ---
+mesa
+vulkan-icd-loader
+
+# --- Fonts ---
+noto-fonts
+noto-fonts-emoji
+ttf-dejavu
+
+# --- VM guest integration (dev/test target is VMware; cover common VMs) ---
+open-vm-tools
+spice-vdagent
+qemu-guest-agent

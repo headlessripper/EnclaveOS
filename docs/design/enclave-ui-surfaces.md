@@ -1,12 +1,19 @@
 # Enclave UI — Surfaces Tracker
 
 Every surface of the Enclave experience to design and build, so none is missed.
-Direction (locked 2026-11-14): **warm vibrant glass** — an orange→coral→magenta
-bloom wallpaper, glossy frosted light-glass panels, a bold rounded orange taskbar,
-the glossy launcher that fuses apps + widgets + recents + greeting. Windows-11/12
-bones, unmistakably Enclave (orange `#FF7A3D` / coral `#F2506E`, logo, control
-bubble). Widgets, popups, notifications, menus all share **one glass card system**.
-Design system artifact: https://claude.ai/artifact/J6dtnG722icKTzUqFADo43
+
+Direction (reset 2026-11-17 — see
+`../superpowers/specs/2026-11-17-enclave-os-v2-arch-windowslike-design.md`):
+**Windows-*familiar*, cleaner and nicer.** Layout and navigation read like
+Windows 11 so a Windows user instantly knows where everything is — but tidier,
+calmer, lighter, with Enclave's own branding. Proposed visual language: calm and
+flat-leaning, *restrained* translucency (not heavy glass), generous spacing, one
+tasteful Enclave accent — not the retired orange→magenta "glass bloom". The
+**floating control bubble** stays as the one signature non-Windows touch.
+Built on **Arch + trimmed KDE Plasma 6 (Wayland/KWin)**.
+
+> Superseded: the 2026-11-14 "warm vibrant glass" direction (orange bloom,
+> frosted glass panels) is retired along with the NixOS base.
 
 Status: ⬜ todo · 🟧 designing · ✅ design signed off · 🏗️ building · ✔️ shipped
 
