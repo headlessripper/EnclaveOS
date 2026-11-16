@@ -1,0 +1,6 @@
+[Basic Settings]
+Indexing-Enabled=false
+
+# Enclave ships with the KDE file indexer (Baloo) OFF — it's the biggest idle
+# CPU/disk cost in a default Plasma session and most users don't need it.
+# Re-enable in System Settings > Search if desired.

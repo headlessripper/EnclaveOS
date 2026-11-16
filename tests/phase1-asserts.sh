@@ -37,6 +37,9 @@ exists "arch/branding/wallpapers/enclave-default.svg"       "default wallpaper p
 exists "$AIR/usr/share/kwin/scripts/enclave-bubble/metadata.json"       "bubble kwin script metadata"
 has "$AIR/usr/share/kwin/scripts/enclave-bubble/contents/code/main.js" 'noBorder = true' "frameless strips decorations"
 
+# --- lean desktop: file indexer off ---
+has "$AIR/etc/xdg/baloofilerc" '^Indexing-Enabled=false' "Baloo file indexer disabled"
+
 # --- scripts parse ---
 if bash -n "$AIR/usr/local/bin/enclave-firstrun.sh"; then pass "firstrun parses"; else bad "firstrun parse"; fi
 
