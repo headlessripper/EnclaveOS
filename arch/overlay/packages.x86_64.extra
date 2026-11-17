@@ -14,11 +14,11 @@ kwin
 xorg-server
 xorg-xauth
 xorg-xinit
-# Xorg input driver (keyboard/mouse under X) + the VMware SVGA video/mouse
-# drivers so Xorg reliably finds a screen and input in VMware.
+# Xorg input driver (keyboard/mouse under X). VMware's SVGA GPU is driven by
+# Xorg's built-in modesetting driver (part of xorg-server) — the old
+# xf86-video-vmware / xf86-input-vmmouse DDX drivers were dropped from Arch and
+# are no longer needed.
 xf86-input-libinput
-xf86-video-vmware
-xf86-input-vmmouse
 systemsettings
 kscreen
 powerdevil
