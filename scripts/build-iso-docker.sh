@@ -26,5 +26,5 @@ exec "$RUNNER" run --rm --privileged \
   -e ENCLAVE_WORK=/tmp/enclave-build \
   -v "$REPO:/enclave" -w /enclave \
   archlinux:latest \
-  bash -c 'pacman -Syu --noconfirm --needed archiso git && exec bash scripts/build-iso.sh "$@"' \
+  bash -c 'pacman -Syu --noconfirm --needed archiso git base-devel sudo && exec bash scripts/build-iso.sh "$@"' \
   _ "$@"

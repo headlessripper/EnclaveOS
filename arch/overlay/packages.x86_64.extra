@@ -68,6 +68,19 @@ lib32-gnutls
 lib32-pipewire
 vulkan-tools
 
+# --- Phase 4: graphical installer (Calamares) ---
+# calamares itself is built from the AUR into a local repo at build time
+# (no trustworthy prebuilt exists for Arch); see scripts/build-iso.sh.
+# These are what Calamares shells out to while installing to disk:
+calamares
+grub
+efibootmgr
+squashfs-tools
+parted
+dosfstools
+e2fsprogs
+mkinitcpio
+
 # --- Phase 3: advisory assistant + voice runtime (official bits only) ---
 # The assistant app (Alpha Code chat layer), the local model runner (llama.cpp),
 # and OpenVox are installed opt-in by enclave-assistant-setup (AUR/pip/heavy).

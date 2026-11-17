@@ -12,14 +12,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Static checks (all phases)
-        run: for p in 0 1 2 3; do bash "tests/phase$p-asserts.sh"; done
+        run: for p in 0 1 2 3 4; do bash "tests/phase$p-asserts.sh"; done
 
       - name: Build ISO (in archlinux container)
         run: |
           docker run --rm --privileged \
             -v "$PWD":/enclave -w /enclave \
             archlinux:latest bash -c '
-              pacman -Syu --noconfirm --needed archiso git &&
+              pacman -Syu --noconfirm --needed archiso git base-devel sudo &&
               bash scripts/build-iso.sh'
 
       - name: Upload ISO

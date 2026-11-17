@@ -33,9 +33,9 @@ has "$O/pacman.conf"           '^\[multilib\]'               "pacman: multilib e
 # --- live session wiring ---
 exists "$AIR/usr/local/bin/enclave-live-setup.sh"            "live-setup script present"
 has "$AIR/etc/systemd/system/enclave-live-setup.service" 'enclave-live-setup.sh' "live-setup unit runs script"
-has "$AIR/etc/sddm.conf.d/10-enclave.conf" '^User=enclave'   "sddm autologin user = enclave"
+has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^User=enclave'   "sddm autologin user = enclave"
 # Live session must default to X11 — Wayland black-screens on VM virtual GPUs.
-has "$AIR/etc/sddm.conf.d/10-enclave.conf" '^Session=plasmax11\.desktop' "autologin uses X11 session (VM-safe)"
+has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=plasmax11\.desktop' "autologin uses X11 session (VM-safe)"
 has "$O/packages.x86_64.extra" '^xorg-server$'              "pkg: xorg-server (X11 session)"
 # Regression guard: user creation must not inline missing groups into useradd
 # (the "network" group doesn't exist on Arch and aborted the whole script,

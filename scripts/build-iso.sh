@@ -113,6 +113,10 @@ if [ -d "$BRANDING" ]; then
   install -d "$AIR/usr/share/enclave"
   cp -a "$BRANDING/." "$AIR/usr/share/enclave/"
 fi
+# Calamares branding expects its logo beside branding.desc.
+if [ -d "$AIR/etc/calamares/branding/enclave" ] && [ -f "$BRANDING/enclave-logo.svg" ]; then
+  cp -f "$BRANDING/enclave-logo.svg" "$AIR/etc/calamares/branding/enclave/enclave-logo.svg"
+fi
 
 # --- 7. service wiring (symlinks created here so the repo stays Windows-clean) ---
 log "wiring services (graphical default, SDDM, NetworkManager, live setup)"
@@ -136,6 +140,41 @@ log "branding boot menus"
 grep -rIl --null 'Arch Linux' \
   "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null \
   | xargs -0 -r sed -i 's/Arch Linux/Enclave OS/g'
+
+# --- 8b. Calamares installer: build from AUR into a local file:// repo ---
+# No trustworthy prebuilt Calamares exists for Arch (EndeavourOS ships only the
+# PKGBUILD, Chaotic-AUR doesn't carry it). Every Calamares dependency is in the
+# official repos, so we compile just Calamares here and hand it to mkarchiso via
+# a local repo. Skipped automatically if makepkg isn't available.
+if command -v makepkg >/dev/null 2>&1; then
+  LOCALREPO="${ENCLAVE_WORK:-$REPO/build}/localrepo"
+  log "building Calamares from AUR (one-time compile, ~10 min)…"
+  rm -rf "$LOCALREPO"; install -d "$LOCALREPO"
+  # makepkg refuses to run as root; use a throwaway unprivileged builder.
+  id builder >/dev/null 2>&1 || useradd -m -s /bin/bash builder
+  printf 'builder ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/00-enclave-builder
+  chmod 0440 /etc/sudoers.d/00-enclave-builder
+  BUILDTMP="$(sudo -u builder mktemp -d)"
+  sudo -u builder env MAKEFLAGS="-j$(nproc)" bash -euc "
+    cd '$BUILDTMP'
+    git clone --depth 1 https://aur.archlinux.org/calamares.git
+    cd calamares
+    # Skip the separate -debug package; we only ship the main one.
+    OPTIONS=(!debug) makepkg -s --noconfirm --needed
+  "
+  cp "$BUILDTMP"/calamares/calamares-[0-9]*.pkg.tar.* "$LOCALREPO"/
+  repo-add "$LOCALREPO/enclave-local.db.tar.gz" "$LOCALREPO"/calamares-[0-9]*.pkg.tar.*
+  rm -rf "$BUILDTMP"
+  cat >> "$PROFILE/pacman.conf" <<EOF
+
+[enclave-local]
+SigLevel = Optional TrustAll
+Server = file://$LOCALREPO
+EOF
+  log "  Calamares package staged in local repo"
+else
+  die "makepkg not found — needed to build Calamares (install base-devel)"
+fi
 
 # --- 9. build ---
 mkdir -p "$OUT"
