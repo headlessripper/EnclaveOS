@@ -46,6 +46,14 @@ has "$AIR/etc/skel/.config/picom.conf" 'blur-method'       "picom: blur enabled"
 has "$AIR/etc/skel/.config/picom.conf" 'corner-radius'     "picom: rounded corners"
 exists "$AIR/etc/skel/.config/autostart/picom.desktop"     "picom autostarts"
 
+# --- signature floating bubble ---
+exists "$AIR/usr/local/bin/enclave-bubble"                 "floating bubble app present"
+has "$AIR/usr/local/bin/enclave-bubble" 'wmctrl|xdotool'   "bubble controls the active window"
+exists "$AIR/etc/skel/.config/autostart/enclave-bubble.desktop" "bubble autostarts"
+has "arch/overlay/packages.x86_64.extra" '^python-gobject$' "pkg: python-gobject (bubble GTK)"
+has "arch/overlay/packages.x86_64.extra" '^wmctrl$'        "pkg: wmctrl (bubble window control)"
+has "arch/overlay/packages.x86_64.extra" '^xdotool$'       "pkg: xdotool (bubble window control)"
+
 # --- no KDE/Plasma leftovers in the overlay ---
 if [ -d "$AIR/usr/share/plasma" ] || [ -d "$AIR/usr/share/kwin" ] || [ -f "$AIR/etc/xdg/kdeglobals" ]; then
   bad "KDE/Plasma overlay files still present"

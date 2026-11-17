@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+# Enclave OS — the signature floating window-control bubble.
+#
+# A small, always-on-top, rounded "island" that controls the *active* window
+# (minimize / maximize / close) from anywhere on screen. Draggable with the
+# left mouse button on its body. It never takes focus, so the window it acts on
+# stays the real active one. Enclave's distinctive, non-Windows touch.
+#
+# Deps: python-gobject, gtk3, xdotool, wmctrl.
+import subprocess
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk, Gdk  # noqa: E402
+
+ACCENT = "#FF7A3D"
+
+
+def _run(args):
+    try:
+        subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
+
+def minimize(_btn):
+    _run(["xdotool", "getactivewindow", "windowminimize"])
+
+
+def maximize(_btn):
+    _run(["wmctrl", "-r", ":ACTIVE:", "-b", "toggle,maximized_vert,maximized_horz"])
+
+
+def close(_btn):
+    _run(["wmctrl", "-r", ":ACTIVE:", "-c"])
+
+
+CSS = f"""
+.enclave-bubble {{
+  background-color: rgba(28, 32, 40, 0.86);
+  border-radius: 22px;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}}
+.enclave-bubble button {{
+  border-radius: 16px;
+  min-width: 30px;
+  min-height: 30px;
+  margin: 0 1px;
+  color: #F3F5F8;
+  background: transparent;
+  border: none;
+}}
+.enclave-bubble button:hover {{
+  background-color: rgba(255, 255, 255, 0.12);
+}}
+.enclave-bubble button.close:hover {{
+  background-color: {ACCENT};
+  color: #1A1008;
+}}
+.enclave-grip {{
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0 2px 0 4px;
+}}
+"""
+
+
+class Bubble(Gtk.Window):
+    def __init__(self):
+        super().__init__(type=Gtk.WindowType.TOPLEVEL)
+        self.set_decorated(False)
+        self.set_keep_above(True)
+        self.set_skip_taskbar_hint(True)
+        self.set_skip_pager_hint(True)
+        self.set_accept_focus(False)
+        self.set_focus_on_map(False)
+        self.set_resizable(False)
+        self.set_type_hint(Gdk.WindowTypeHint.UTILITY)
+        self.stick()  # show on every workspace
+
+        # translucent for rounded corners
+        screen = self.get_screen()
+        visual = screen.get_rgba_visual()
+        if visual is not None:
+            self.set_visual(visual)
+        self.set_app_paintable(True)
+
+        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+        row.get_style_context().add_class("enclave-bubble")
+
+        grip = Gtk.Label(label="☰")  # ☰ drag handle
+        grip.get_style_context().add_class("enclave-grip")
+        row.pack_start(grip, False, False, 0)
+
+        for icon, cb, cls in (
+            ("window-minimize-symbolic", minimize, None),
+            ("window-maximize-symbolic", maximize, None),
+            ("window-close-symbolic", close, "close"),
+        ):
+            b = Gtk.Button()
+            b.set_relief(Gtk.ReliefStyle.NONE)
+            b.set_can_focus(False)
+            img = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.SMALL_TOOLBAR)
+            b.add(img)
+            if cls:
+                b.get_style_context().add_class(cls)
+            b.connect("clicked", cb)
+            row.pack_start(b, False, False, 0)
+
+        self.add(row)
+
+        # drag to move (press on the body (grip/box), not the buttons)
+        self.connect("button-press-event", self._on_press)
+
+        prov = Gtk.CssProvider()
+        prov.load_from_data(CSS.encode())
+        Gtk.StyleContext.add_provider_for_screen(
+            screen, prov, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
+        # start near the top-centre
+        self.move(max(0, screen.get_width() // 2 - 90), 16)
+
+    def _on_press(self, _w, event):
+        if event.button == 1:
+            self.begin_move_drag(
+                event.button, int(event.x_root), int(event.y_root), event.time
+            )
+        return False
+
+
+def main():
+    win = Bubble()
+    win.connect("destroy", Gtk.main_quit)
+    win.show_all()
+    Gtk.main()
+
+
+if __name__ == "__main__":
+    main()
