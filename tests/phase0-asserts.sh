@@ -34,6 +34,15 @@ has "$O/pacman.conf"           '^\[multilib\]'               "pacman: multilib e
 exists "$AIR/usr/local/bin/enclave-live-setup.sh"            "live-setup script present"
 has "$AIR/etc/systemd/system/enclave-live-setup.service" 'enclave-live-setup.sh' "live-setup unit runs script"
 has "$AIR/etc/sddm.conf.d/10-enclave.conf" '^User=enclave'   "sddm autologin user = enclave"
+# Regression guard: user creation must not inline missing groups into useradd
+# (the "network" group doesn't exist on Arch and aborted the whole script,
+# leaving no account to log in with). Groups are added defensively instead.
+has "$AIR/usr/local/bin/enclave-live-setup.sh" 'getent group' "live-setup adds groups defensively"
+if grep -qE 'useradd .*-G[ =]' "$AIR/usr/local/bin/enclave-live-setup.sh"; then
+  bad "live-setup must not pass -G to useradd (missing group aborts it)"
+else
+  pass "live-setup does not inline groups into useradd"
+fi
 
 # --- branding assets ---
 exists "$A/branding/enclave-logo.svg"                        "branding: logo svg"

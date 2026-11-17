@@ -7,10 +7,17 @@ set -euo pipefail
 LIVE_USER="enclave"
 
 # --- live user ---
+# Create the account first, then add only groups that actually exist on the
+# image. (Arch has no "network" group — adding a missing group makes useradd
+# fail, which previously aborted this whole script and left no login at all.)
 if ! id -u "$LIVE_USER" >/dev/null 2>&1; then
-  useradd -m -G wheel,network,video,audio,storage,power,lp,input \
-    -s /bin/bash "$LIVE_USER"
+  useradd -m -s /bin/bash "$LIVE_USER"
 fi
+for grp in wheel video audio storage power lp input network sys rfkill; do
+  if getent group "$grp" >/dev/null 2>&1; then
+    gpasswd -a "$LIVE_USER" "$grp" >/dev/null 2>&1 || true
+  fi
+done
 echo "${LIVE_USER}:${LIVE_USER}" | chpasswd
 
 # --- passwordless sudo (live medium convenience only) ---

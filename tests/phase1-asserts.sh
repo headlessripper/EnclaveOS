@@ -33,6 +33,19 @@ exists "$AIR/etc/skel/.config/autostart/enclave-firstrun.desktop" "first-run aut
 # --- wallpaper ---
 exists "arch/branding/wallpapers/enclave-default.svg"       "default wallpaper present"
 
+# --- SDDM login theme (Windows-familiar greeter) ---
+SDDM="$AIR/usr/share/sddm/themes/enclave"
+has "$SDDM/metadata.desktop" 'Type=sddm-theme'              "sddm theme metadata"
+has "$SDDM/metadata.desktop" '^MainScript=Main.qml'         "sddm theme main script"
+exists "$SDDM/Main.qml"                                      "sddm theme Main.qml present"
+has "$SDDM/Main.qml" 'sddm\.login'                          "sddm theme performs login"
+has "$SDDM/theme.conf" 'accentColor=#FF7A3D'               "sddm theme uses Enclave accent"
+has "$AIR/etc/sddm.conf.d/10-enclave.conf" '^Current=enclave' "sddm uses the Enclave theme"
+exists "arch/branding/wallpapers/enclave-login.svg"         "login background present"
+
+# --- lock screen matches the login ---
+has "$AIR/etc/xdg/kscreenlockerrc" 'enclave-login\.svg'     "lock screen uses Enclave wallpaper"
+
 # --- window bubble (frameless part 1) ---
 exists "$AIR/usr/share/kwin/scripts/enclave-bubble/metadata.json"       "bubble kwin script metadata"
 has "$AIR/usr/share/kwin/scripts/enclave-bubble/contents/code/main.js" 'noBorder = true' "frameless strips decorations"

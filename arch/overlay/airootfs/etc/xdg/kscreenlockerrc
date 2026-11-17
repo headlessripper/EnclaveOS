@@ -1,0 +1,10 @@
+# Enclave OS — lock screen defaults. Keeps the lock screen visually in step
+# with the SDDM login: same calm Enclave wallpaper, same accent.
+[Daemon]
+Autolock=true
+LockGrace=5
+Timeout=10
+
+[Greeter][Wallpaper][org.kde.image][General]
+Image=/usr/share/enclave/wallpapers/enclave-login.svg
+FillMode=2

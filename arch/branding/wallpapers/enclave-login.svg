@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <!-- deeper, cooler base than the desktop wallpaper so the login card reads clearly -->
+    <linearGradient id="base" x1="0" y1="0" x2="0.25" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.55" stop-color="#101b2b"/>
+      <stop offset="1" stop-color="#0a1018"/>
+    </linearGradient>
+    <!-- a single restrained Enclave-orange glow, low and soft -->
+    <radialGradient id="glow" cx="0.5" cy="1.12" r="0.8">
+      <stop offset="0" stop-color="#ff7a3d" stop-opacity="0.18"/>
+      <stop offset="0.45" stop-color="#f2506e" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#ff7a3d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vign" cx="0.5" cy="0.42" r="0.9">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.34"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="3840" height="2160" fill="url(#base)"/>
+  <rect width="3840" height="2160" fill="url(#glow)"/>
+
+  <!-- faint, oversized Enclave mark, barely-there -->
+  <g transform="translate(1920 1040)" opacity="0.045" fill="none"
+     stroke="#ff9a63" stroke-width="26" stroke-linecap="round">
+    <path d="M 360 -210 A 420 420 0 1 0 360 210"/>
+    <circle cx="300" cy="0" r="78" fill="#ff9a63" stroke="none"/>
+  </g>
+
+  <rect width="3840" height="2160" fill="url(#vign)"/>
+</svg>

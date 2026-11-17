@@ -1,0 +1,14 @@
+[SddmGreeterTheme]
+Name=Enclave
+Description=Enclave OS login — clean, Windows-familiar
+Author=Enclave OS
+Copyright=Enclave OS
+License=MIT
+Type=sddm-theme
+Version=1.0
+Website=https://github.com/headlessripper/EnclaveOS
+Screenshot=assets/preview.png
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=
+Email=
