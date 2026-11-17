@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Enclave first-run setup
-Exec=/usr/local/bin/enclave-firstrun.sh
-X-KDE-autostart-phase=2
-OnlyShowIn=KDE;
-NoDisplay=true

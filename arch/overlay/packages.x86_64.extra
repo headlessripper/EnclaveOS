@@ -1,35 +1,47 @@
 # Enclave OS — packages appended to releng/packages.x86_64 by build-iso.sh.
-# Phase 0: boot to a basic branded Plasma 6 (Wayland) session, kept lean
-# (curated Plasma, not plasma-meta). Theming/polish is Phase 1.
+# Desktop: a lean XFCE session on X11. KDE Plasma was dropped — Plasma 6.8 is
+# Wayland-only and KWin-Wayland black-screens on VMware's virtual GPU. XFCE on
+# Xorg renders reliably in VMs and is lighter.
 
-# --- Display manager + Plasma 6 shell ---
+# --- Display manager (SDDM, with Enclave's greeter theme, runs under X11) ---
 sddm
-plasma-desktop
-plasma-workspace
-kwin
-# Xorg — for the SDDM *greeter* only. Plasma 6.8 is Wayland-only (no X11
-# session), but SDDM's greeter runs reliably as a plain Xorg app on VMware via
-# the modesetting driver, which is why 05-enclave-theme.conf sets
-# DisplayServer=x11. The Plasma *session* itself is Wayland (software GL).
+
+# --- Xorg (XFCE is an X11 desktop) ---
 xorg-server
 xorg-xauth
+xorg-xinit
 xf86-input-libinput
-# Qt's Wayland platform plugin (Plasma session runs under Wayland).
-qt6-wayland
-systemsettings
-kscreen
-powerdevil
-plasma-pa
-plasma-nm
-breeze
-breeze-gtk
+
+# --- XFCE desktop (curated, not the full group) ---
+xfce4-session
+xfwm4
+xfce4-panel
+xfdesktop
+xfce4-settings
+xfconf
+garcon
+xfce4-whiskermenu-plugin
+xfce4-notifyd
+xfce4-pulseaudio-plugin
+xfce4-power-manager
+xfce4-screenshooter
+network-manager-applet
 xdg-desktop-portal
-xdg-desktop-portal-kde
+xdg-desktop-portal-gtk
+
+# --- GTK theme + icons (clean, Windows-familiar) ---
+# Adwaita ships in gnome-themes-extra (always available). Papirus = flat icons.
+gnome-themes-extra
+papirus-icon-theme
 
 # --- Core apps for a usable first session ---
-dolphin
-konsole
-ark
+thunar
+thunar-volman
+gvfs
+tumbler
+xfce4-terminal
+xarchiver
+mousepad
 
 # --- Networking ---
 networkmanager
@@ -39,6 +51,7 @@ pipewire
 pipewire-alsa
 pipewire-pulse
 wireplumber
+pavucontrol
 
 # --- Graphics / Mesa ---
 mesa

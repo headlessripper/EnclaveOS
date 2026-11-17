@@ -26,22 +26,25 @@ has "$AIR/etc/hostname"       '^enclave$'                    "hostname = enclave
 
 # --- packages / repos ---
 has "$O/packages.x86_64.extra" '^sddm$'                      "pkg: sddm"
-has "$O/packages.x86_64.extra" '^plasma-desktop$'            "pkg: plasma-desktop"
+has "$O/packages.x86_64.extra" '^xfce4-session$'            "pkg: xfce4-session (XFCE desktop)"
 has "$O/packages.x86_64.extra" '^networkmanager$'            "pkg: networkmanager"
 has "$O/pacman.conf"           '^\[multilib\]'               "pacman: multilib enabled"
+# KDE/Plasma must be gone (Wayland-only, black-screens on VMware).
+if grep -qE '^(plasma-desktop|plasma-workspace|kwin)$' "$O/packages.x86_64.extra"; then
+  bad "Plasma packages must not be present (Wayland-only, VM black screen)"
+else
+  pass "no Plasma/KWin packages"
+fi
 
 # --- live session wiring ---
 exists "$AIR/usr/local/bin/enclave-live-setup.sh"            "live-setup script present"
 has "$AIR/etc/systemd/system/enclave-live-setup.service" 'enclave-live-setup.sh' "live-setup unit runs script"
 has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^User=enclave'   "sddm autologin user = enclave"
-# Plasma 6.8 is Wayland-only; the session is plasma.desktop, and KWin renders
-# in a VM via software GL (llvmpipe) set in /etc/environment.
-has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=plasma\.desktop' "autologin uses the Wayland session"
-has "$AIR/etc/environment" '^LIBGL_ALWAYS_SOFTWARE=1' "software GL forced for KWin in VMs"
-has "$O/packages.x86_64.extra" '^xorg-server$'              "pkg: xorg-server (SDDM greeter)"
-has "$O/packages.x86_64.extra" '^xf86-input-libinput$'      "pkg: xf86-input-libinput (greeter input)"
-has "$O/packages.x86_64.extra" '^qt6-wayland$'              "pkg: qt6-wayland (Wayland session)"
-has "$AIR/etc/sddm.conf.d/05-enclave-theme.conf" '^DisplayServer=x11' "sddm greeter runs under X11 (VM-safe)"
+# XFCE is an X11 desktop — renders reliably on VMware (no Wayland black screen).
+has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=xfce\.desktop' "autologin uses the XFCE session"
+has "$O/packages.x86_64.extra" '^xorg-server$'              "pkg: xorg-server (X11)"
+has "$O/packages.x86_64.extra" '^xf86-input-libinput$'      "pkg: xf86-input-libinput (X input)"
+has "$AIR/etc/sddm.conf.d/05-enclave-theme.conf" '^DisplayServer=x11' "sddm greeter runs under X11"
 # Regression guard: user creation must not inline missing groups into useradd
 # (the "network" group doesn't exist on Arch and aborted the whole script,
 # leaving no account to log in with). Groups are added defensively instead.
