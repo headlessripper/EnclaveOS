@@ -1,7 +1,8 @@
-# Enclave OS — Whisker (start) menu: Enclave logo button, clean layout.
-favorites=thunar.desktop,xfce4-terminal.desktop,mousepad.desktop,enclave-assistant.desktop,enclave-install.desktop
+# Enclave OS — Start menu (Whisker), tuned toward a Windows-11 feel:
+# search on top, favourites as an icon grid, Enclave logo button.
+favorites=thunar.desktop,xfce4-terminal.desktop,enclave-assistant.desktop,enclave-install.desktop,xfce4-settings-manager.desktop
 recent=
-button-title=Enclave
+button-title=Start
 button-icon=/usr/share/enclave/enclave-logo.svg
 button-single-row=false
 show-button-title=false
@@ -9,18 +10,18 @@ show-button-icon=true
 launcher-show-name=true
 launcher-show-description=false
 category-show-name=true
-load-hierarchy=false
-view-as-icons=false
+hover-switch-category=true
+view-as-icons=true
 default-category=0
-recent-items-max=5
-favorites-in-recent=true
+recent-items-max=6
+favorites-in-recent=false
 position-search-alternate=true
-position-commands-alternate=false
-position-categories-alternate=true
+position-commands-alternate=true
+position-categories-alternate=false
 stay-on-focus-out=false
 confirm-session-command=true
-menu-width=480
-menu-height=520
+menu-width=560
+menu-height=620
 menu-opacity=100
 command-settings=xfce4-settings-manager
 show-command-settings=true
@@ -28,4 +29,5 @@ command-lockscreen=xflock4
 show-command-lockscreen=true
 command-logout=xfce4-session-logout
 show-command-logout=true
+command-switchuser=
 search-actions=5

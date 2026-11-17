@@ -27,8 +27,10 @@ has "$XML/xsettings.xml" 'ThemeName" type="string" value="Enclave"' "GTK theme =
 has "$XML/xfwm4.xml" 'theme" type="string" value="Enclave"'          "window decorations = Enclave"
 has "$XML/xsettings.xml" 'IconThemeName" type="string" value="Papirus"' "icons = Papirus"
 has "scripts/build-iso.sh" 'Fluent-gtk-theme'                       "build generates the Enclave (Fluent) theme"
-has "$XML/xfce4-panel.xml" 'length-adjust" type="bool" value="true"' "taskbar is a content-width island"
-has "$AIR/etc/skel/.config/gtk-3.0/gtk.css" 'border-radius'         "island panel is rounded (gtk.css)"
+has "$XML/xfce4-panel.xml" 'whiskermenu'                            "taskbar has a Start button"
+has "$XML/xfce4-panel.xml" 'expand" type="bool" value="true"'      "taskbar centres Start+apps (expanding spacers)"
+has "$AIR/etc/skel/.config/gtk-3.0/gtk.css" 'xfce4-panel'          "taskbar is styled (gtk.css)"
+has "$XML/xfce4-panel.xml" 'p=8'                                    "taskbar is at the bottom"
 has "$XML/xfce4-desktop.xml" 'show-filesystem" type="bool" value="false"' "no Linux 'File System' desktop icon"
 
 # --- wallpaper ---

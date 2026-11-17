@@ -1,28 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
-      <stop offset="0" stop-color="#0b1220"/>
-      <stop offset="0.55" stop-color="#101b2b"/>
+      <stop offset="0" stop-color="#0d1526"/>
+      <stop offset="0.6" stop-color="#101a2e"/>
       <stop offset="1" stop-color="#0a1018"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.28" r="0.5">
-      <stop offset="0" stop-color="#ff7a3d" stop-opacity="0.16"/>
+    <radialGradient id="glow" cx="0.5" cy="0.34" r="0.42">
+      <stop offset="0" stop-color="#ff7a3d" stop-opacity="0.20"/>
       <stop offset="1" stop-color="#ff7a3d" stop-opacity="0"/>
     </radialGradient>
+    <linearGradient id="tile" x1="0.12" y1="0.05" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#FF9E5E"/>
+      <stop offset="1" stop-color="#F0590F"/>
+    </linearGradient>
   </defs>
 
   <rect width="640" height="480" fill="url(#bg)"/>
   <rect width="640" height="480" fill="url(#glow)"/>
 
-  <!-- Enclave mark -->
-  <g transform="translate(320 128)" fill="none" stroke="#ff8a4d" stroke-width="7" stroke-linecap="round">
-    <path d="M 34 -40 A 56 56 0 1 0 34 40"/>
-    <circle cx="26" cy="0" r="12" fill="#ff8a4d" stroke="none"/>
+  <!-- logo tile -->
+  <g transform="translate(320 150)">
+    <rect x="-46" y="-46" width="92" height="92" rx="25" fill="url(#tile)"/>
+    <path d="M 18.4 -12.3 A 20 20 0 1 0 18.4 12.3" fill="none"
+          stroke="#ffffff" stroke-width="8.3" stroke-linecap="round"/>
+    <circle cx="12.5" cy="0" r="5.4" fill="#ffffff"/>
   </g>
 
-  <text x="320" y="232" text-anchor="middle" fill="#F3F5F8"
-        font-family="DejaVu Sans, sans-serif" font-size="34" font-weight="300"
-        letter-spacing="2">Enclave OS</text>
-  <text x="320" y="262" text-anchor="middle" fill="#8aa0b8"
-        font-family="DejaVu Sans, sans-serif" font-size="14">windows-like, yours</text>
+  <text x="320" y="252" text-anchor="middle" fill="#F3F5F8"
+        font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="38" font-weight="500"
+        letter-spacing="1.5">Enclave OS</text>
+  <text x="320" y="282" text-anchor="middle" fill="#7f94ab"
+        font-family="DejaVu Sans, Segoe UI, sans-serif" font-size="15"
+        letter-spacing="3">WINDOWS-LIKE, YOURS</text>
 </svg>
