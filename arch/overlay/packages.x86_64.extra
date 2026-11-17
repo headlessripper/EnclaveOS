@@ -3,6 +3,9 @@
 # Wayland-only and KWin-Wayland black-screens on VMware's virtual GPU. XFCE on
 # Xorg renders reliably in VMs and is lighter.
 
+# --- Graphical boot splash (hides the boot logs behind an Enclave skin) ---
+plymouth
+
 # --- Display manager (SDDM, with Enclave's greeter theme, runs under X11) ---
 sddm
 

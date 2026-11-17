@@ -152,6 +152,38 @@ if command -v git >/dev/null 2>&1 && command -v sassc >/dev/null 2>&1; then
   rm -rf "$THEMETMP"
 fi
 
+# --- 6c. Plymouth boot splash: skin the boot logs with an Enclave theme.
+#     Built by recolouring the bundled "spinner" theme (reliable, known-good). ---
+if [ -d /usr/share/plymouth/themes/spinner ]; then
+  log "building Enclave Plymouth boot splash"
+  PTH="$AIR/usr/share/plymouth/themes/enclave"
+  rm -rf "$PTH"; install -d "$PTH"
+  cp -a /usr/share/plymouth/themes/spinner/. "$PTH/"
+  mv -f "$PTH/spinner.plymouth" "$PTH/enclave.plymouth" 2>/dev/null || true
+  sed -i 's/^Name=.*/Name=Enclave/; s/^Description=.*/Description=Enclave boot splash/' "$PTH/enclave.plymouth" 2>/dev/null || true
+  # Enclave dark background.
+  if grep -q 'BackgroundStartColor' "$PTH/enclave.plymouth" 2>/dev/null; then
+    sed -i 's/^BackgroundStartColor=.*/BackgroundStartColor=0x0b1220/; s/^BackgroundEndColor=.*/BackgroundEndColor=0x0a1018/' "$PTH/enclave.plymouth"
+  else
+    printf '\nBackgroundStartColor=0x0b1220\nBackgroundEndColor=0x0a1018\n' >> "$PTH/enclave.plymouth"
+  fi
+  # Enclave logo as the watermark.
+  if command -v rsvg-convert >/dev/null 2>&1 && [ -f "$BRANDING/enclave-logo.svg" ]; then
+    rsvg-convert -w 160 -h 160 "$BRANDING/enclave-logo.svg" -o "$PTH/watermark.png" 2>/dev/null || true
+  fi
+  # Live ISO initramfs: add the plymouth hook (right after udev) so the splash
+  # shows on the live boot too.
+  for mk in "$AIR"/etc/mkinitcpio.conf.d/*.conf "$PROFILE"/airootfs/etc/mkinitcpio.conf.d/*.conf; do
+    [ -f "$mk" ] || continue
+    grep -q 'plymouth' "$mk" 2>/dev/null && continue
+    sed -i 's/\(HOOKS=([^)]*\budev\b\)/\1 plymouth/' "$mk" 2>/dev/null || true
+  done
+  # Quiet the kernel log and enable the splash on every boot entry.
+  grep -rIl --null 'archisobasedir\|APPEND\|linux /' \
+    "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null \
+    | xargs -0 -r sed -i -E 's/(archisobasedir=[^ ]+)/\1 quiet splash/' 2>/dev/null || true
+fi
+
 # --- 7. service wiring (symlinks created here so the repo stays Windows-clean) ---
 log "wiring services (graphical default, SDDM, NetworkManager, live setup)"
 ln -sfn /usr/lib/systemd/system/graphical.target "$AIR/etc/systemd/system/default.target"
