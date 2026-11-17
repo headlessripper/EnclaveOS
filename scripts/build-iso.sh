@@ -154,6 +154,14 @@ if command -v makepkg >/dev/null 2>&1; then
   id builder >/dev/null 2>&1 || useradd -m -s /bin/bash builder
   printf 'builder ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/00-enclave-builder
   chmod 0440 /etc/sudoers.d/00-enclave-builder
+  # Robust source download: codeberg.org (the Calamares source host) frequently
+  # resets HTTP/2 streams, which aborts makepkg's one-shot download. Give the
+  # builder a curl DLAGENT that retries hard and resumes partial transfers.
+  cat > /home/builder/.makepkg.conf <<'MKCONF'
+DLAGENTS=('https::/usr/bin/curl -qgb "" -fLC - --retry 20 --retry-delay 3 --retry-all-errors --connect-timeout 30 -o %o %u'
+          'http::/usr/bin/curl -qgb "" -fLC - --retry 20 --retry-delay 3 --retry-all-errors --connect-timeout 30 -o %o %u')
+MKCONF
+  chown builder:builder /home/builder/.makepkg.conf
   BUILDTMP="$(sudo -u builder mktemp -d)"
   sudo -u builder env MAKEFLAGS="-j$(nproc)" bash -euc "
     cd '$BUILDTMP'
