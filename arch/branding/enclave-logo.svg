@@ -1,21 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
-  <defs>
-    <linearGradient id="eo-bg" x1="0.12" y1="0.05" x2="0.9" y2="1">
-      <stop offset="0" stop-color="#FF9E5E"/>
-      <stop offset="1" stop-color="#F0590F"/>
-    </linearGradient>
-    <linearGradient id="eo-sheen" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"/>
-      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-  </defs>
-
-  <!-- app-tile squircle -->
-  <rect x="18" y="18" width="220" height="220" rx="60" fill="url(#eo-bg)"/>
-  <rect x="18" y="18" width="220" height="220" rx="60" fill="url(#eo-sheen)"/>
-
-  <!-- enclosure mark: a bold ring opening to a node -->
-  <path d="M 164.8 97.1 A 48 48 0 1 0 164.8 158.9" fill="none"
-        stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
-  <circle cx="158" cy="128" r="13" fill="#ffffff"/>
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Enclave official logo (03-perimeter, light + orange dot) -->
+  <rect width="100" height="100" rx="22" fill="#f2f4f8"/>
+  <path d="M66 12 A40 40 0 1 0 66 88" stroke="#070d1a" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M60 26 A26 26 0 1 0 60 74" stroke="#070d1a" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.35"/>
+  <circle cx="26" cy="50" r="7" fill="#ff6b1a"/>
 </svg>

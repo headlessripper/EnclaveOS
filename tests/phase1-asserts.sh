@@ -69,7 +69,7 @@ has "$SDDM/metadata.desktop" 'Type=sddm-theme'              "sddm theme metadata
 has "$SDDM/metadata.desktop" '^MainScript=Main.qml'         "sddm theme main script"
 exists "$SDDM/Main.qml"                                      "sddm theme Main.qml present"
 has "$SDDM/Main.qml" 'sddm\.login'                          "sddm theme performs login"
-has "$SDDM/theme.conf" 'accentColor=#FF7A3D'               "sddm theme uses Enclave accent"
+has "$SDDM/theme.conf" 'accentColor=#ff6b1a'               "sddm theme uses Enclave accent"
 has "$AIR/etc/sddm.conf.d/05-enclave-theme.conf" '^Current=enclave' "sddm uses the Enclave theme"
 exists "arch/branding/wallpapers/enclave-login.svg"         "login background present"
 

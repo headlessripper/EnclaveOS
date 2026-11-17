@@ -13,7 +13,7 @@ Rectangle {
     color: config.backgroundFill !== "" ? config.backgroundFill : "#0E1621"
 
     // Enclave accent, with a safe default.
-    property color accent: config.accentColor !== "" ? config.accentColor : "#FF7A3D"
+    property color accent: config.accentColor !== "" ? config.accentColor : "#ff6b1a"
     property color ink:    config.textColor   !== "" ? config.textColor   : "#F3F5F8"
 
     // --- background: painted gradient (always works) + optional image on top ---
@@ -90,7 +90,7 @@ Rectangle {
             Image {
                 anchors.centerIn: parent
                 width: 60; height: 60
-                source: "/usr/share/enclave/enclave-logo.svg"
+                source: "/usr/share/enclave/enclave-logo-dark.svg"
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
                 onStatusChanged: if (status === Image.Error) visible = false

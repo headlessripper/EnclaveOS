@@ -169,7 +169,7 @@ if [ -d /usr/share/plymouth/themes/spinner ]; then
   fi
   # Enclave logo as the watermark.
   if command -v rsvg-convert >/dev/null 2>&1 && [ -f "$BRANDING/enclave-logo.svg" ]; then
-    rsvg-convert -w 160 -h 160 "$BRANDING/enclave-logo.svg" -o "$PTH/watermark.png" 2>/dev/null || true
+    rsvg-convert -w 160 -h 160 "$BRANDING/enclave-logo-dark.svg" -o "$PTH/watermark.png" 2>/dev/null || true
   fi
   # Live ISO initramfs: add the plymouth hook (right after udev) so the splash
   # shows on the live boot too.
