@@ -20,7 +20,7 @@ jobs:
             -v "$PWD":/enclave -w /enclave \
             archlinux:latest bash -c '
               pacman -Syu --noconfirm --needed archiso git &&
-              scripts/build-iso.sh'
+              bash scripts/build-iso.sh'
 
       - name: Upload ISO
         uses: actions/upload-artifact@v4
