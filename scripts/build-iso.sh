@@ -117,6 +117,40 @@ fi
 if [ -d "$AIR/etc/calamares/branding/enclave" ] && [ -f "$BRANDING/enclave-logo.svg" ]; then
   cp -f "$BRANDING/enclave-logo.svg" "$AIR/etc/calamares/branding/enclave/enclave-logo.svg"
 fi
+# Make sure Enclave scripts are executable in the image (Windows checkouts
+# don't carry the exec bit).
+if [ -d "$AIR/usr/local/bin" ]; then
+  find "$AIR/usr/local/bin" -type f -exec chmod 0755 {} +
+fi
+
+# --- 6b. desktop theme: Fluent (Windows-11-like), recolored to Enclave orange,
+#         installed as "Enclave" so no third-party/Linux name shows. ---
+if command -v git >/dev/null 2>&1 && command -v sassc >/dev/null 2>&1; then
+  log "building Enclave desktop theme (Fluent → Enclave, orange)…"
+  THEMETMP="$(mktemp -d)"
+  ok=0
+  for i in 1 2 3 4 5; do
+    git clone --depth 1 https://github.com/vinceliuice/Fluent-gtk-theme.git "$THEMETMP/fluent" >/dev/null 2>&1 && { ok=1; break; }
+    sleep 3
+  done
+  if [ "$ok" -eq 1 ]; then
+    install -d "$AIR/usr/share/themes"
+    ( cd "$THEMETMP/fluent" && ./install.sh -t orange -c light --tweaks round -d "$AIR/usr/share/themes" </dev/null ) >/dev/null 2>&1 || true
+    # Rename "Fluent-round-orange-Light" -> "Enclave" (drop the Fluent trace).
+    if [ -d "$AIR/usr/share/themes/Fluent-round-orange-Light" ]; then
+      rm -rf "$AIR/usr/share/themes/Enclave"
+      mv "$AIR/usr/share/themes/Fluent-round-orange-Light" "$AIR/usr/share/themes/Enclave"
+      sed -i 's/^Name=.*/Name=Enclave/' "$AIR/usr/share/themes/Enclave/index.theme" 2>/dev/null || true
+      log "  Enclave theme installed"
+    else
+      log "  WARN: Fluent theme folder not found after install"
+    fi
+    rm -rf "$AIR/usr/share/themes/Fluent-round-orange-Light-compact"
+  else
+    log "  WARN: could not fetch Fluent theme (network) — desktop falls back to default GTK"
+  fi
+  rm -rf "$THEMETMP"
+fi
 
 # --- 7. service wiring (symlinks created here so the repo stays Windows-clean) ---
 log "wiring services (graphical default, SDDM, NetworkManager, live setup)"

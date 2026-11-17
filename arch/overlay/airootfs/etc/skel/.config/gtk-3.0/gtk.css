@@ -1,0 +1,27 @@
+/* Enclave OS — floating "island" taskbar.
+   Rounds the xfce4-panel into a pill and lifts it off the bottom edge so it
+   reads as a distinct Enclave element, not a full-width Linux bar.
+   Layered on top of the Enclave (Fluent) GTK theme. */
+
+.xfce4-panel {
+  border-radius: 20px;
+  margin: 6px 0 10px 0;
+  padding: 2px 6px;
+  background-color: rgba(250, 250, 250, 0.90);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Give panel buttons a softer, modern hit area. */
+.xfce4-panel button {
+  border-radius: 12px;
+  padding: 2px 6px;
+}
+
+/* Enclave orange on the active window button. */
+.xfce4-panel button:checked {
+  background-color: rgba(255, 122, 61, 0.16);
+}
+.xfce4-panel button:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}

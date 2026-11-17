@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Enclave OS — Windows-familiar XFCE panel: a single bottom bar with a start
-     menu (Whisker, Enclave logo), window buttons, a spacer, the system tray,
-     volume, power and a clock. -->
+<!-- Enclave OS — the signature "island" taskbar: a single floating, rounded,
+     content-width bar centred at the bottom (not a full-width Linux panel).
+     Start menu (Enclave logo) · window buttons · tray · volume · clock.
+     Rounding + the floating gap come from the gtk.css shipped in skel. -->
 <channel name="xfce4-panel" version="1.0">
   <property name="configver" type="int" value="2"/>
   <property name="panels" type="array">
     <value type="int" value="1"/>
     <property name="dark-mode" type="bool" value="false"/>
     <property name="panel-1" type="empty">
+      <property name="mode" type="uint" value="0"/>
       <property name="position" type="string" value="p=8;x=0;y=0"/>
-      <property name="length" type="uint" value="100"/>
+      <property name="length" type="uint" value="1"/>
       <property name="length-adjust" type="bool" value="true"/>
       <property name="position-locked" type="bool" value="true"/>
-      <property name="icon-size" type="uint" value="22"/>
-      <property name="size" type="uint" value="40"/>
+      <property name="autohide-behavior" type="uint" value="0"/>
+      <property name="enable-struts" type="bool" value="false"/>
+      <property name="icon-size" type="uint" value="0"/>
+      <property name="size" type="uint" value="46"/>
+      <property name="background-style" type="uint" value="0"/>
       <property name="plugin-ids" type="array">
         <value type="int" value="1"/>
         <value type="int" value="2"/>
@@ -22,23 +27,22 @@
         <value type="int" value="5"/>
         <value type="int" value="6"/>
         <value type="int" value="7"/>
-        <value type="int" value="8"/>
       </property>
     </property>
   </property>
   <property name="plugins" type="empty">
     <property name="plugin-1" type="string" value="whiskermenu"/>
     <property name="plugin-2" type="string" value="separator">
-      <property name="style" type="uint" value="0"/>
+      <property name="style" type="uint" value="1"/>
     </property>
     <property name="plugin-3" type="string" value="tasklist">
       <property name="grouping" type="uint" value="1"/>
-      <property name="show-labels" type="bool" value="true"/>
-      <property name="flat-buttons" type="bool" value="false"/>
+      <property name="show-labels" type="bool" value="false"/>
+      <property name="flat-buttons" type="bool" value="true"/>
+      <property name="show-handle" type="bool" value="false"/>
     </property>
     <property name="plugin-4" type="string" value="separator">
-      <property name="expand" type="bool" value="true"/>
-      <property name="style" type="uint" value="0"/>
+      <property name="style" type="uint" value="1"/>
     </property>
     <property name="plugin-5" type="string" value="systray">
       <property name="square-icons" type="bool" value="true"/>
@@ -46,8 +50,7 @@
     <property name="plugin-6" type="string" value="pulseaudio">
       <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
     </property>
-    <property name="plugin-7" type="string" value="power-manager-plugin"/>
-    <property name="plugin-8" type="string" value="clock">
+    <property name="plugin-7" type="string" value="clock">
       <property name="digital-layout" type="uint" value="3"/>
       <property name="digital-time-format" type="string" value="%H:%M"/>
       <property name="digital-date-format" type="string" value="%a %d %b"/>
