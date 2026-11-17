@@ -34,10 +34,13 @@ has "$O/pacman.conf"           '^\[multilib\]'               "pacman: multilib e
 exists "$AIR/usr/local/bin/enclave-live-setup.sh"            "live-setup script present"
 has "$AIR/etc/systemd/system/enclave-live-setup.service" 'enclave-live-setup.sh' "live-setup unit runs script"
 has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^User=enclave'   "sddm autologin user = enclave"
-# Live session must default to X11 — Wayland black-screens on VM virtual GPUs.
-has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=plasmax11\.desktop' "autologin uses X11 session (VM-safe)"
-has "$O/packages.x86_64.extra" '^xorg-server$'              "pkg: xorg-server (X11 session)"
-has "$O/packages.x86_64.extra" '^xf86-input-libinput$'      "pkg: xf86-input-libinput (X input)"
+# Plasma 6.8 is Wayland-only; the session is plasma.desktop, and KWin renders
+# in a VM via software GL (llvmpipe) set in /etc/environment.
+has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=plasma\.desktop' "autologin uses the Wayland session"
+has "$AIR/etc/environment" '^LIBGL_ALWAYS_SOFTWARE=1' "software GL forced for KWin in VMs"
+has "$O/packages.x86_64.extra" '^xorg-server$'              "pkg: xorg-server (SDDM greeter)"
+has "$O/packages.x86_64.extra" '^xf86-input-libinput$'      "pkg: xf86-input-libinput (greeter input)"
+has "$O/packages.x86_64.extra" '^qt6-wayland$'              "pkg: qt6-wayland (Wayland session)"
 has "$AIR/etc/sddm.conf.d/05-enclave-theme.conf" '^DisplayServer=x11' "sddm greeter runs under X11 (VM-safe)"
 # Regression guard: user creation must not inline missing groups into useradd
 # (the "network" group doesn't exist on Arch and aborted the whole script,

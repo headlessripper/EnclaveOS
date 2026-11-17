@@ -6,3 +6,7 @@ result-*
 *.vmdk
 *.iso
 /build/
+
+# local debug scratch
+_*.sh
+_*.txt

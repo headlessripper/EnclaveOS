@@ -7,18 +7,15 @@ sddm
 plasma-desktop
 plasma-workspace
 kwin
-# X11 session + server. Default live session is X11 (plasmax11.desktop) because
-# Wayland on VMware/VBox virtual GPUs black-screens; Xorg's modesetting driver
-# drives the virtual GPU reliably. plasma-workspace ships startplasma-x11; these
-# give it a server to run on. (Wayland stays available in the greeter menu.)
+# Xorg — for the SDDM *greeter* only. Plasma 6.8 is Wayland-only (no X11
+# session), but SDDM's greeter runs reliably as a plain Xorg app on VMware via
+# the modesetting driver, which is why 05-enclave-theme.conf sets
+# DisplayServer=x11. The Plasma *session* itself is Wayland (software GL).
 xorg-server
 xorg-xauth
-xorg-xinit
-# Xorg input driver (keyboard/mouse under X). VMware's SVGA GPU is driven by
-# Xorg's built-in modesetting driver (part of xorg-server) — the old
-# xf86-video-vmware / xf86-input-vmmouse DDX drivers were dropped from Arch and
-# are no longer needed.
 xf86-input-libinput
+# Qt's Wayland platform plugin (Plasma session runs under Wayland).
+qt6-wayland
 systemsettings
 kscreen
 powerdevil
