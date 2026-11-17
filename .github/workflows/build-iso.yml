@@ -19,7 +19,7 @@ jobs:
           docker run --rm --privileged \
             -v "$PWD":/enclave -w /enclave \
             archlinux:latest bash -c '
-              pacman -Sy --noconfirm --needed archiso git &&
+              pacman -Syu --noconfirm --needed archiso git &&
               scripts/build-iso.sh'
 
       - name: Upload ISO

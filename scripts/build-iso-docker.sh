@@ -25,5 +25,5 @@ echo "[enclave] building inside archlinux container via $RUNNER …"
 exec "$RUNNER" run --rm --privileged \
   -v "$REPO:/enclave" -w /enclave \
   archlinux:latest \
-  bash -c 'pacman -Sy --noconfirm --needed archiso git && exec scripts/build-iso.sh "$@"' \
+  bash -c 'pacman -Syu --noconfirm --needed archiso git && exec scripts/build-iso.sh "$@"' \
   _ "$@"
