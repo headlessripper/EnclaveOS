@@ -176,7 +176,7 @@ MKCONF
   cat >> "$PROFILE/pacman.conf" <<EOF
 
 [enclave-local]
-SigLevel = Optional TrustAll
+SigLevel = Never
 Server = file://$LOCALREPO
 EOF
   log "  Calamares package staged in local repo"
