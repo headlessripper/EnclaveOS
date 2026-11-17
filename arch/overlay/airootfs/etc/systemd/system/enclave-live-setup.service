@@ -1,13 +1,15 @@
 [Unit]
 Description=Enclave live session setup (user, sudo, locale)
 ConditionPathExists=/usr/local/bin/enclave-live-setup.sh
+# Must finish before the display manager autologins as the 'enclave' user.
 Before=sddm.service display-manager.service
 After=systemd-user-sessions.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/local/bin/enclave-live-setup.sh
+# Invoke via bash so a missing exec bit can never cause a 203/EXEC failure.
+ExecStart=/bin/bash /usr/local/bin/enclave-live-setup.sh
 
 [Install]
 WantedBy=multi-user.target
