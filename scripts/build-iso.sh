@@ -174,6 +174,31 @@ log "branding boot menus"
 grep -rIl --null 'Arch Linux' \
   "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null \
   | xargs -0 -r sed -i 's/Arch Linux/Enclave OS/g'
+# Also retitle the GRUB/BIOS menu entries from "Arch Linux install medium".
+grep -rIl --null 'Arch Linux install medium\|Arch install' \
+  "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null \
+  | xargs -0 -r sed -i 's/Arch Linux install medium/Enclave OS/g; s/Arch install/Enclave OS/g'
+
+# --- 8a. replace the Arch-logo boot splash with Enclave's ---
+if command -v rsvg-convert >/dev/null 2>&1 && [ -f "$BRANDING/enclave-boot.svg" ]; then
+  log "branding boot splash (Enclave)"
+  # BIOS/syslinux background (released as splash.png, 640x480).
+  if [ -d "$PROFILE/syslinux" ]; then
+    rsvg-convert -w 640 -h 480 "$BRANDING/enclave-boot.svg" \
+      -o "$PROFILE/syslinux/splash.png" 2>/dev/null || true
+  fi
+  # UEFI/GRUB background: render larger and point grub.cfg at it.
+  if [ -d "$PROFILE/grub" ]; then
+    rsvg-convert -w 1280 -h 720 "$BRANDING/enclave-boot.svg" \
+      -o "$PROFILE/grub/enclave-boot.png" 2>/dev/null || true
+    for cfg in "$PROFILE/grub"/*.cfg; do
+      [ -f "$cfg" ] || continue
+      grep -q 'background_image' "$cfg" 2>/dev/null \
+        && sed -i 's#background_image .*#background_image -m stretch /boot/grub/enclave-boot.png#' "$cfg" \
+        || sed -i '1i background_image -m stretch /boot/grub/enclave-boot.png' "$cfg"
+    done
+  fi
+fi
 
 # --- 8b. Calamares installer: build from AUR into a local file:// repo ---
 # No trustworthy prebuilt Calamares exists for Arch (EndeavourOS ships only the

@@ -57,6 +57,8 @@ fi
 
 # --- branding assets ---
 exists "$A/branding/enclave-logo.svg"                        "branding: logo svg"
+exists "$A/branding/enclave-boot.svg"                        "branding: boot splash svg"
+has "scripts/build-iso.sh" 'rsvg-convert.*splash\.png|splash\.png.*rsvg-convert|syslinux/splash.png' "build rebrands the boot splash"
 
 # --- debloat ---
 has "$O/pacman.conf"       '^NoExtract = usr/share/man'  "debloat: NoExtract man/doc"

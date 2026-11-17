@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="0.55" stop-color="#101b2b"/>
+      <stop offset="1" stop-color="#0a1018"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.28" r="0.5">
+      <stop offset="0" stop-color="#ff7a3d" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ff7a3d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="640" height="480" fill="url(#bg)"/>
+  <rect width="640" height="480" fill="url(#glow)"/>
+
+  <!-- Enclave mark -->
+  <g transform="translate(320 128)" fill="none" stroke="#ff8a4d" stroke-width="7" stroke-linecap="round">
+    <path d="M 34 -40 A 56 56 0 1 0 34 40"/>
+    <circle cx="26" cy="0" r="12" fill="#ff8a4d" stroke="none"/>
+  </g>
+
+  <text x="320" y="232" text-anchor="middle" fill="#F3F5F8"
+        font-family="DejaVu Sans, sans-serif" font-size="34" font-weight="300"
+        letter-spacing="2">Enclave OS</text>
+  <text x="320" y="262" text-anchor="middle" fill="#8aa0b8"
+        font-family="DejaVu Sans, sans-serif" font-size="14">windows-like, yours</text>
+</svg>
