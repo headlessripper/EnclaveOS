@@ -1,0 +1,23 @@
+[Desktop Entry]
+Type=Application
+Name=Files
+GenericName=File Manager
+Comment=Browse your files
+Exec=thunar %F
+Icon=system-file-manager
+Terminal=false
+StartupNotify=true
+Categories=System;Utility;Core;GTK;FileTools;FileManager;
+MimeType=inode/directory;
+Keywords=files;explorer;file manager;folders;browse;
+Actions=open-home;open-computer;
+
+[Desktop Action open-home]
+Name=Home
+Exec=thunar
+Icon=user-home
+
+[Desktop Action open-computer]
+Name=This PC
+Exec=thunar computer:///
+Icon=computer

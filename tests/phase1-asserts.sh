@@ -35,6 +35,17 @@ has "$XML/xfce4-desktop.xml" 'show-filesystem" type="bool" value="false"' "no Li
 has "$XML/xfce4-desktop.xml" 'enclave-default\.svg'         "desktop wallpaper = Enclave"
 exists "arch/branding/wallpapers/enclave-default.svg"       "default wallpaper present"
 
+# --- Enclave Files (Thunar) + picom (Hyprland look) ---
+has "$XML/thunar.xml" 'ThunarShortcutsPane'                "Enclave Files has a Places sidebar"
+has "$XML/thunar.xml" 'misc-single-click" type="bool" value="false"' "Enclave Files uses double-click"
+has "$AIR/etc/skel/.local/share/applications/thunar.desktop" '^Name=Files' "file manager branded 'Files'"
+exists "$AIR/etc/skel/.config/Thunar/uca.xml"              "Enclave Files custom actions"
+has "arch/overlay/packages.x86_64.extra" '^picom$'         "pkg: picom (Hyprland-style compositor)"
+has "$XML/xfwm4.xml" 'use_compositing" type="bool" value="false"' "xfwm4 compositor off (picom takes over)"
+has "$AIR/etc/skel/.config/picom.conf" 'blur-method'       "picom: blur enabled"
+has "$AIR/etc/skel/.config/picom.conf" 'corner-radius'     "picom: rounded corners"
+exists "$AIR/etc/skel/.config/autostart/picom.desktop"     "picom autostarts"
+
 # --- no KDE/Plasma leftovers in the overlay ---
 if [ -d "$AIR/usr/share/plasma" ] || [ -d "$AIR/usr/share/kwin" ] || [ -f "$AIR/etc/xdg/kdeglobals" ]; then
   bad "KDE/Plasma overlay files still present"

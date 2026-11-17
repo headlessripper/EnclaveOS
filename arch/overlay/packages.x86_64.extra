@@ -28,6 +28,9 @@ xfce4-screenshooter
 network-manager-applet
 xdg-desktop-portal
 xdg-desktop-portal-gtk
+# picom: the Hyprland-style look on X11 — blur, rounded corners, shadows,
+# fade animations, transparency (replaces xfwm4's built-in compositor).
+picom
 
 # --- GTK theme + icons (clean, Windows-familiar) ---
 # Adwaita ships in gnome-themes-extra (always available). Papirus = flat icons.

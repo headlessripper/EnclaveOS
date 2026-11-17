@@ -6,7 +6,8 @@
     <property name="theme" type="string" value="Enclave"/>
     <property name="title_alignment" type="string" value="center"/>
     <property name="button_layout" type="string" value="O|HMC"/>
-    <property name="use_compositing" type="bool" value="true"/>
+    <!-- picom handles compositing (blur/rounded/animations); disable xfwm4's. -->
+    <property name="use_compositing" type="bool" value="false"/>
     <property name="frame_opacity" type="int" value="100"/>
     <property name="snap_to_border" type="bool" value="true"/>
     <property name="snap_to_windows" type="bool" value="true"/>
