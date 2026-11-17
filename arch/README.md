@@ -55,6 +55,5 @@ The build log prints the before/after package count.
 
 **No bloat apps.** The desktop ships a *curated* Plasma set — no `plasma-meta`,
 no KDE PIM/games/education, no software-center pull-ins. Default apps are just
-Dolphin (files), Konsole, Ark, System Settings, and the Enclave Assistant. The
-KDE file indexer (Baloo) is disabled by default (`etc/xdg/baloofilerc`) since
-it's the biggest idle cost in stock Plasma.
+Dolphin (files), Konsole, Ark, System Settings, and the Enclave Assistant.
+(File indexing / Baloo is left at its Plasma default — enabled.)
