@@ -2,11 +2,18 @@
 # Phase 0: boot to a basic branded Plasma 6 (Wayland) session, kept lean
 # (curated Plasma, not plasma-meta). Theming/polish is Phase 1.
 
-# --- Display manager + Plasma 6 shell (Wayland) ---
+# --- Display manager + Plasma 6 shell ---
 sddm
 plasma-desktop
 plasma-workspace
 kwin
+# X11 session + server. Default live session is X11 (plasmax11.desktop) because
+# Wayland on VMware/VBox virtual GPUs black-screens; Xorg's modesetting driver
+# drives the virtual GPU reliably. plasma-workspace ships startplasma-x11; these
+# give it a server to run on. (Wayland stays available in the greeter menu.)
+xorg-server
+xorg-xauth
+xorg-xinit
 systemsettings
 kscreen
 powerdevil

@@ -20,8 +20,11 @@ BRANDING="$ARCH_DIR/branding"
 RELENG="/usr/share/archiso/configs/releng"
 
 OUT="$REPO/dist"
-WORK="$REPO/build/work"
-PROFILE="$REPO/build/profile"
+# WORK/PROFILE can be redirected off the repo (e.g. onto the container's native
+# filesystem) via ENCLAVE_WORK — archiso loop-mounts its airootfs image, which
+# fails on a Windows/9p bind mount. Default keeps everything under the repo.
+WORK="${ENCLAVE_WORK:-$REPO/build}/work"
+PROFILE="${ENCLAVE_WORK:-$REPO/build}/profile"
 KEEP_WORK=0
 
 # --- args ---
