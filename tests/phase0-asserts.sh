@@ -37,6 +37,8 @@ has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^User=enclave'   "sddm aut
 # Live session must default to X11 — Wayland black-screens on VM virtual GPUs.
 has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=plasmax11\.desktop' "autologin uses X11 session (VM-safe)"
 has "$O/packages.x86_64.extra" '^xorg-server$'              "pkg: xorg-server (X11 session)"
+has "$O/packages.x86_64.extra" '^xf86-input-libinput$'      "pkg: xf86-input-libinput (X input)"
+has "$AIR/etc/sddm.conf.d/05-enclave-theme.conf" '^DisplayServer=x11' "sddm greeter runs under X11 (VM-safe)"
 # Regression guard: user creation must not inline missing groups into useradd
 # (the "network" group doesn't exist on Arch and aborted the whole script,
 # leaving no account to log in with). Groups are added defensively instead.
