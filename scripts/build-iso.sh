@@ -202,14 +202,12 @@ rm -f "$AIR/etc/systemd/system/multi-user.target.wants/systemd-networkd.service"
       "$AIR/etc/systemd/system/sockets.target.wants/systemd-networkd.socket" 2>/dev/null || true
 
 # --- 8. human-readable boot menu titles ---
+# NOTE: these grep|xargs pipelines use `|| true` because under `set -o pipefail`
+# a grep that matches nothing returns non-zero and would abort the build.
 log "branding boot menus"
-grep -rIl --null 'Arch Linux' \
+{ grep -rIl --null 'Arch Linux' \
   "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null \
-  | xargs -0 -r sed -i 's/Arch Linux/Enclave OS/g'
-# Also retitle the GRUB/BIOS menu entries from "Arch Linux install medium".
-grep -rIl --null 'Arch Linux install medium\|Arch install' \
-  "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null \
-  | xargs -0 -r sed -i 's/Arch Linux install medium/Enclave OS/g; s/Arch install/Enclave OS/g'
+  | xargs -0 -r sed -i 's/Arch Linux install medium/Enclave OS/g; s/Arch Linux/Enclave OS/g'; } || true
 
 # --- 8a. replace the Arch-logo boot splash with Enclave's ---
 if command -v rsvg-convert >/dev/null 2>&1 && [ -f "$BRANDING/enclave-boot.svg" ]; then
