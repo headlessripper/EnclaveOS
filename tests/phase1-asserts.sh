@@ -21,6 +21,10 @@ has "$XML/xfce4-panel.xml" 'whiskermenu'                     "panel has a start 
 has "$XML/xfce4-panel.xml" 'value="docklike"'                "taskbar has pinned + running apps (Docklike)"
 has "$XML/xfce4-panel.xml" '"clock"'                         "panel has a clock"
 has "$XML/xfce4-panel.xml" 'showdesktop'                     "taskbar has a show-desktop corner"
+has "$XML/xfce4-panel.xml" 'name="plugin-1" type="string" value="enclave-balancer"' "taskbar truly centred (balancer is the first plugin)"
+exists "arch/plugins/enclave-balancer/enclave-balancer.c"   "centring plugin source present"
+has "arch/plugins/enclave-balancer/enclave-balancer.desktop" '^X-XFCE-Module=enclave-balancer$' "centring plugin module name"
+has "scripts/build-iso.sh" 'libxfce4panel-2.0'              "build compiles the Enclave panel plugins"
 has "arch/overlay/packages.x86_64.extra" '^xfce4-docklike-plugin$' "pkg: xfce4-docklike-plugin"
 has "$AIR/etc/xdg/xfce4/panel/docklike.rc" '^pinned=.*zen'   "taskbar pins Zen Browser"
 

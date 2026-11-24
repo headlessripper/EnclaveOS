@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Enclave OS taskbar — Windows 11 layout with a macOS-dock feel:
-       [ spacer ][ Start | pinned + running apps ][ spacer ][ tray | volume | notifications | clock | ▏]
-     * Start + apps are centred between two expanding spacers.
+       [ balancer ][ spacer ][ Start | apps ][ spacer ][ tray | volume | notifications | clock | ▏]
+     * Start + apps sit at the true screen centre: two expanding spacers plus
+       an invisible "balancer" that mirrors the tray cluster's width.
      * Apps come from the Docklike plugin: pinned apps are always there and
        running ones get an indicator, like the Windows 11 taskbar / macOS dock
        (pins: /etc/xdg/xfce4/panel/docklike.rc).
@@ -35,35 +36,40 @@
         <value type="int" value="7"/>
         <value type="int" value="8"/>
         <value type="int" value="9"/>
+        <value type="int" value="10"/>
       </property>
     </property>
   </property>
   <property name="plugins" type="empty">
+    <!-- invisible balancer: always as wide as the tray cluster on the right, so
+         Start + apps sit at the TRUE centre of the screen (Enclave plugin,
+         arch/plugins/enclave-balancer) -->
+    <property name="plugin-1" type="string" value="enclave-balancer"/>
     <!-- left spacer (expands) -->
-    <property name="plugin-1" type="string" value="separator">
+    <property name="plugin-2" type="string" value="separator">
       <property name="expand" type="bool" value="true"/>
       <property name="style" type="uint" value="0"/>
     </property>
     <!-- Start (settings: /etc/xdg/xfce4/whiskermenu/defaults.rc) -->
-    <property name="plugin-2" type="string" value="whiskermenu"/>
+    <property name="plugin-3" type="string" value="whiskermenu"/>
     <!-- pinned + running apps -->
-    <property name="plugin-3" type="string" value="docklike"/>
+    <property name="plugin-4" type="string" value="docklike"/>
     <!-- right spacer (expands) -->
-    <property name="plugin-4" type="string" value="separator">
+    <property name="plugin-5" type="string" value="separator">
       <property name="expand" type="bool" value="true"/>
       <property name="style" type="uint" value="0"/>
     </property>
     <!-- system tray / volume / notification centre / clock -->
-    <property name="plugin-5" type="string" value="systray">
+    <property name="plugin-6" type="string" value="systray">
       <property name="square-icons" type="bool" value="true"/>
       <property name="icon-size" type="int" value="16"/>
     </property>
-    <property name="plugin-6" type="string" value="pulseaudio">
+    <property name="plugin-7" type="string" value="pulseaudio">
       <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
       <property name="show-notifications" type="bool" value="true"/>
     </property>
-    <property name="plugin-7" type="string" value="notification-plugin"/>
-    <property name="plugin-8" type="string" value="clock">
+    <property name="plugin-8" type="string" value="notification-plugin"/>
+    <property name="plugin-9" type="string" value="clock">
       <property name="mode" type="uint" value="2"/>
       <!-- 1 = CLOCK_PLUGIN_DIGITAL_FORMAT_TIME_DATE (time above date) -->
       <property name="digital-layout" type="uint" value="1"/>
@@ -74,7 +80,7 @@
       <property name="tooltip-format" type="string" value="%A, %d %B %Y"/>
     </property>
     <!-- Windows-style "show desktop" sliver at the far right -->
-    <property name="plugin-9" type="string" value="showdesktop">
+    <property name="plugin-10" type="string" value="showdesktop">
       <property name="show-on-hover" type="bool" value="false"/>
     </property>
   </property>

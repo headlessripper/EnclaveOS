@@ -30,7 +30,7 @@ you already rely on (Windows, Android, Linux) running side by side.
 
 ```bash
 # On Arch (WSL-Arch or a VM):
-sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache
+sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache xfce4-panel
 sudo scripts/build-iso.sh
 
 # On WSL Ubuntu / any host with Docker:

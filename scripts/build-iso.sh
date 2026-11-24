@@ -209,6 +209,21 @@ fi
 rm -rf "$THEMETMP"
 log "  Enclave icons + cursor installed"
 
+# --- 6b2. Enclave panel plugins (compiled against the same Arch xfce4-panel
+#          the image installs). enclave-balancer = true taskbar centring. ---
+command -v gcc >/dev/null 2>&1 || die "gcc not found (install base-devel)"
+pkg-config --exists libxfce4panel-2.0 gtk+-3.0 \
+  || die "xfce4-panel/gtk3 headers not found (pacman -S xfce4-panel) — needed for Enclave panel plugins"
+for plug in "$ARCH_DIR"/plugins/*/; do
+  name="$(basename "$plug")"
+  log "compiling panel plugin: $name"
+  install -d "$AIR/usr/lib/xfce4/panel/plugins" "$AIR/usr/share/xfce4/panel/plugins"
+  # shellcheck disable=SC2046
+  gcc -shared -fPIC -O2 -Wall -o "$AIR/usr/lib/xfce4/panel/plugins/lib$name.so" "$plug/$name.c" \
+    $(pkg-config --cflags --libs libxfce4panel-2.0 gtk+-3.0) || die "plugin $name failed to compile"
+  install -m644 "$plug/$name.desktop" "$AIR/usr/share/xfce4/panel/plugins/$name.desktop"
+done
+
 # --- 6c. Plymouth boot splash: skin the boot logs with an Enclave theme.
 #     Built by recolouring the bundled "spinner" theme (reliable, known-good). ---
 if [ -d /usr/share/plymouth/themes/spinner ]; then

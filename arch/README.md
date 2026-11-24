@@ -28,7 +28,7 @@ and loop devices — so pick the path that matches your machine:
 
 **On Arch (WSL-Arch or an Arch VM):**
 ```bash
-sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache
+sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache xfce4-panel
 sudo ../scripts/build-iso.sh
 ```
 
@@ -64,6 +64,7 @@ pulled in by the base system are hidden.
 | Piece | File |
 |---|---|
 | Taskbar layout | `airootfs/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml` |
+| Taskbar true centring | `arch/plugins/enclave-balancer/` (C panel plugin, compiled by `build-iso.sh`) |
 | Taskbar pinned apps | `airootfs/etc/xdg/xfce4/panel/docklike.rc` |
 | Start menu | `airootfs/etc/xdg/xfce4/whiskermenu/defaults.rc` |
 | Taskbar styling | `airootfs/etc/skel/.config/gtk-3.0/gtk.css` |
