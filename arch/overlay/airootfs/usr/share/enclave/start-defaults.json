@@ -1,0 +1,16 @@
+{
+  "pinned": [
+    "zen.desktop",
+    "org.mozilla.Thunderbird.desktop",
+    "thunar.desktop",
+    "enclave-assistant.desktop",
+    "org.xfce.mousepad.desktop",
+    "org.xfce.ristretto.desktop",
+    "io.github.celluloid_player.Celluloid.desktop",
+    "xfce4-terminal.desktop",
+    "xfce4-screenshooter.desktop",
+    "xfce4-taskmanager.desktop",
+    "xfce-settings-manager.desktop",
+    "enclave-install.desktop"
+  ]
+}

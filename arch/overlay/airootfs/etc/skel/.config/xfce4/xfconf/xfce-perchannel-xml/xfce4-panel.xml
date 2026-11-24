@@ -50,8 +50,15 @@
       <property name="expand" type="bool" value="true"/>
       <property name="style" type="uint" value="0"/>
     </property>
-    <!-- Start (settings: /etc/xdg/xfce4/whiskermenu/defaults.rc) -->
-    <property name="plugin-3" type="string" value="whiskermenu"/>
+    <!-- Start: the Enclave Start menu (usr/local/bin/enclave-start), opened via
+         a launcher whose one item lives in ~/.config/xfce4/panel/launcher-3/ -->
+    <property name="plugin-3" type="string" value="launcher">
+      <property name="items" type="array">
+        <value type="string" value="enclave-start.desktop"/>
+      </property>
+      <property name="show-label" type="bool" value="false"/>
+      <property name="move-first" type="bool" value="false"/>
+    </property>
     <!-- pinned + running apps -->
     <property name="plugin-4" type="string" value="docklike"/>
     <!-- right spacer (expands) -->

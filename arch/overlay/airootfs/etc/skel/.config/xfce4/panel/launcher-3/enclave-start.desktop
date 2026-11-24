@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Start
+Comment=Open Start
+Exec=/usr/local/bin/enclave-start-toggle
+Icon=/usr/share/enclave/enclave-logo.svg
+Terminal=false
+StartupNotify=false

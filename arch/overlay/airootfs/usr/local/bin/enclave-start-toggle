@@ -1,0 +1,7 @@
+#!/bin/sh
+# Enclave OS — open/close the Start menu (Start button, Windows key).
+# Asks the resident enclave-start (started at login) to toggle over D-Bus —
+# instant. If it isn't running, start it (it opens on first launch).
+gdbus call --session --dest os.enclave.Start --object-path /os/enclave/Start \
+  --method org.gtk.Actions.Activate toggle "[]" "{}" >/dev/null 2>&1 && exit 0
+exec /usr/local/bin/enclave-start

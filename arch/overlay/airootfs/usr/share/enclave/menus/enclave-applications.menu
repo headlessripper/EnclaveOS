@@ -1,7 +1,8 @@
 <!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
   "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
 <!--
-  Enclave OS — the Start menu's app list (used by Whisker via custom-menu-file).
+  Enclave OS — the Start menu's app list (read by usr/local/bin/enclave-start,
+  and valid freedesktop menu XML for any menu that wants it).
 
   One flat list, like Windows 11 "All apps": every installed application
   (including Windows apps installed through Wine) EXCEPT

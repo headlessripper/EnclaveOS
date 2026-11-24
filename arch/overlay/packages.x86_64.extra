@@ -23,7 +23,6 @@ xfdesktop
 xfce4-settings
 xfconf
 garcon
-xfce4-whiskermenu-plugin
 # Taskbar: pinned + running apps in one row (Windows 11 / macOS dock behaviour)
 xfce4-docklike-plugin
 xfce4-notifyd

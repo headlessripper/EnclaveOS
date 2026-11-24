@@ -66,7 +66,7 @@ pulled in by the base system are hidden.
 | Taskbar layout | `airootfs/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml` |
 | Taskbar true centring | `arch/plugins/enclave-balancer/` (C panel plugin, compiled by `build-iso.sh`) |
 | Taskbar pinned apps | `airootfs/etc/xdg/xfce4/panel/docklike.rc` |
-| Start menu | `airootfs/etc/xdg/xfce4/whiskermenu/defaults.rc` |
+| Start menu | `airootfs/usr/local/bin/enclave-start` (+ `enclave-start-toggle`, default pins in `usr/share/enclave/start-defaults.json`) |
 | Taskbar styling | `airootfs/etc/skel/.config/gtk-3.0/gtk.css` |
 | Theme / icons / cursor | built from pinned Fluent sources in `scripts/build-iso.sh` (step 6b) |
 | Window manager | `…/xfce-perchannel-xml/xfwm4.xml` |

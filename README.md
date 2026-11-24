@@ -6,9 +6,10 @@ you already rely on (Windows, Android, Linux) running side by side.
 
 - **Base:** Arch Linux, shipped as a branded `archiso` ISO.
 - **Desktop:** XFCE on X11, shaped into a Windows 11 layout with macOS polish:
-  centred taskbar with pinned apps, a Windows-11-style Start menu, Fluent-based
-  Enclave theme / icons / cursor, Inter font, picom shadows + blur, and
-  Enclave's signature floating **control bubble**.
+  centred taskbar with pinned apps, Enclave's own Windows-11-style Start menu
+  (pinned apps, Recommended, All apps, instant search), Fluent-based Enclave
+  theme / icons / cursor, Inter font, picom shadows + blur, and Enclave's
+  signature floating **control bubble**.
 - **Default apps:** Zen Browser, Thunderbird, Files, Text Editor, Photos
   (Ristretto), Media Player (Celluloid), Task Manager.
 - **Apps:** Linux (Flatpak/AUR), Windows (Wine/Proton), Android (Waydroid).

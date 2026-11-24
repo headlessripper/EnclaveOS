@@ -17,7 +17,7 @@ XML="$XFC/xfconf/xfce-perchannel-xml"
 
 # --- Windows-familiar panel (bottom bar: start menu, tasklist, tray, clock) ---
 has "$XML/xfce4-panel.xml" 'position.*p=8'                   "panel is at the bottom"
-has "$XML/xfce4-panel.xml" 'whiskermenu'                     "panel has a start menu (Whisker)"
+has "$XML/xfce4-panel.xml" 'value="enclave-start\.desktop"'  "panel has the Enclave Start button"
 has "$XML/xfce4-panel.xml" 'value="docklike"'                "taskbar has pinned + running apps (Docklike)"
 has "$XML/xfce4-panel.xml" '"clock"'                         "panel has a clock"
 has "$XML/xfce4-panel.xml" 'showdesktop'                     "taskbar has a show-desktop corner"
@@ -28,22 +28,29 @@ has "scripts/build-iso.sh" 'libxfce4panel-2.0'              "build compiles the 
 has "arch/overlay/packages.x86_64.extra" '^xfce4-docklike-plugin$' "pkg: xfce4-docklike-plugin"
 has "$AIR/etc/xdg/xfce4/panel/docklike.rc" '^pinned=.*zen'   "taskbar pins Zen Browser"
 
-# --- Start menu (Whisker 2.10 seeds itself from $XDG_CONFIG_DIRS defaults.rc;
-#     a per-user whiskermenu-N.rc is only read when N == plugin id — that
-#     mismatch shipped in alpha.10 and silently dropped the whole config) ---
-WM="$AIR/etc/xdg/xfce4/whiskermenu/defaults.rc"
-has "$WM" '^button-icon=/usr/share/enclave/enclave-logo\.svg'  "start button uses the Enclave logo"
-has "$WM" '^position-search-alternate=false'                  "start menu: search on top"
-has "$WM" '^position-profile-alternate=true'                  "start menu: profile + power at the bottom"
-has "$WM" '^view-mode=0'                                      "start menu: pinned apps as an icon grid"
-has "$WM" '^custom-menu-file=/usr/share/enclave/menus/enclave-applications\.menu' "start menu uses the de-cluttered app list"
+# --- Start menu (Enclave's own: pinned grid, Recommended, All apps, search) ---
+ST="$AIR/usr/local/bin/enclave-start"
+exists "$ST"                                                  "Enclave Start menu present"
+has "$ST" 'Recommended'                                       "start menu: Recommended section"
+has "$ST" 'All apps'                                          "start menu: All apps list"
+has "$ST" 'enclave-applications\.menu'                        "start menu uses the de-cluttered app list"
+has "$ST" 'start-defaults\.json'                              "start menu: default pins"
+has "$ST" 'set_prgname\("enclave-start"\)'                      "start menu WM_CLASS Enclave-start (picom rule match)"
+exists "$AIR/usr/share/enclave/start-defaults.json"           "default pinned apps present"
+has "$AIR/usr/local/bin/enclave-start-toggle" 'org\.gtk\.Actions\.Activate' "Start button toggles the running menu"
+has "$AIR/etc/skel/.config/autostart/enclave-start.desktop" 'enclave-start --background' "start menu preloads at login"
+has "$XFC/panel/launcher-3/enclave-start.desktop" '^Icon=/usr/share/enclave/enclave-logo\.svg' "start button uses the Enclave logo"
+has "$XML/xfce4-panel.xml" 'name="plugin-3" type="string" value="launcher"' "Start button is panel plugin 3 (matches launcher-3/)"
+has "$AIR/etc/skel/.config/picom.conf" "class_g = 'Enclave-start'" "picom rounds the Start menu"
 exists "$AIR/usr/share/enclave/menus/enclave-applications.menu" "de-cluttered app list present"
 has "$AIR/usr/share/enclave/menus/enclave-applications.menu" '<Category>X-XFCE-SettingsDialog</Category>' "settings panels folded into Settings"
-if ls "$XFC"/panel/whiskermenu-*.rc >/dev/null 2>&1; then
-  bad "no per-user whiskermenu-N.rc (it is ignored unless N matches the plugin id)"
+if grep -q '^xfce4-whiskermenu-plugin$' arch/overlay/packages.x86_64.extra; then
+  bad "Whisker menu no longer shipped (replaced by enclave-start)"
 else
-  pass "no stray per-user whiskermenu-N.rc"
+  pass "Whisker menu no longer shipped (replaced by enclave-start)"
 fi
+has "$AIR/usr/local/share/applications/org.xfce.ristretto.desktop" '^Name=Photos$' "image viewer branded 'Photos'"
+has "$AIR/usr/local/share/applications/io.github.celluloid_player.Celluloid.desktop" '^Name=Media Player$' "video player branded 'Media Player'"
 
 # --- theme (Fluent recolored to Enclave orange) + island panel ---
 has "$XML/xsettings.xml" 'ThemeName" type="string" value="Enclave"' "GTK theme = Enclave (Fluent/orange)"
@@ -57,7 +64,6 @@ has "scripts/build-iso.sh" 'FLUENT_GTK_REV="[0-9a-f]{40}"'  "Fluent GTK source i
 has "scripts/build-iso.sh" 'show_app_icon=true'             "window frames show the app icon"
 has "$XML/xfwm4.xml" 'title_alignment" type="string" value="left"' "window titles left-aligned (Windows)"
 has "scripts/build-iso.sh" 'Fluent-gtk-theme'                       "build generates the Enclave (Fluent) theme"
-has "$XML/xfce4-panel.xml" 'whiskermenu'                            "taskbar has a Start button"
 has "$XML/xfce4-panel.xml" 'expand" type="bool" value="true"'      "taskbar centres Start+apps (expanding spacers)"
 has "$AIR/etc/skel/.config/gtk-3.0/gtk.css" 'xfce4-panel'          "taskbar is styled (gtk.css)"
 has "$XML/xfce4-panel.xml" 'p=8'                                    "taskbar is at the bottom"
@@ -73,7 +79,7 @@ has "$XML/thunar.xml" 'misc-single-click" type="bool" value="false"' "Enclave Fi
 has "$AIR/usr/local/share/applications/thunar.desktop" '^Name=Files' "file manager branded 'Files'"
 has "$AIR/usr/local/share/applications/xfce-settings-manager.desktop" '^Name=Settings$' "one 'Settings' app"
 has "$XML/xfce4-desktop.xml" 'show-home" type="bool" value="false"' "clean desktop (no Home icon)"
-has "$XML/xfce4-keyboard-shortcuts.xml" 'xfce4-popup-whiskermenu' "Windows key opens Start"
+has "$XML/xfce4-keyboard-shortcuts.xml" 'enclave-start-toggle'   "Windows key opens Start"
 exists "$AIR/etc/skel/.config/Thunar/uca.xml"              "Enclave Files custom actions"
 has "arch/overlay/packages.x86_64.extra" '^picom$'         "pkg: picom (Hyprland-style compositor)"
 has "$XML/xfwm4.xml" 'use_compositing" type="bool" value="false"' "xfwm4 compositor off (picom takes over)"
