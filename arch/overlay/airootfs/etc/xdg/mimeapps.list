@@ -1,4 +1,37 @@
 [Default Applications]
+# --- Enclave OS default apps ---
+# Web: Zen Browser
+text/html=zen.desktop
+application/xhtml+xml=zen.desktop
+application/pdf=zen.desktop
+x-scheme-handler/http=zen.desktop
+x-scheme-handler/https=zen.desktop
+x-scheme-handler/about=zen.desktop
+x-scheme-handler/unknown=zen.desktop
+# Mail: Thunderbird
+x-scheme-handler/mailto=org.mozilla.Thunderbird.desktop
+message/rfc822=org.mozilla.Thunderbird.desktop
+text/calendar=org.mozilla.Thunderbird.desktop
+# Files, text, photos, media
+inode/directory=thunar.desktop
+text/plain=org.xfce.mousepad.desktop
+image/png=org.xfce.ristretto.desktop
+image/jpeg=org.xfce.ristretto.desktop
+image/gif=org.xfce.ristretto.desktop
+image/webp=org.xfce.ristretto.desktop
+image/bmp=org.xfce.ristretto.desktop
+image/tiff=org.xfce.ristretto.desktop
+image/svg+xml=org.xfce.ristretto.desktop
+video/mp4=io.github.celluloid_player.Celluloid.desktop
+video/x-matroska=io.github.celluloid_player.Celluloid.desktop
+video/webm=io.github.celluloid_player.Celluloid.desktop
+video/quicktime=io.github.celluloid_player.Celluloid.desktop
+video/x-msvideo=io.github.celluloid_player.Celluloid.desktop
+audio/mpeg=io.github.celluloid_player.Celluloid.desktop
+audio/flac=io.github.celluloid_player.Celluloid.desktop
+audio/ogg=io.github.celluloid_player.Celluloid.desktop
+audio/x-wav=io.github.celluloid_player.Celluloid.desktop
+# Windows / Android apps
 application/x-ms-dos-executable=enclave-windows-app.desktop
 application/x-msdownload=enclave-windows-app.desktop
 application/x-msi=enclave-windows-app.desktop

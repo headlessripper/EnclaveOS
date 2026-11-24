@@ -1,0 +1,11 @@
+[Desktop Entry]
+# Enclave OS — lets Xfce's "preferred web browser" (exo-open) launch Zen.
+NoDisplay=true
+Version=1.0
+Type=X-XFCE-Helper
+X-XFCE-Category=WebBrowser
+Name=Zen Browser
+Icon=zen-browser
+X-XFCE-Binaries=zen-browser;
+X-XFCE-Commands=%B;
+X-XFCE-CommandsWithParameter=%B "%s";

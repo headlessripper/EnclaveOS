@@ -1,54 +1,59 @@
 #!/usr/bin/env python3
 # Enclave OS — the signature floating window-control bubble.
 #
-# A small, always-on-top, rounded "island" that controls the *active* window
-# (minimize / maximize / close) from anywhere on screen. Draggable with the
-# left mouse button on its body. It never takes focus, so the window it acts on
-# stays the real active one. Enclave's distinctive, non-Windows touch.
+# A small, always-on-top, pill-shaped "island" that controls the *active*
+# window (minimize / maximize / close) from anywhere on screen. Drag it by its
+# body. It never takes focus, so the window it acts on stays the active one.
+# Enclave's distinctive touch.
 #
-# Deps: python-gobject, gtk3, xdotool, wmctrl.
-import subprocess
+# Behaviour:
+#   * Acts only on real app windows (normal windows and dialogs) — never on the
+#     desktop, the taskbar or itself. With no app window active, its buttons dim.
+#   * Hides while the active window is fullscreen (video, games, slides).
+#   * Rounded + translucent when a compositor is running; when there isn't one
+#     it switches to a solid style instead of showing black corners, and
+#     switches back as soon as the compositor starts.
+#
+# Deps: python-gobject, python-cairo, gtk3, libwnck3.
+import cairo
 import gi
+from gi.repository import GLib
+
+# Must be set before GTK initialises: it becomes the window's WM_CLASS
+# ("enclave-bubble", "Enclave-bubble"), which picom's rules match.
+GLib.set_prgname("enclave-bubble")
+GLib.set_application_name("Enclave Bubble")
+
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk  # noqa: E402
+gi.require_version("Gdk", "3.0")
+gi.require_version("Wnck", "3.0")
+from gi.repository import Gdk, Gtk, Wnck  # noqa: E402
 
 ACCENT = "#ff6b1a"
 
-
-def _run(args):
-    try:
-        subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception:
-        pass
-
-
-def minimize(_btn):
-    _run(["xdotool", "getactivewindow", "windowminimize"])
-
-
-def maximize(_btn):
-    _run(["wmctrl", "-r", ":ACTIVE:", "-b", "toggle,maximized_vert,maximized_horz"])
-
-
-def close(_btn):
-    _run(["wmctrl", "-r", ":ACTIVE:", "-c"])
-
-
 CSS = f"""
 .enclave-bubble {{
-  background-color: rgba(28, 32, 40, 0.86);
+  background-color: rgba(28, 32, 40, 0.82);
   border-radius: 22px;
   padding: 4px 8px;
   border: 1px solid rgba(255, 255, 255, 0.10);
+}}
+.enclave-bubble.solid {{
+  background-color: rgb(32, 36, 44);
+  border-radius: 0;
+  border: none;
 }}
 .enclave-bubble button {{
   border-radius: 16px;
   min-width: 30px;
   min-height: 30px;
   margin: 0 1px;
+  padding: 0;
   color: #F3F5F8;
   background: transparent;
+  background-image: none;
   border: none;
+  box-shadow: none;
 }}
 .enclave-bubble button:hover {{
   background-color: rgba(255, 255, 255, 0.12);
@@ -57,16 +62,23 @@ CSS = f"""
   background-color: {ACCENT};
   color: #1A1008;
 }}
+.enclave-bubble button:disabled {{
+  opacity: 0.35;
+}}
 .enclave-grip {{
   color: rgba(255, 255, 255, 0.35);
   margin: 0 2px 0 4px;
 }}
 """
 
+# Window types the bubble may act on.
+ACTIONABLE = (Wnck.WindowType.NORMAL, Wnck.WindowType.DIALOG)
+
 
 class Bubble(Gtk.Window):
     def __init__(self):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
+        self.set_title("Enclave Bubble")
         self.set_decorated(False)
         self.set_keep_above(True)
         self.set_skip_taskbar_hint(True)
@@ -75,40 +87,41 @@ class Bubble(Gtk.Window):
         self.set_focus_on_map(False)
         self.set_resizable(False)
         self.set_type_hint(Gdk.WindowTypeHint.UTILITY)
-        self.stick()  # show on every workspace
+        self.stick()  # every workspace
 
-        # translucent for rounded corners
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
         if visual is not None:
             self.set_visual(visual)
         self.set_app_paintable(True)
+        self.connect("draw", self._on_draw)
+        screen.connect("composited-changed", lambda *_: self._update_style())
 
-        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
-        row.get_style_context().add_class("enclave-bubble")
+        self.row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+        self.row.get_style_context().add_class("enclave-bubble")
 
         grip = Gtk.Label(label="☰")  # ☰ drag handle
         grip.get_style_context().add_class("enclave-grip")
-        row.pack_start(grip, False, False, 0)
+        self.row.pack_start(grip, False, False, 0)
 
-        for icon, cb, cls in (
-            ("window-minimize-symbolic", minimize, None),
-            ("window-maximize-symbolic", maximize, None),
-            ("window-close-symbolic", close, "close"),
+        self.buttons = []
+        for icon, cb, cls, tip in (
+            ("window-minimize-symbolic", self.minimize, None, "Minimize"),
+            ("window-maximize-symbolic", self.maximize, None, "Maximize"),
+            ("window-close-symbolic", self.close_window, "close", "Close"),
         ):
             b = Gtk.Button()
             b.set_relief(Gtk.ReliefStyle.NONE)
             b.set_can_focus(False)
-            img = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.SMALL_TOOLBAR)
-            b.add(img)
+            b.set_tooltip_text(tip)
+            b.add(Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.SMALL_TOOLBAR))
             if cls:
                 b.get_style_context().add_class(cls)
             b.connect("clicked", cb)
-            row.pack_start(b, False, False, 0)
+            self.row.pack_start(b, False, False, 0)
+            self.buttons.append(b)
 
-        self.add(row)
-
-        # drag to move (press on the body (grip/box), not the buttons)
+        self.add(self.row)
         self.connect("button-press-event", self._on_press)
 
         prov = Gtk.CssProvider()
@@ -116,9 +129,100 @@ class Bubble(Gtk.Window):
         Gtk.StyleContext.add_provider_for_screen(
             screen, prov, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
+        self._update_style()
 
-        # start near the top-centre
-        self.move(max(0, screen.get_width() // 2 - 90), 16)
+        # Track the active window. Acting as a "pager" client makes the window
+        # manager treat minimize/close requests as user actions.
+        self._started = False
+        Wnck.set_client_type(Wnck.ClientType.PAGER)
+        self.wnck = Wnck.Screen.get_default()
+        self.wnck.force_update()
+        self.wnck.connect("active-window-changed", lambda *_: self._sync())
+        self._watched = None
+        self._sync()
+
+        # Start near the top-centre (titles are left-aligned, so this spot is
+        # free on most windows).
+        self.move(max(0, screen.get_width() // 2 - 90), 10)
+
+    # --- target window ---------------------------------------------------
+    def _target(self):
+        w = self.wnck.get_active_window()
+        if w is None or w.get_window_type() not in ACTIONABLE:
+            return None
+        if w.get_xid() == self._own_xid():
+            return None
+        return w
+
+    def _own_xid(self):
+        gdkwin = self.get_window()
+        try:
+            return gdkwin.get_xid() if gdkwin is not None else None
+        except AttributeError:
+            return None
+
+    def _sync(self, *_):
+        # Follow the active window's state (fullscreen) as it changes.
+        active = self.wnck.get_active_window()
+        if self._watched is not None:
+            try:
+                self._watched[0].disconnect(self._watched[1])
+            except Exception:
+                pass
+            self._watched = None
+        if active is not None:
+            hid = active.connect("state-changed", lambda *_: self._refresh())
+            self._watched = (active, hid)
+        self._refresh()
+
+    def _refresh(self):
+        target = self._target()
+        for b in self.buttons:
+            b.set_sensitive(target is not None)
+        if not self._started:
+            return
+        active = self.wnck.get_active_window()
+        if active is not None and active.is_fullscreen():
+            self.hide()
+        elif not self.get_visible():
+            self.show_all()
+
+    # --- actions ---------------------------------------------------------
+    def minimize(self, _btn):
+        w = self._target()
+        if w is not None:
+            w.minimize()
+
+    def maximize(self, _btn):
+        w = self._target()
+        if w is None:
+            return
+        if w.is_maximized():
+            w.unmaximize()
+        else:
+            w.maximize()
+
+    def close_window(self, _btn):
+        w = self._target()
+        if w is not None:
+            w.close(Gtk.get_current_event_time())
+
+    # --- look ------------------------------------------------------------
+    def _update_style(self):
+        ctx = self.row.get_style_context()
+        if self.get_screen().is_composited():
+            ctx.remove_class("solid")
+        else:
+            ctx.add_class("solid")
+        self.queue_draw()
+
+    def _on_draw(self, _w, cr):
+        # Clear to fully transparent so only the rounded pill is visible.
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_operator(cairo.OPERATOR_SOURCE)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+        return False
 
     def _on_press(self, _w, event):
         if event.button == 1:
@@ -132,6 +236,8 @@ def main():
     win = Bubble()
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
+    win._started = True
+    win._refresh()
     Gtk.main()
 
 

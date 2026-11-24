@@ -1,23 +1,44 @@
-/* Enclave OS — taskbar styling.
-   A clean, translucent full-width bottom bar (Windows-11 feel), layered on the
-   Enclave (Fluent) theme. Buttons get soft rounded hit areas; the active app
-   button carries the Enclave orange. */
+/* Enclave OS — taskbar styling, layered on the Enclave (Fluent) theme.
+   A light, translucent bar (picom blurs what is behind it → Windows 11 "Mica" /
+   macOS vibrancy), soft rounded hit areas, and the Enclave orange only where it
+   carries meaning (the running-app indicator). */
 
 .xfce4-panel {
-  background-color: rgba(252, 252, 253, 0.90);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.06);
+  background-color: rgba(243, 244, 246, 0.78);
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+  font-family: "Inter";
 }
 
 .xfce4-panel button {
-  border-radius: 10px;
-  padding: 2px 8px;
-  margin: 3px 2px;
+  border-radius: 8px;
+  border: none;
+  background-image: none;
+  box-shadow: none;
+  padding: 2px 6px;
+  margin: 5px 1px;
+  transition: background-color 120ms ease-out;
 }
 .xfce4-panel button:hover {
-  background-color: rgba(0, 0, 0, 0.06);
+  background-color: rgba(0, 0, 0, 0.055);
 }
+.xfce4-panel button:active,
 .xfce4-panel button:checked {
-  background-color: rgba(255, 122, 61, 0.16);
-  box-shadow: inset 0 -2px 0 0 #ff6b1a;
+  background-color: rgba(0, 0, 0, 0.085);
+}
+
+/* Show-desktop sliver: barely there until hovered, like Windows. */
+.xfce4-panel #showdesktop-button {
+  min-width: 6px;
+  padding: 0 3px;
+  margin: 5px 0 5px 4px;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0;
+}
+.xfce4-panel #showdesktop-button image {
+  opacity: 0;
+}
+
+/* Tooltips: rounded, quiet. */
+tooltip.background {
+  border-radius: 8px;
 }

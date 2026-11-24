@@ -1,8 +1,0 @@
-[Icon Theme]
-Name=Enclave
-Comment=Enclave icon theme (inherits Breeze until the Enclave pack is drawn)
-Inherits=breeze,hicolor
-Directories=
-
-# Phase 1 placeholder: inherits Breeze so every icon resolves. The Enclave
-# icon pack (app + system icons) is layered in here as it's designed.

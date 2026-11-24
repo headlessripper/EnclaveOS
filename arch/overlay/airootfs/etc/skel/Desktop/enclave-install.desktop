@@ -6,6 +6,6 @@ Comment=Install Enclave OS to your disk
 Icon=/usr/share/enclave/enclave-logo.svg
 Exec=pkexec calamares
 Terminal=false
-Categories=System;Settings;
+Categories=System;
 Keywords=install;installer;calamares;setup;
 StartupNotify=true

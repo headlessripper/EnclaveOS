@@ -2,12 +2,13 @@
 <!-- Enclave OS — desktop wallpaper. Monitor names vary in VMs, so set the
      backdrop for the common ones; single-workspace-mode applies it everywhere. -->
 <channel name="xfce4-desktop" version="1.0">
-  <!-- De-Linux the desktop: no "File System"/removable icons, keep Home + Trash
-       (the "Install Enclave OS" launcher comes from ~/Desktop). -->
+  <!-- Clean desktop like Windows 11 / macOS: only the Trash (Recycle Bin) and
+       the live "Install Enclave OS" launcher (from ~/Desktop). No Home or
+       "File System" icons. -->
   <property name="desktop-icons" type="empty">
     <property name="style" type="int" value="2"/>
     <property name="file-icons" type="empty">
-      <property name="show-home" type="bool" value="true"/>
+      <property name="show-home" type="bool" value="false"/>
       <property name="show-filesystem" type="bool" value="false"/>
       <property name="show-trash" type="bool" value="true"/>
       <property name="show-removable" type="bool" value="false"/>

@@ -5,8 +5,12 @@ Windows** — familiar layout and navigation, Enclave's own identity, and the ap
 you already rely on (Windows, Android, Linux) running side by side.
 
 - **Base:** Arch Linux, shipped as a branded `archiso` ISO.
-- **Desktop:** trimmed KDE Plasma 6 (Wayland/KWin), themed Windows-familiar but
-  cleaner, with Enclave's signature floating **control bubble** on every window.
+- **Desktop:** XFCE on X11, shaped into a Windows 11 layout with macOS polish:
+  centred taskbar with pinned apps, a Windows-11-style Start menu, Fluent-based
+  Enclave theme / icons / cursor, Inter font, picom shadows + blur, and
+  Enclave's signature floating **control bubble**.
+- **Default apps:** Zen Browser, Thunderbird, Files, Text Editor, Photos
+  (Ristretto), Media Player (Celluloid), Task Manager.
 - **Apps:** Linux (Flatpak/AUR), Windows (Wine/Proton), Android (Waydroid).
 - **Assistant:** a helpful, **advisory** assistant + OpenVox voice — answers and
   helps, never operates the machine.
@@ -26,7 +30,8 @@ you already rely on (Windows, Android, Linux) running side by side.
 
 ```bash
 # On Arch (WSL-Arch or a VM):
-sudo pacman -S --needed archiso && sudo scripts/build-iso.sh
+sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache
+sudo scripts/build-iso.sh
 
 # On WSL Ubuntu / any host with Docker:
 scripts/build-iso-docker.sh

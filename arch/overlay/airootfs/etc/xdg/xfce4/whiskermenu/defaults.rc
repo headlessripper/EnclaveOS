@@ -1,0 +1,69 @@
+# Enclave OS — Start menu (Whisker Menu) defaults, Windows 11 layout:
+#   search on top · pinned apps as an icon grid · profile + power at the bottom.
+#
+# Whisker 2.10 keeps its settings in xfconf and seeds a new menu from THIS file
+# ($XDG_CONFIG_DIRS/xfce4/whiskermenu/defaults.rc). It never reads a
+# ~/.config/xfce4/panel/whiskermenu-N.rc unless N matches the panel plugin id,
+# which is why the old skel file was ignored.
+#
+# Layout (from Whisker's window.cpp update_layout):
+#   position-profile-alternate=true + position-search-alternate=false
+#     -> search box / apps / profile+commands row, top to bottom.
+#   position-categories-horizontal=true -> the category switcher is a small
+#     icon row instead of a Linux-style sidebar.
+
+# Pinned (Favourites). Desktop-file IDs.
+favorites=zen.desktop,org.mozilla.Thunderbird.desktop,thunar.desktop,enclave-assistant.desktop,org.xfce.mousepad.desktop,org.xfce.ristretto.desktop,io.github.celluloid_player.Celluloid.desktop,xfce4-terminal.desktop,xfce4-screenshooter.desktop,xfce-settings-manager.desktop,enclave-install.desktop
+recent=
+
+# Flat, de-cluttered app list (no Linux settings sprawl) — see that file.
+custom-menu-file=/usr/share/enclave/menus/enclave-applications.menu
+
+button-title=Start
+button-icon=/usr/share/enclave/enclave-logo.svg
+show-button-title=false
+show-button-icon=true
+button-single-row=false
+
+view-mode=0
+default-category=0
+launcher-show-name=true
+launcher-show-description=false
+launcher-show-tooltip=true
+hover-switch-category=false
+category-show-name=false
+sort-categories=true
+recent-items-max=8
+favorites-in-recent=false
+
+position-search-alternate=false
+position-profile-alternate=true
+position-commands-alternate=false
+position-categories-alternate=false
+position-categories-horizontal=true
+profile-shape=0
+
+stay-on-focus-out=false
+confirm-session-command=true
+menu-width=620
+menu-height=680
+menu-opacity=100
+
+# Bottom row: Settings · Lock · Power (the session dialog offers shut down /
+# restart / sleep / sign out, like the Windows power button).
+command-settings=xfce4-settings-manager
+show-command-settings=true
+command-lockscreen=xflock4
+show-command-lockscreen=true
+command-logout=xfce4-session-logout
+show-command-logout=true
+show-command-switchuser=false
+show-command-logoutuser=false
+show-command-restart=false
+show-command-shutdown=false
+show-command-suspend=false
+show-command-hibernate=false
+show-command-menueditor=false
+show-command-profile=false
+
+search-actions=0

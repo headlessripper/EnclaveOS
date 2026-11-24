@@ -10,3 +10,7 @@ result-*
 # local debug scratch
 _*.sh
 _*.txt
+
+# Python bytecode
+__pycache__/
+*.pyc

@@ -1,0 +1,13 @@
+[Desktop Entry]
+# Enclave OS — Mousepad presented as "Text Editor" (Notepad / TextEdit).
+Type=Application
+Name=Text Editor
+GenericName=Text Editor
+Comment=Write and edit plain text
+Exec=mousepad %U
+Icon=accessories-text-editor
+Terminal=false
+StartupNotify=true
+Categories=Utility;TextEditor;GTK;
+MimeType=text/plain;application/x-zerosize;
+Keywords=notepad;text;editor;

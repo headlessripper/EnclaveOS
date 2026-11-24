@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 Name=Enclave Compositor
-Comment=Blur, rounded corners, shadows and animations
-Exec=picom --config %h/.config/picom.conf
+Comment=Shadows, rounded corners, blur and animations
+Exec=/usr/local/bin/enclave-compositor
 OnlyShowIn=XFCE;
 X-XFCE-Autostart-Override=true
 Terminal=false

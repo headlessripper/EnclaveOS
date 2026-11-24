@@ -18,7 +18,7 @@ CAL="$AIR/etc/calamares"
 has "arch/overlay/packages.x86_64.extra" '^calamares$'        "pkg: calamares"
 has "arch/overlay/packages.x86_64.extra" '^grub$'             "pkg: grub (target bootloader)"
 has "arch/overlay/packages.x86_64.extra" '^squashfs-tools$'   "pkg: squashfs-tools (unpackfs)"
-has "scripts/build-iso.sh" 'aur.archlinux.org/calamares'      "build compiles Calamares from AUR"
+has "scripts/build-iso.sh" 'AUR_PKGS=[(]calamares'           "build compiles Calamares from AUR"
 has "scripts/build-iso.sh" '\[enclave-local\]'                "build registers a local repo"
 has "scripts/build-iso.sh" 'repo-add'                         "build adds pkg to local repo"
 has ".github/workflows/build-iso.yml" 'base-devel'           "CI installs base-devel (makepkg)"
@@ -42,6 +42,22 @@ has "$CAL/modules/displaymanager.conf" 'sddm'               "installed display m
 has "$CAL/modules/shellprocess-cleanup.conf" '10-enclave-autologin\.conf' "cleanup removes live autologin"
 has "$CAL/modules/shellprocess-cleanup.conf" 'userdel -rf enclave'        "cleanup removes the live user"
 has "$CAL/modules/shellprocess-cleanup.conf" 'pacman -R --noconfirm calamares' "cleanup removes the installer"
+has "$CAL/modules/shellprocess-cleanup.conf" 'getty@tty1\.service\.d'      "cleanup removes live root autologin"
+has "$CAL/modules/shellprocess-cleanup.conf" '10-archiso\.conf'            "cleanup removes ssh root password login"
+has "$CAL/modules/shellprocess-cleanup.conf" 'volatile-storage\.conf'      "cleanup restores a persistent journal"
+
+# --- prepare makes the unpacked live system bootable from disk ---
+# (mkarchiso empties /boot in the squashfs, and archiso.conf would put the
+# find-the-live-ISO hooks into the installed initramfs.)
+has "$CAL/settings.conf" 'shellprocess@prepare'                            "install sequence runs prepare"
+if awk '/shellprocess@prepare/{p=NR} /- initcpiocfg/{i=NR} END{exit !(p && i && p<i)}' "$CAL/settings.conf"; then
+  pass "prepare runs before initcpiocfg"
+else
+  bad "prepare must run before initcpiocfg"
+fi
+has "$CAL/modules/shellprocess-prepare.conf" '/boot/vmlinuz-linux'         "prepare installs the kernel into /boot"
+has "$CAL/modules/shellprocess-prepare.conf" 'rm -f /etc/mkinitcpio\.conf\.d/archiso\.conf' "prepare drops the live initramfs hooks"
+has "$CAL/modules/shellprocess-prepare.conf" 'pacman-key --populate'       "prepare sets up the pacman keyring"
 
 # --- branding + launcher ---
 has "$CAL/branding/enclave/branding.desc" 'productName:\s+Enclave OS' "branding names Enclave OS"

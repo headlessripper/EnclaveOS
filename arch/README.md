@@ -15,7 +15,7 @@ boot plumbing correct and the repo small.
 arch/
   overlay/                 # Enclave's changes, layered on top of `releng`
     pacman.conf            # + [multilib] (needed for Wine/Proton later)
-    packages.x86_64.extra  # appended to releng's package list (Plasma, SDDM, NM…)
+    packages.x86_64.extra  # appended to releng's package list (XFCE, SDDM, apps…)
     airootfs/              # identity, branding, services, live user, autologin
   profiledef.overrides     # key=value identity lines sed'd into releng/profiledef.sh
   branding/                # logo/wallpaper assets copied into the image
@@ -28,7 +28,7 @@ and loop devices — so pick the path that matches your machine:
 
 **On Arch (WSL-Arch or an Arch VM):**
 ```bash
-sudo pacman -S --needed archiso
+sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache
 sudo ../scripts/build-iso.sh
 ```
 
@@ -53,7 +53,26 @@ The build strips Arch's live-ISO bloat so the image stays light:
 
 The build log prints the before/after package count.
 
-**No bloat apps.** The desktop ships a *curated* Plasma set — no `plasma-meta`,
-no KDE PIM/games/education, no software-center pull-ins. Default apps are just
-Dolphin (files), Konsole, Ark, System Settings, and the Enclave Assistant.
-(File indexing / Baloo is left at its Plasma default — enabled.)
+**No bloat apps.** The desktop is a curated XFCE set (not the `xfce4` group).
+The Start menu shows one flat, de-cluttered app list
+(`airootfs/usr/share/enclave/menus/enclave-applications.menu`): individual
+settings panels live inside the single **Settings** app, and technician tools
+pulled in by the base system are hidden.
+
+## Where the desktop look comes from
+
+| Piece | File |
+|---|---|
+| Taskbar layout | `airootfs/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml` |
+| Taskbar pinned apps | `airootfs/etc/xdg/xfce4/panel/docklike.rc` |
+| Start menu | `airootfs/etc/xdg/xfce4/whiskermenu/defaults.rc` |
+| Taskbar styling | `airootfs/etc/skel/.config/gtk-3.0/gtk.css` |
+| Theme / icons / cursor | built from pinned Fluent sources in `scripts/build-iso.sh` (step 6b) |
+| Window manager | `…/xfce-perchannel-xml/xfwm4.xml` |
+| Compositor | `airootfs/etc/skel/.config/picom.conf` + `usr/local/bin/enclave-compositor` |
+| Floating bubble | `airootfs/usr/local/bin/enclave-bubble` (see `bubble.md`) |
+| Default apps | `airootfs/etc/xdg/mimeapps.list` |
+
+**File modes:** mkarchiso discards file modes from `airootfs/` and applies only
+`file_permissions` from `profiledef.sh`. `build-iso.sh` registers everything in
+`usr/local/bin` there — a plain `chmod` would be silently lost.

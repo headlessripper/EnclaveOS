@@ -24,35 +24,50 @@ xfce4-settings
 xfconf
 garcon
 xfce4-whiskermenu-plugin
+# Taskbar: pinned + running apps in one row (Windows 11 / macOS dock behaviour)
+xfce4-docklike-plugin
 xfce4-notifyd
 xfce4-pulseaudio-plugin
 xfce4-power-manager
 xfce4-screenshooter
+# Task Manager (Ctrl+Shift+Esc)
+xfce4-taskmanager
 network-manager-applet
 xdg-desktop-portal
 xdg-desktop-portal-gtk
 # picom: the Hyprland-style look on X11 — blur, rounded corners, shadows,
 # fade animations, transparency (replaces xfwm4's built-in compositor).
 picom
-# Enclave's signature floating window-control bubble (GTK) + the tools it uses
-# to act on the active window.
+# Enclave's signature floating window-control bubble (GTK + libwnck, which it
+# uses to act on the active window).
 python-gobject
-xdotool
-wmctrl
+libwnck3
+python-cairo
 
-# --- GTK theme + icons (clean, Windows-familiar) ---
-# Adwaita ships in gnome-themes-extra (always available). Papirus = flat icons.
+# --- Theme fallbacks + UI font ---
+# The Enclave GTK/window theme, icons and cursor are built from pinned Fluent
+# sources by build-iso.sh. Adwaita (gnome-themes-extra) is the GTK fallback.
 gnome-themes-extra
-papirus-icon-theme
+# Inter: the clean UI typeface (Segoe UI / SF Pro proportions).
+inter-font
 
-# --- Core apps for a usable first session ---
+# --- Core apps for a usable first session (the Windows-equivalent set) ---
 thunar
 thunar-volman
+# Extract Here / Create Archive in the Files context menu
+thunar-archive-plugin
 gvfs
 tumbler
 xfce4-terminal
 xarchiver
 mousepad
+# Photos + media player
+ristretto
+celluloid
+# Mail (Zen Browser, the default browser, is built from the AUR by build-iso.sh)
+thunderbird
+zen-browser-bin
+xdg-utils
 
 # --- Networking ---
 networkmanager

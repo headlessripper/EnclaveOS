@@ -1,4 +1,5 @@
 [Desktop Entry]
+# Enclave OS — the terminal, without the desktop-environment name.
 Type=Application
 Name=Terminal
 GenericName=Terminal
@@ -8,4 +9,4 @@ Icon=utilities-terminal
 Terminal=false
 StartupNotify=true
 Categories=System;Utility;TerminalEmulator;
-Keywords=terminal;console;command;shell;
+Keywords=terminal;console;command;shell;prompt;

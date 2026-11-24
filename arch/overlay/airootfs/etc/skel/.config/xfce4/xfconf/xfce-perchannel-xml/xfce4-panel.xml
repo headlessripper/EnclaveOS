@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Enclave OS taskbar — Windows-11 layout: a clean full-width bottom bar with
-     the Start button + running apps CENTRED (two expanding spacers), and the
-     system tray / volume / clock on the right. Styling (translucency) is in
-     gtk.css. -->
+<!-- Enclave OS taskbar — Windows 11 layout with a macOS-dock feel:
+       [ spacer ][ Start | pinned + running apps ][ spacer ][ tray | volume | notifications | clock | ▏]
+     * Start + apps are centred between two expanding spacers.
+     * Apps come from the Docklike plugin: pinned apps are always there and
+       running ones get an indicator, like the Windows 11 taskbar / macOS dock
+       (pins: /etc/xdg/xfce4/panel/docklike.rc).
+     * Clock shows time over date; the thin last button is "show desktop".
+     Translucency and hover styling: ~/.config/gtk-3.0/gtk.css; blur: picom.
+     Positions (xfce4-panel 4.20 SnapPosition): p=8 is bottom-left, which with
+     length=100 spans the full bottom edge. -->
 <channel name="xfce4-panel" version="1.0">
   <property name="configver" type="int" value="2"/>
   <property name="panels" type="array">
@@ -16,8 +22,8 @@
       <property name="position-locked" type="bool" value="true"/>
       <property name="autohide-behavior" type="uint" value="0"/>
       <property name="enable-struts" type="bool" value="true"/>
-      <property name="icon-size" type="uint" value="22"/>
-      <property name="size" type="uint" value="46"/>
+      <property name="icon-size" type="uint" value="20"/>
+      <property name="size" type="uint" value="48"/>
       <property name="nrows" type="uint" value="1"/>
       <property name="plugin-ids" type="array">
         <value type="int" value="1"/>
@@ -27,6 +33,8 @@
         <value type="int" value="5"/>
         <value type="int" value="6"/>
         <value type="int" value="7"/>
+        <value type="int" value="8"/>
+        <value type="int" value="9"/>
       </property>
     </property>
   </property>
@@ -36,32 +44,38 @@
       <property name="expand" type="bool" value="true"/>
       <property name="style" type="uint" value="0"/>
     </property>
-    <!-- Start -->
+    <!-- Start (settings: /etc/xdg/xfce4/whiskermenu/defaults.rc) -->
     <property name="plugin-2" type="string" value="whiskermenu"/>
-    <!-- running apps -->
-    <property name="plugin-3" type="string" value="tasklist">
-      <property name="grouping" type="uint" value="1"/>
-      <property name="show-labels" type="bool" value="false"/>
-      <property name="flat-buttons" type="bool" value="true"/>
-      <property name="show-handle" type="bool" value="false"/>
-      <property name="window-scrolling" type="bool" value="false"/>
-    </property>
-    <!-- right spacer (expands) -> pushes the tray cluster to the right -->
+    <!-- pinned + running apps -->
+    <property name="plugin-3" type="string" value="docklike"/>
+    <!-- right spacer (expands) -->
     <property name="plugin-4" type="string" value="separator">
       <property name="expand" type="bool" value="true"/>
       <property name="style" type="uint" value="0"/>
     </property>
-    <!-- system tray / volume / clock -->
+    <!-- system tray / volume / notification centre / clock -->
     <property name="plugin-5" type="string" value="systray">
       <property name="square-icons" type="bool" value="true"/>
+      <property name="icon-size" type="int" value="16"/>
     </property>
     <property name="plugin-6" type="string" value="pulseaudio">
       <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
+      <property name="show-notifications" type="bool" value="true"/>
     </property>
-    <property name="plugin-7" type="string" value="clock">
-      <property name="digital-layout" type="uint" value="3"/>
+    <property name="plugin-7" type="string" value="notification-plugin"/>
+    <property name="plugin-8" type="string" value="clock">
+      <property name="mode" type="uint" value="2"/>
+      <!-- 1 = CLOCK_PLUGIN_DIGITAL_FORMAT_TIME_DATE (time above date) -->
+      <property name="digital-layout" type="uint" value="1"/>
       <property name="digital-time-format" type="string" value="%H:%M"/>
-      <property name="digital-date-format" type="string" value="%a %d %b"/>
+      <property name="digital-date-format" type="string" value="%d/%m/%Y"/>
+      <property name="digital-time-font" type="string" value="Inter 9"/>
+      <property name="digital-date-font" type="string" value="Inter 9"/>
+      <property name="tooltip-format" type="string" value="%A, %d %B %Y"/>
+    </property>
+    <!-- Windows-style "show desktop" sliver at the far right -->
+    <property name="plugin-9" type="string" value="showdesktop">
+      <property name="show-on-hover" type="bool" value="false"/>
     </property>
   </property>
 </channel>

@@ -1,0 +1,74 @@
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
+  "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
+<!--
+  Enclave OS — the Start menu's app list (used by Whisker via custom-menu-file).
+
+  One flat list, like Windows 11 "All apps": every installed application
+  (including Windows apps installed through Wine) EXCEPT
+    * the individual Linux settings panels — they all live inside the single
+      "Settings" app (xfce4-settings-manager), which is re-included below;
+    * command-line / technician tools and duplicate "preferred application"
+      shortcuts that make the menu look like a Linux toolbox.
+  Rules are applied in order (freedesktop menu spec): include all, exclude,
+  then re-include Settings.
+-->
+<Menu>
+  <Name>Enclave</Name>
+  <DefaultAppDirs/>
+  <DefaultDirectoryDirs/>
+
+  <Include>
+    <All/>
+  </Include>
+
+  <Exclude>
+    <Or>
+      <!-- individual settings panels (reachable from Settings) -->
+      <Category>Settings</Category>
+      <Category>X-XFCE-SettingsDialog</Category>
+      <Category>X-XFCE-HardwareSettings</Category>
+      <Category>X-XFCE-PersonalSettings</Category>
+      <Category>X-XFCE-SystemSettings</Category>
+      <Category>X-GNOME-NetworkSettings</Category>
+      <!-- duplicate "preferred application" launchers -->
+      <Filename>xfce4-web-browser.desktop</Filename>
+      <Filename>xfce4-mail-reader.desktop</Filename>
+      <Filename>xfce4-file-manager.desktop</Filename>
+      <Filename>xfce4-terminal-emulator.desktop</Filename>
+      <Filename>xfce4-run.desktop</Filename>
+      <Filename>xfce4-session-logout.desktop</Filename>
+      <Filename>xfce4-about.desktop</Filename>
+      <!-- the live installer has its own Enclave entry -->
+      <Filename>calamares.desktop</Filename>
+      <!-- technician / command-line tools pulled in by the base system -->
+      <Filename>lstopo.desktop</Filename>
+      <Filename>stoken-gui.desktop</Filename>
+      <Filename>stoken-gui-small.desktop</Filename>
+      <Filename>vim.desktop</Filename>
+      <Filename>gvim.desktop</Filename>
+      <Filename>winetricks.desktop</Filename>
+      <Filename>wine.desktop</Filename>
+      <Filename>xarchiver.desktop</Filename>
+      <Filename>thunar-bulk-rename.desktop</Filename>
+      <Filename>org.xfce.mousepad-settings.desktop</Filename>
+      <Filename>org.gnupg.pinentry-qt.desktop</Filename>
+      <Filename>xdg-desktop-portal-gtk.desktop</Filename>
+      <Filename>avahi-discover.desktop</Filename>
+      <Filename>bssh.desktop</Filename>
+      <Filename>bvnc.desktop</Filename>
+      <Filename>qv4l2.desktop</Filename>
+      <Filename>qvidcap.desktop</Filename>
+      <Filename>vulkan-cube.desktop</Filename>
+      <Filename>htop.desktop</Filename>
+      <Filename>nvtop.desktop</Filename>
+      <Filename>cmake-gui.desktop</Filename>
+      <Filename>uxterm.desktop</Filename>
+      <Filename>xterm.desktop</Filename>
+    </Or>
+  </Exclude>
+
+  <!-- the one Settings app -->
+  <Include>
+    <Filename>xfce-settings-manager.desktop</Filename>
+  </Include>
+</Menu>
