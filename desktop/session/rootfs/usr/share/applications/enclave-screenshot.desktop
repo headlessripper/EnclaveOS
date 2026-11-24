@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Screenshot
+Comment=Capture part of the screen (Win+Shift+S)
+Exec=enclave-screenshot
+Icon=applets-screenshooter
+Terminal=false
+StartupNotify=false
+Categories=Utility;Graphics;
+Keywords=screenshot;capture;snip;print;

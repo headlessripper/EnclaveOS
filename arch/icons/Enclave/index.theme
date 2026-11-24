@@ -1,0 +1,34 @@
+[Icon Theme]
+Name=Enclave Icons
+Comment=Enclave OS icons (light). Enclave's own set from tools/make-icons.py; everything else from Papirus.
+Inherits=Papirus,Adwaita,hicolor
+Example=folder
+Directories=scalable/apps,scalable/places,scalable/devices,scalable/mimetypes
+
+[scalable/apps]
+Context=Applications
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[scalable/places]
+Context=Places
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[scalable/devices]
+Context=Devices
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable
+
+[scalable/mimetypes]
+Context=MimeTypes
+Size=128
+MinSize=8
+MaxSize=512
+Type=Scalable

@@ -7,7 +7,12 @@
 #include <QLocalSocket>
 #include <QMimeDatabase>
 #include <QProcess>
+#include <QRegion>
+#include <QSettings>
+#include <QWindow>
 #include <QStandardPaths>
+#include <QStorageInfo>
+#include <QTimer>
 #include <QUrl>
 #include <QXmlStreamReader>
 #include <algorithm>
@@ -69,6 +74,8 @@ QString System::avatar() const
     return QFile::exists(face) ? face : QString();
 }
 
+QString System::homePath() const { return QDir::homePath(); }
+
 bool System::live() const
 {
     return QFile::exists("/run/archiso") || QFile::exists("/etc/sddm.conf.d/10-enclave-autologin.conf");
@@ -94,6 +101,50 @@ void System::logout()
         run("kill", {"-TERM", pid});
     else
         run("loginctl", {"terminate-session", qEnvironmentVariable("XDG_SESSION_ID")});
+}
+
+void System::query(const QString &program, const QStringList &args, const QJSValue &callback)
+{
+    auto *p = new QProcess(this);
+    auto done = [p, callback](const QString &out, int code) {
+        if (callback.isCallable())
+            QJSValue(callback).call({QJSValue(out), QJSValue(code)});
+        p->deleteLater();
+    };
+    connect(p, &QProcess::finished, this, [p, done](int code, QProcess::ExitStatus) {
+        done(QString::fromUtf8(p->readAllStandardOutput()).trimmed(), code);
+    });
+    connect(p, &QProcess::errorOccurred, this, [done](QProcess::ProcessError e) {
+        if (e == QProcess::FailedToStart)
+            done({}, -1);
+    });
+    QTimer::singleShot(3000, p, [p] {
+        if (p->state() != QProcess::NotRunning)
+            p->kill();
+    });
+    p->start(program, args);
+}
+
+void System::setInputRegion(QObject *window, const QRect &rect)
+{
+    if (auto *w = qobject_cast<QWindow *>(window))
+        w->setMask(rect.isEmpty() ? QRegion() : QRegion(rect));
+}
+
+static QString shellConf()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)
+        + "/enclave/shell.conf";
+}
+
+QVariant System::setting(const QString &key, const QVariant &fallback) const
+{
+    return QSettings(shellConf(), QSettings::IniFormat).value(key, fallback);
+}
+
+void System::setSetting(const QString &key, const QVariant &value)
+{
+    QSettings(shellConf(), QSettings::IniFormat).setValue(key, value);
 }
 
 QVariantList System::recentFiles(int limit) const
@@ -127,6 +178,59 @@ QVariantList System::recentFiles(int limit) const
                                                           : fi.absolutePath()},
                            {"icon", mimes.mimeTypeForFile(fi).iconName()},
                            {"url", QUrl::fromLocalFile(it.path).toString()}};
+    }
+    return out;
+}
+
+QVariantMap System::stats()
+{
+    QVariantMap out;
+    // CPU: busy share since the previous call (/proc/stat "cpu" line).
+    QFile stat("/proc/stat");
+    if (stat.open(QIODevice::ReadOnly)) {
+        const QList<QByteArray> f = stat.readLine().simplified().split(' ');
+        quint64 total = 0, idle = 0;
+        for (int i = 1; i < f.size(); ++i) {
+            total += f[i].toULongLong();
+            if (i == 4 || i == 5)            // idle + iowait
+                idle += f[i].toULongLong();
+        }
+        const quint64 dt = total - m_cpuTotal, di = idle - m_cpuIdle;
+        out["cpu"] = m_cpuTotal && dt ? 1.0 - double(di) / double(dt) : 0.0;
+        m_cpuTotal = total;
+        m_cpuIdle = idle;
+    }
+    // Memory: 1 - MemAvailable / MemTotal.
+    QFile mem("/proc/meminfo");
+    if (mem.open(QIODevice::ReadOnly)) {
+        double total = 0, avail = 0;
+        for (const QByteArray &line : mem.readAll().split('\n')) {
+            const QList<QByteArray> f = line.simplified().split(' ');
+            if (f.size() < 2) continue;
+            if (f[0] == "MemTotal:") total = f[1].toDouble();
+            else if (f[0] == "MemAvailable:") avail = f[1].toDouble();
+        }
+        out["memory"] = total > 0 ? 1.0 - avail / total : 0.0;
+        out["memoryTotal"] = total * 1024.0;
+    }
+    // Disk: the home filesystem.
+    const QStorageInfo disk(QDir::homePath());
+    if (disk.isValid() && disk.bytesTotal() > 0) {
+        out["disk"] = 1.0 - double(disk.bytesAvailable()) / double(disk.bytesTotal());
+        out["diskTotal"] = double(disk.bytesTotal());
+    }
+    // Network: bytes in/out over every interface but loopback.
+    QFile net("/proc/net/dev");
+    if (net.open(QIODevice::ReadOnly)) {
+        double rx = 0, tx = 0;
+        for (const QByteArray &line : net.readAll().split('\n')) {
+            const int colon = line.indexOf(':');
+            if (colon < 0 || line.left(colon).trimmed() == "lo") continue;
+            const QList<QByteArray> f = line.mid(colon + 1).simplified().split(' ');
+            if (f.size() >= 9) { rx += f[0].toDouble(); tx += f[8].toDouble(); }
+        }
+        out["rx"] = rx;
+        out["tx"] = tx;
     }
     return out;
 }

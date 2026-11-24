@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Enclave Session Setup
-Comment=Per-login Enclave touch-ups
-Exec=/usr/local/bin/enclave-session-setup
-OnlyShowIn=XFCE;
-Terminal=false
-NoDisplay=true
-X-XFCE-Autostart-Override=true

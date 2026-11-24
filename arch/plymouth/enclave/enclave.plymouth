@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Enclave
+Description=Enclave OS boot splash (Enclave Ember)
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/enclave
+ScriptFile=/usr/share/plymouth/themes/enclave/enclave.script

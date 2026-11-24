@@ -35,15 +35,29 @@ has "$SH/CMakeLists.txt" 'wlr-foreign-toplevel-management' "task list via standa
 has "$SH/src/windowmanager.h" 'class WindowManager'   "WindowManager interface (compositor-independent)"
 has "$SH/src/toplevels.h" 'public WindowManager'      "foreign-toplevel implements WindowManager"
 if grep -rqE 'labwc' "$SH/src"; then bad "shell code never depends on labwc"; else pass "shell code never depends on labwc"; fi
-for s in Wallpaper Taskbar StartMenu Bubble; do
+for s in Wallpaper TopBar Taskbar Widgets StartMenu Bubble components/Flyout; do
   exists "$SH/qml/$s.qml"                             "surface: $s"
   has "$SH/qml/$s.qml" 'org\.kde\.layershell'         "$s is a layer-shell surface"
 done
+for s in ControlCenter CalendarPanel; do
+  has "$SH/qml/$s.qml" '^Flyout \{'                    "$s is a flyout surface"
+done
 has "$SH/qml/Bubble.qml" 'activeMinimize'             "bubble controls the active window (Wayland)"
-has "$SH/qml/Taskbar.qml" 'anchors\.centerIn: parent' "taskbar items truly centred"
+has "$SH/qml/Bubble.qml" 'Snap left'                  "bubble snaps windows (they have no title bar)"
+has "$SH/qml/Bubble.qml" 'setInputRegion'             "bubble is click-through around itself"
+has "$SH/qml/Bubble.qml" 'bubble/side'                "bubble remembers where it rests"
+has "$SH/qml/Taskbar.qml" 'anchors\.centerIn: parent' "dock items truly centred"
+has "$SH/qml/Taskbar.qml" 'allAppsRequested'          "dock ends with All apps"
+has "$SH/qml/TopBar.qml" 'Search anything'            "top bar: search anything"
+has "$SH/qml/TopBar.qml" 'activeTitle'                "top bar names the window in front"
 has "$SH/qml/StartMenu.qml" 'Recommended'             "Start: Recommended section"
+has "$SH/qml/StartMenu.qml" 'Apps\.categories'        "Start: category rail"
+has "$SH/qml/Wallpaper.qml" 'Apps\.desktopPins'       "desktop icons only when the user adds them"
+has "$SH/src/appregistry.h" 'pinDesktop'              "apps can be added to / removed from the desktop"
+has "$SH/qml/Widgets.qml" 'System\.stats'             "widgets show live system figures"
+has "$SH/src/system.cpp" 'System::query'              "status queries never block the shell"
 has "$SH/src/appregistry.cpp" 'enclave-applications\.menu' "apps from .desktop entries + Enclave menu rules"
-if grep -rqE '#[0-9A-Fa-f]{6}' "$SH/qml/Taskbar.qml" "$SH/qml/StartMenu.qml" "$SH/qml/Bubble.qml"; then
+if grep -rqE '#[0-9A-Fa-f]{6}' "$SH/qml/"*.qml "$SH/qml/components/"*.qml; then
   bad "surfaces use theme tokens, not hard-coded colours"
 else
   pass "surfaces use theme tokens, not hard-coded colours"
@@ -59,6 +73,10 @@ has "$SES/usr/bin/enclave-shell-run" 'enclave-shell'  "crash-restart wrapper"
 has "$SES/usr/share/enclave/labwc/rc.xml" 'Super_L'   "Windows key opens Start"
 has "$SES/usr/share/enclave/labwc/rc.xml" 'Enclave-Ember' "windows use the Ember frame theme"
 has "$SES/usr/share/themes/Enclave-Ember/labwc/themerc" 'FF7A1A' "Ember orange focus cues"
+has "$SES/usr/share/enclave/labwc/rc.xml" 'decorations="border" forceSSD="yes"' "every window's title bar and frame stripped"
+has "$SES/usr/share/enclave/labwc/rc.xml" '<maximizedDecoration>none' "maximised windows are frameless"
+has "$SES/usr/share/themes/Enclave-Ember/labwc/themerc" '26262E' "Enclave frame: Reclip-style hairline"
+has "arch/overlay/packages.x86_64.extra" '^wtype$'     "pkg: wtype (bubble snap/move)"
 has "$SES/usr/share/xdg-desktop-portal/enclave-portals.conf" 'wlr' "portals for screenshots/screen share"
 
 # --- build + packages ---

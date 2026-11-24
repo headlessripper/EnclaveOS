@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Enclave Start
-Comment=Keeps the Start menu ready so it opens instantly
-Exec=/usr/local/bin/enclave-start --background
-OnlyShowIn=XFCE;
-Terminal=false
-NoDisplay=true
-X-XFCE-Autostart-Override=true

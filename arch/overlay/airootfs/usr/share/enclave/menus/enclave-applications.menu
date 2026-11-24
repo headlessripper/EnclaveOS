@@ -1,13 +1,13 @@
 <!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"
   "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
 <!--
-  Enclave OS — the Start menu's app list (read by usr/local/bin/enclave-start,
+  Enclave OS — the Start menu's app list (read by Enclave Shell (desktop/shell),
   and valid freedesktop menu XML for any menu that wants it).
 
   One flat list, like Windows 11 "All apps": every installed application
   (including Windows apps installed through Wine) EXCEPT
     * the individual Linux settings panels — they all live inside the single
-      "Settings" app (xfce4-settings-manager), which is re-included below;
+      "Settings" app (Enclave Control Center), which is re-included below;
     * command-line / technician tools and duplicate "preferred application"
       shortcuts that make the menu look like a Linux toolbox.
   Rules are applied in order (freedesktop menu spec): include all, exclude,
@@ -70,6 +70,6 @@
 
   <!-- the one Settings app -->
   <Include>
-    <Filename>xfce-settings-manager.desktop</Filename>
+    <Filename>enclave-settings.desktop</Filename>
   </Include>
 </Menu>

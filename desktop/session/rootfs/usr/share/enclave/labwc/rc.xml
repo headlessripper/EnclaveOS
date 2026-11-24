@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <!-- Enclave OS — labwc configuration for the Enclave Shell session.
-     labwc only manages windows; everything you see around them (taskbar,
-     Start, bubble, wallpaper) is Enclave Shell. -->
+     labwc only manages windows; everything you see around them (top bar,
+     dock, Start, bubble, wallpaper) is Enclave Shell. Windows carry no title
+     bar: every one gets the slim Enclave frame (a hairline and a shadow) and
+     is controlled from the bubble. Hold Super or Alt and drag to move one. -->
 <labwc_config>
   <core>
     <decoration>server</decoration>
@@ -12,20 +14,30 @@
 
   <theme>
     <name>Enclave-Ember</name>
-    <icon>Enclave-orange-light</icon>
+    <icon>Enclave</icon>
     <fallbackAppIcon>application-x-executable</fallbackAppIcon>
     <titlebar>
-      <layout>icon:iconify,max,close</layout>
-      <showTitle>yes</showTitle>
+      <layout>:</layout>
+      <showTitle>no</showTitle>
     </titlebar>
     <cornerRadius>12</cornerRadius>
     <keepBorder>yes</keepBorder>
+    <maximizedDecoration>none</maximizedDecoration>
     <dropShadows>yes</dropShadows>
     <font place="ActiveWindow"><name>Inter</name><size>10</size><weight>bold</weight></font>
     <font place="InactiveWindow"><name>Inter</name><size>10</size></font>
     <font place="MenuItem"><name>Inter</name><size>10</size></font>
     <font place="OnScreenDisplay"><name>Inter</name><size>10</size></font>
   </theme>
+
+  <!-- Every window: its own title bar and frame stripped (server-side
+       decorations forced, even for apps that would draw their own), replaced
+       by the border-only Enclave frame. The bubble is the window's controls. -->
+  <windowRules>
+    <windowRule identifier="*" serverDecoration="yes">
+      <action name="SetDecorations" decorations="border" forceSSD="yes" />
+    </windowRule>
+  </windowRules>
 
   <windowSwitcher preview="yes" outlines="yes">
     <osd show="yes" style="thumbnail" output="focused" thumbnailLabelFormat="%T" />
@@ -50,14 +62,22 @@
     <keybind key="C-A-t"><action name="Execute" command="xfce4-terminal" /></keybind>
     <keybind key="C-S-Escape"><action name="Execute" command="xfce4-taskmanager" /></keybind>
     <keybind key="W-l"><action name="Execute" command="loginctl lock-session" /></keybind>
-    <keybind key="Print">
-      <action name="Execute" command="sh -c 'mkdir -p ~/Pictures/Screenshots &amp;&amp; grim ~/Pictures/Screenshots/Screenshot-$(date +%Y%m%d-%H%M%S).png'" />
-    </keybind>
+    <keybind key="Print"><action name="Execute" command="enclave-screenshot --full" /></keybind>
+    <keybind key="W-S-s"><action name="Execute" command="enclave-screenshot" /></keybind>
+    <keybind key="W-a"><action name="Execute" command="enclave-shell --command control-center" /></keybind>
+    <keybind key="W-i"><action name="Execute" command="enclave-shell --command control-center" /></keybind>
+    <keybind key="W-space"><action name="Execute" command="enclave-shell --command search" /></keybind>
+    <keybind key="W-b"><action name="Execute" command="enclave-shell --command bubble" /></keybind>
+    <keybind key="W-c"><action name="Execute" command="enclave-shell --command calendar" /></keybind>
+    <keybind key="W-w"><action name="Execute" command="enclave-shell --command widgets" /></keybind>
     <keybind key="W-Up"><action name="Maximize" /></keybind>
     <keybind key="W-Down"><action name="UnMaximize" /></keybind>
     <keybind key="W-Left"><action name="SnapToEdge" direction="left" combine="yes" /></keybind>
     <keybind key="W-Right"><action name="SnapToEdge" direction="right" combine="yes" /></keybind>
     <keybind key="A-F4"><action name="Close" /></keybind>
+    <!-- Move / resize with the keyboard (the bubble's Move uses A-F7). -->
+    <keybind key="A-F7"><action name="Move" /></keybind>
+    <keybind key="A-F8"><action name="Resize" /></keybind>
   </keyboard>
 
   <mouse>

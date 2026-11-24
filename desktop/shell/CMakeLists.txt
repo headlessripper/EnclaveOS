@@ -48,9 +48,22 @@ qt_add_qml_module(enclave-shell
   QML_FILES
     qml/Main.qml
     qml/Wallpaper.qml
+    qml/TopBar.qml
     qml/Taskbar.qml
+    qml/Widgets.qml
     qml/StartMenu.qml
     qml/Bubble.qml
+    qml/Status.qml
+    qml/ControlCenter.qml
+    qml/CalendarPanel.qml
+    qml/components/Glass.qml
+    qml/components/Flyout.qml
+    qml/components/Module.qml
+    qml/components/ToggleRow.qml
+    qml/components/EmberSlider.qml
+    qml/components/EmberMenu.qml
+    qml/components/HoverLabel.qml
+    qml/components/DockItem.qml
     qml/components/IconButton.qml
     qml/components/AppTile.qml
     qml/components/SearchField.qml)

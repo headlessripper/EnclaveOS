@@ -63,6 +63,6 @@ has "$CAL/modules/shellprocess-prepare.conf" 'pacman-key --populate'       "prep
 has "$CAL/branding/enclave/branding.desc" 'productName:\s+Enclave OS' "branding names Enclave OS"
 exists "$CAL/branding/enclave/show.qml"                       "installer slideshow present"
 has "$AIR/usr/share/applications/enclave-install.desktop" 'Exec=pkexec calamares' "Install launcher (menu)"
-exists "$AIR/etc/skel/Desktop/enclave-install.desktop"       "Install launcher on live desktop"
+has "$AIR/usr/share/enclave/start-defaults.json" 'enclave-install\.desktop' "Install pinned in Start (desktop stays clean)"
 
 exit $fail

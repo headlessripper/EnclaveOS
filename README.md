@@ -5,16 +5,17 @@ Windows** — familiar layout and navigation, Enclave's own identity, and the ap
 you already rely on (Windows, Android, Linux) running side by side.
 
 - **Base:** Arch Linux, shipped as a branded `archiso` ISO.
-- **Desktop:** XFCE on X11, shaped into a Windows 11 layout with macOS polish:
-  centred taskbar with pinned apps, Enclave's own Windows-11-style Start menu
-  (pinned apps, Recommended, All apps, instant search), Fluent-based Enclave
-  theme / icons / cursor, Inter font, picom shadows + blur, and Enclave's
-  signature floating **control bubble**.
-- **Enclave Shell (in progress):** Enclave's own desktop — Qt 6 / QML on
-  Wayland (labwc underneath), in the **Enclave Ember** design system (orange
-  identity, adaptive light/dark). Pick **Enclave (Wayland preview)** on the
-  login screen; XFCE stays the default until the shell passes its release
-  gates. See `desktop/` and `docs/superpowers/specs/2026-11-24-enclave-shell-design.md`.
+- **Desktop: Enclave Shell** — Enclave's own desktop, Qt 6 / QML on Wayland
+  (labwc underneath), in the **Enclave Ember** design system (orange identity,
+  adaptive light/dark). A slim top bar (the Enclave mark, the window in front,
+  "Search anything", status and clock), a floating centred dock, Start with a
+  category rail, Control Center, calendar, live desktop widgets, the "Ember
+  Horizon" wallpapers, and a clean desktop (icons only where you add them).
+  Windows have no title bar: each gets the slim Enclave frame and is
+  controlled from Enclave's signature floating **bubble**. Enclave Icons
+  (Enclave's own squircle app, folder and device icons on a Papirus base),
+  Inter font, an Ember boot splash. See `desktop/` and
+  `docs/superpowers/specs/2026-11-24-enclave-shell-design.md`.
 - **Default apps:** Zen Browser, Thunderbird, Files, Text Editor, Photos
   (Ristretto), Media Player (Celluloid), Task Manager.
 - **Apps:** Linux (Flatpak/AUR), Windows (Wine/Proton), Android (Waydroid).
@@ -36,7 +37,7 @@ you already rely on (Windows, Android, Linux) running side by side.
 
 ```bash
 # On Arch (WSL-Arch or a VM):
-sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache xfce4-panel \
+sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache \
   cmake wlr-protocols wayland-protocols qt6-base qt6-declarative qt6-wayland qt6-svg layer-shell-qt
 sudo scripts/build-iso.sh
 

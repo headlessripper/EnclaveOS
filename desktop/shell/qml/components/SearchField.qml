@@ -11,7 +11,7 @@ TextField {
     color: Theme.c.text
     placeholderTextColor: Theme.c.textSecondary
     selectionColor: Theme.brand.glow
-    selectedTextColor: "#202124"
+    selectedTextColor: Theme.c.text  // on the Glow selection; Theme.c.text reads on it in both modes
     font.pointSize: 10
 
     background: Rectangle {

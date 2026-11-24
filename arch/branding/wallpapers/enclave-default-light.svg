@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+<!-- Enclave Ember wallpaper "Ember Horizon" (light). Generated; see docs. -->
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBFAF7"/><stop offset="0.6" stop-color="#F7F6F3"/><stop offset="1" stop-color="#FFE6D1"/></linearGradient>
+<radialGradient id="haze" cx="2600" cy="1600" r="2300" gradientUnits="userSpaceOnUse" gradientTransform="translate(2600 1600) scale(1.6 0.55) translate(-2600 -1600)"><stop offset="0" stop-color="#FF7A1A" stop-opacity="0.22"/><stop offset="0.45" stop-color="#FF7A1A" stop-opacity="0.077"/><stop offset="1" stop-color="#FF7A1A" stop-opacity="0"/></radialGradient>
+<radialGradient id="cool" cx="700" cy="300" r="1900" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#C9D3E6" stop-opacity="0.35"/><stop offset="1" stop-color="#C9D3E6" stop-opacity="0"/></radialGradient>
+<radialGradient id="planet" cx="2600" cy="2815.0" r="3375.0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFF4EA"/><stop offset="1" stop-color="#F3E6DA"/></radialGradient>
+<radialGradient id="rim" cx="2600" cy="4300" r="2760" gradientUnits="userSpaceOnUse"><stop offset="0.955" stop-color="#E95B16" stop-opacity="0"/><stop offset="0.975" stop-color="#E95B16" stop-opacity="0.245"/><stop offset="0.9785" stop-color="#FFAC55" stop-opacity="0.7"/><stop offset="0.982" stop-color="#E95B16" stop-opacity="0.350"/><stop offset="1" stop-color="#E95B16" stop-opacity="0"/></radialGradient>
+<radialGradient id="atmo" cx="2600" cy="4300" r="3120" gradientUnits="userSpaceOnUse"><stop offset="0.86" stop-color="#E95B16" stop-opacity="0"/><stop offset="0.87" stop-color="#E95B16" stop-opacity="0.198"/><stop offset="1" stop-color="#E95B16" stop-opacity="0"/></radialGradient>
+<linearGradient id="sheen" x1="0" y1="1600" x2="0" y2="2300" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#E95B16" stop-opacity="0.176"/><stop offset="1" stop-color="#E95B16" stop-opacity="0"/></linearGradient>
+<radialGradient id="vign" cx="0.5" cy="0.45" r="0.8"><stop offset="0.55" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity="0.0"/></radialGradient>
+</defs>
+<rect width="3840" height="2160" fill="url(#sky)"/>
+<rect width="3840" height="2160" fill="url(#cool)"/>
+<g></g>
+<rect width="3840" height="2160" fill="url(#haze)"/>
+<circle cx="2600" cy="4300" r="3120" fill="url(#atmo)"/>
+<ellipse cx="2600" cy="1950" rx="3400" ry="620" fill="none" stroke="#E95B16" stroke-opacity="0.160" stroke-width="4" transform="rotate(-9 2600 1950)"/>
+<ellipse cx="2600" cy="1950" rx="3900" ry="760" fill="none" stroke="#E95B16" stroke-opacity="0.096" stroke-width="3" transform="rotate(-9 2600 1950)"/>
+<ellipse cx="2600" cy="1950" rx="4500" ry="900" fill="none" stroke="#E95B16" stroke-opacity="0.056" stroke-width="2" transform="rotate(-9 2600 1950)"/>
+<circle cx="2600" cy="4300" r="2700" fill="url(#planet)"/>
+<circle cx="2600" cy="4300" r="2700" fill="url(#sheen)"/>
+<circle cx="2600" cy="4300" r="2760" fill="url(#rim)"/>
+<rect width="3840" height="2160" fill="url(#vign)"/>
+</svg>

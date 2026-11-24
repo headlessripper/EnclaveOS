@@ -22,6 +22,8 @@ class AppRegistry : public QAbstractListModel {
     Q_OBJECT
     Q_PROPERTY(QStringList startPins READ startPins NOTIFY pinsChanged)
     Q_PROPERTY(QStringList taskbarPins READ taskbarPins NOTIFY pinsChanged)
+    // Desktop icons: app ids, plus "home" and "trash" for those folders.
+    Q_PROPERTY(QStringList desktopPins READ desktopPins NOTIFY pinsChanged)
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
 
 public:
@@ -34,13 +36,20 @@ public:
 
     QStringList startPins() const { return m_startPins; }
     QStringList taskbarPins() const { return m_taskbarPins; }
+    QStringList desktopPins() const { return m_desktopPins; }
 
     Q_INVOKABLE QVariantMap app(const QString &id) const;
     Q_INVOKABLE bool launch(const QString &id);
     Q_INVOKABLE QVariantList search(const QString &query, int limit = 12) const;
+    // Start's category rail: the groups that have apps, in display order, and
+    // the apps in one group ("" = all listed apps).
+    Q_INVOKABLE QStringList categories() const;
+    Q_INVOKABLE QVariantList appsIn(const QString &category) const;
+    static QString groupOf(const AppEntry &a);
     Q_INVOKABLE QString matchAppId(const QString &waylandAppId) const;  // -> desktop id
     Q_INVOKABLE void pinStart(const QString &id, bool pinned);
     Q_INVOKABLE void pinTaskbar(const QString &id, bool pinned);
+    Q_INVOKABLE void pinDesktop(const QString &id, bool pinned);
     Q_INVOKABLE void moveStartPinToFront(const QString &id);
     Q_INVOKABLE void reload();
 
@@ -60,7 +69,7 @@ private:
 
     QList<AppEntry> m_apps;               // listed apps, sorted by name
     QHash<QString, AppEntry> m_all;       // every visible app incl. settings panels
-    QStringList m_startPins, m_taskbarPins;
+    QStringList m_startPins, m_taskbarPins, m_desktopPins;
     QSet<QString> m_excludeCategories, m_excludeFiles, m_includeFiles;
     QFileSystemWatcher m_watcher;
     QTimer m_reloadTimer;

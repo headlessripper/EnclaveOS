@@ -1,0 +1,22 @@
+#!/bin/sh
+# Enclave OS — screenshots. Default: pick a region (like Win+Shift+S);
+# --full captures the whole screen. Saved to ~/Pictures/Screenshots, copied
+# to the clipboard, and announced with a notification you can click to open.
+set -u
+dir="$(xdg-user-dir PICTURES 2>/dev/null || echo "$HOME/Pictures")/Screenshots"
+mkdir -p "$dir"
+file="$dir/Screenshot $(date '+%Y-%m-%d %H.%M.%S').png"
+
+if [ "${1:-}" = "--full" ]; then
+  grim "$file" || exit 1
+else
+  region="$(slurp -d -b '#10111466' -c '#FF7A1A' -s '#FF7A1A1A' -w 2)" || exit 0   # Esc cancels
+  grim -g "$region" "$file" || exit 1
+fi
+
+command -v wl-copy >/dev/null && wl-copy --type image/png < "$file"
+if command -v notify-send >/dev/null; then
+  action="$(notify-send --app-name=Screenshot --icon="$file" --action=open=Open \
+            "Screenshot saved" "Copied to the clipboard · $(basename "$file")")"
+  [ "$action" = "open" ] && xdg-open "$file"
+fi

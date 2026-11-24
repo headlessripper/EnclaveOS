@@ -143,10 +143,10 @@ fi
 # --- 6b. desktop look: GTK/window theme, icons and cursor (Fluent, the
 #         Windows-11 design language), recoloured to Enclave orange and
 #         installed under Enclave names. These are the desktop's look, so a
-#         build without them fails loudly instead of shipping stock XFCE.
+#         build without them fails loudly instead of shipping a stock look.
 #         Sources are pinned so a rebuild can't silently change the look.
 FLUENT_GTK_REV="7a49a464b0188c340101c52965c18190b1c694cf"   # Fluent-gtk-theme HEAD, 2026-11
-FLUENT_ICON_REV="c70c2441bcf2ab8bbc267e55635c76d69f659a8b"  # Fluent-icon-theme tag 2026-07-27
+FLUENT_ICON_REV="c70c2441bcf2ab8bbc267e55635c76d69f659a8b"  # Fluent-icon-theme tag 2026-07-27 (cursors)
 command -v git   >/dev/null 2>&1 || die "git not found (needed for the Enclave theme)"
 command -v sassc >/dev/null 2>&1 || die "sassc not found (needed to build the Enclave theme): pacman -S sassc"
 THEMETMP="$(mktemp -d)"
@@ -179,53 +179,42 @@ install -d "$AIR/usr/share/themes"
 rm -rf "$AIR/usr/share/themes/Enclave" "$AIR"/usr/share/themes/Fluent-round-orange-Light-*
 mv "$AIR/usr/share/themes/Fluent-round-orange-Light" "$AIR/usr/share/themes/Enclave"
 sed -i 's/^Name=.*/Name=Enclave/; s/^GtkTheme=.*/GtkTheme=Enclave/; s/^MetacityTheme=.*/MetacityTheme=Enclave/;
-        s/^IconTheme=.*/IconTheme=Enclave-orange-light/; s/^CursorTheme=.*/CursorTheme=Enclave-cursors/' \
+        s/^IconTheme=.*/IconTheme=Enclave/; s/^CursorTheme=.*/CursorTheme=Enclave-cursors/' \
   "$AIR/usr/share/themes/Enclave/index.theme"
 # Window frames: show the app icon at the top-left like Windows (Fluent hides it).
-XFWM_RC="$AIR/usr/share/themes/Enclave/xfwm4/themerc"
-[ -f "$XFWM_RC" ] || die "Enclave theme has no xfwm4 frames"
-if grep -q '^show_app_icon=' "$XFWM_RC"; then
-  sed -i 's/^show_app_icon=.*/show_app_icon=true/' "$XFWM_RC"
-else
-  echo 'show_app_icon=true' >> "$XFWM_RC"
-fi
 log "  Enclave theme installed"
 
-log "building Enclave icons + cursor (Fluent icons @ ${FLUENT_ICON_REV:0:7})"
-fetch_rev https://github.com/vinceliuice/Fluent-icon-theme.git "$FLUENT_ICON_REV" "$THEMETMP/icons" \
-  || die "could not fetch Fluent-icon-theme"
+# Enclave Icons: Enclave's own set (arch/icons/Enclave, drawn by
+# tools/make-icons.py: apps, folders, places, drives, trash) layered on
+# Papirus (packages.x86_64.extra) for the thousands of other app, file-type
+# and symbolic icons. Enclave-dark shares the same icons and inherits
+# Papirus-Dark, so symbolic icons stay legible in dark mode.
+log "installing Enclave Icons + cursor (Fluent @ ${FLUENT_ICON_REV:0:7})"
 install -d "$AIR/usr/share/icons"
-( cd "$THEMETMP/icons" && run_logged "$THEMETMP/icons.log" ./install.sh -d "$AIR/usr/share/icons" -n Enclave orange ) \
-  || die "Fluent-icon-theme install failed"
-[ -f "$AIR/usr/share/icons/Enclave-orange-light/index.theme" ] || die "Enclave-orange-light icons missing after install"
+[ -f "$REPO/arch/icons/Enclave/scalable/apps/enclave.svg" ] || die "Enclave Icons missing (run tools/make-icons.py)"
+rm -rf "$AIR/usr/share/icons/Enclave" "$AIR/usr/share/icons/Enclave-light" "$AIR/usr/share/icons/Enclave-dark"
+cp -a "$REPO/arch/icons/Enclave" "$AIR/usr/share/icons/Enclave"
+install -d "$AIR/usr/share/icons/Enclave-dark"
+cp -f "$REPO/arch/icons/Enclave-dark/index.theme" "$AIR/usr/share/icons/Enclave-dark/index.theme"
+ln -s ../Enclave/scalable "$AIR/usr/share/icons/Enclave-dark/scalable"
+# Cursors stay Enclave's (from Fluent).
+fetch_rev https://github.com/vinceliuice/Fluent-icon-theme.git "$FLUENT_ICON_REV" "$THEMETMP/icons"   || die "could not fetch Fluent-icon-theme (cursors)"
 rm -rf "$AIR/usr/share/icons/Enclave-cursors"
 cp -a "$THEMETMP/icons/cursors/dist" "$AIR/usr/share/icons/Enclave-cursors"
-printf '[Icon Theme]\nName=Enclave Cursors\nComment=Enclave pointer theme\n' > "$AIR/usr/share/icons/Enclave-cursors/index.theme"
+printf '[Icon Theme]
+Name=Enclave Cursors
+Comment=Enclave pointer theme
+' > "$AIR/usr/share/icons/Enclave-cursors/index.theme"
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
-  for t in "$AIR"/usr/share/icons/Enclave-orange*; do
+  for t in "$AIR"/usr/share/icons/Enclave "$AIR"/usr/share/icons/Enclave-dark; do
     [ -d "$t" ] && gtk-update-icon-cache -q -f -t "$t" 2>/dev/null || true
   done
 fi
 rm -rf "$THEMETMP"
 log "  Enclave icons + cursor installed"
 
-# --- 6b2. Enclave panel plugins (compiled against the same Arch xfce4-panel
-#          the image installs). enclave-balancer = true taskbar centring. ---
-command -v gcc >/dev/null 2>&1 || die "gcc not found (install base-devel)"
-pkg-config --exists libxfce4panel-2.0 gtk+-3.0 \
-  || die "xfce4-panel/gtk3 headers not found (pacman -S xfce4-panel) — needed for Enclave panel plugins"
-for plug in "$ARCH_DIR"/plugins/*/; do
-  name="$(basename "$plug")"
-  log "compiling panel plugin: $name"
-  install -d "$AIR/usr/lib/xfce4/panel/plugins" "$AIR/usr/share/xfce4/panel/plugins"
-  # shellcheck disable=SC2046
-  gcc -shared -fPIC -O2 -Wall -o "$AIR/usr/lib/xfce4/panel/plugins/lib$name.so" "$plug/$name.c" \
-    $(pkg-config --cflags --libs libxfce4panel-2.0 gtk+-3.0) || die "plugin $name failed to compile"
-  install -m644 "$plug/$name.desktop" "$AIR/usr/share/xfce4/panel/plugins/$name.desktop"
-done
-
 # --- 6b3. Enclave Shell (Enclave's own Wayland desktop, Qt 6 / QML) and its
-#          labwc session ("Enclave (Wayland preview)" on the login screen).
+#          labwc session ("Enclave" on the login screen).
 #          Compiled against the same Arch Qt the image installs. ---
 DESKTOP_DIR="$REPO/desktop"
 if [ -d "$DESKTOP_DIR/shell" ]; then
@@ -243,42 +232,37 @@ if [ -d "$DESKTOP_DIR/shell" ]; then
   cp -a "$DESKTOP_DIR/session/rootfs/." "$AIR/"
   install -Dm644 "$DESKTOP_DIR/design-system/tokens/ember.json" \
     "$AIR/usr/share/enclave/design-system/ember.json"
-  for f in enclave-shell enclave-session enclave-shell-run; do
+  for f in enclave-shell enclave-session enclave-shell-run enclave-screenshot; do
     add_file_perm "/usr/bin/$f" 755
   done
   log "  Enclave Shell + Wayland session installed"
 fi
 
-# --- 6c. Plymouth boot splash: skin the boot logs with an Enclave theme.
-#     Built by recolouring the bundled "spinner" theme (reliable, known-good). ---
-if [ -d /usr/share/plymouth/themes/spinner ]; then
-  log "building Enclave Plymouth boot splash"
+# --- 6c. Plymouth boot splash: Enclave's own script theme (arch/plymouth/enclave):
+#     obsidian, the mark fading in, an ember segment gliding on a slim track,
+#     and a calm passphrase prompt. Its images are rendered here from the
+#     brand SVGs so they always match the logo. ---
+if [ -d "$REPO/arch/plymouth/enclave" ] && command -v rsvg-convert >/dev/null 2>&1; then
+  log "installing the Enclave Plymouth boot splash"
   PTH="$AIR/usr/share/plymouth/themes/enclave"
   rm -rf "$PTH"; install -d "$PTH"
-  cp -a /usr/share/plymouth/themes/spinner/. "$PTH/"
-  mv -f "$PTH/spinner.plymouth" "$PTH/enclave.plymouth" 2>/dev/null || true
-  sed -i 's/^Name=.*/Name=Enclave/; s/^Description=.*/Description=Enclave boot splash/' "$PTH/enclave.plymouth" 2>/dev/null || true
-  # Enclave dark background.
-  if grep -q 'BackgroundStartColor' "$PTH/enclave.plymouth" 2>/dev/null; then
-    sed -i 's/^BackgroundStartColor=.*/BackgroundStartColor=0x0b1220/; s/^BackgroundEndColor=.*/BackgroundEndColor=0x0a1018/' "$PTH/enclave.plymouth"
-  else
-    printf '\nBackgroundStartColor=0x0b1220\nBackgroundEndColor=0x0a1018\n' >> "$PTH/enclave.plymouth"
-  fi
-  # Enclave logo as the watermark.
-  if command -v rsvg-convert >/dev/null 2>&1 && [ -f "$BRANDING/enclave-logo-dark.svg" ]; then
-    rsvg-convert -w 160 -h 160 "$BRANDING/enclave-logo-dark.svg" -o "$PTH/watermark.png" 2>/dev/null || true
-  fi
+  cp "$REPO/arch/plymouth/enclave/enclave.plymouth" "$REPO/arch/plymouth/enclave/enclave.script" "$PTH/"
+  rsvg-convert -w 96 -h 96 "$BRANDING/enclave-logo-dark.svg" -o "$PTH/logo.png" || die "plymouth logo"
+  printf '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="#272A31"/></svg>'     | rsvg-convert -o "$PTH/track.png" /dev/stdin || die "plymouth track"
+  printf '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="#FF7A1A"/></svg>'     | rsvg-convert -o "$PTH/fill.png" /dev/stdin || die "plymouth fill"
+  printf '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><circle cx="4" cy="4" r="4" fill="#F5F3EF"/></svg>'     | rsvg-convert -o "$PTH/dot.png" /dev/stdin || die "plymouth dot"
   # Live ISO initramfs: add the plymouth hook (right after udev) so the splash
   # shows on the live boot too.
   for mk in "$AIR"/etc/mkinitcpio.conf.d/*.conf "$PROFILE"/airootfs/etc/mkinitcpio.conf.d/*.conf; do
     [ -f "$mk" ] || continue
     grep -q 'plymouth' "$mk" 2>/dev/null && continue
-    sed -i 's/\(HOOKS=([^)]*\budev\b\)/\1 plymouth/' "$mk" 2>/dev/null || true
+    sed -i 's/\(HOOKS=([^)]*udev\)/ plymouth/' "$mk" 2>/dev/null || true
   done
-  # Quiet the kernel log and enable the splash on every boot entry.
-  grep -rIl --null 'archisobasedir\|APPEND\|linux /' \
-    "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null \
-    | xargs -0 -r sed -i -E 's/(archisobasedir=[^ ]+)/\1 quiet splash/' 2>/dev/null || true
+  # A quiet boot on every live entry: no kernel/udev chatter, no blinking
+  # cursor, just the splash.
+  { grep -rIl --null 'archisobasedir'     "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null     | xargs -0 -r sed -i -E 's/(archisobasedir=[^ ]+)/ quiet splash loglevel=3 rd.udev.log_level=3 vt.global_cursor_default=0/'; } || true
+else
+  log "  WARN: Plymouth theme or rsvg-convert missing; boot shows text logs"
 fi
 
 # --- 7. service wiring (symlinks created here so the repo stays Windows-clean) ---
@@ -316,10 +300,17 @@ if command -v rsvg-convert >/dev/null 2>&1 && [ -f "$BRANDING/enclave-boot.svg" 
   rsvg-convert -w 640 -h 480 "$BRANDING/enclave-boot.svg" -o "$PROFILE/syslinux/splash.png" \
     || log "  WARN: could not render the syslinux splash"
 fi
-# systemd-boot (UEFI): no beep, and a shorter wait before booting Enclave.
+# BIOS menu in Enclave Ember: quiet borders, an ember highlight on the
+# selected entry, and the menu set below the mark and wordmark.
+for head in "$PROFILE"/syslinux/archiso_head.cfg; do
+  [ -f "$head" ] || continue
+  sed -i -E     -e 's/^MENU VSHIFT .*/MENU VSHIFT 11/'     -e 's/^MENU COLOR border .*/MENU COLOR border       30;44   #20ffffff #00000000 std/'     -e 's/^MENU COLOR title .*/MENU COLOR title        1;36;44 #00000000 #00000000 std/'     -e 's/^MENU COLOR sel .*/MENU COLOR sel          7;37;40 #fff5f3ef #d0e95b16 all/'     -e 's/^MENU COLOR unsel .*/MENU COLOR unsel        37;44   #c0f5f3ef #00000000 std/'     -e 's/^MENU COLOR help .*/MENU COLOR help         37;40   #a0a7a39b #00000000 std/'     -e 's/^MENU COLOR timeout_msg .*/MENU COLOR timeout_msg  37;40   #80a7a39b #00000000 std/'     -e 's/^MENU COLOR timeout .*/MENU COLOR timeout      1;37;40 #ffff7a1a #00000000 std/'     -e 's/^MENU COLOR tabmsg .*/MENU COLOR tabmsg       31;40   #60a7a39b #00000000 std/'     "$head"
+done
+# Boot sooner: 3 s on both menus, and no beep.
+{ grep -rIl --null '^TIMEOUT' "$PROFILE/syslinux" 2>/dev/null | xargs -0 -r sed -i -E 's/^TIMEOUT .*/TIMEOUT 30/'; } || true
 LOADER_CONF="$PROFILE/efiboot/loader/loader.conf"
 if [ -f "$LOADER_CONF" ]; then
-  sed -i '/^beep /d; s/^timeout .*/timeout 5/' "$LOADER_CONF"
+  sed -i '/^beep /d; s/^timeout .*/timeout 3/' "$LOADER_CONF"
 fi
 
 # --- 8b. AUR packages (Calamares, Zen Browser) → a local file:// repo ---

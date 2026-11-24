@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Settings
+GenericName=Control Center
+Comment=Appearance, sound, network and displays
+Exec=enclave-shell --command control-center
+Icon=preferences-system
+Terminal=false
+StartupNotify=false
+Categories=System;
+Keywords=settings;preferences;control;appearance;dark;light;sound;volume;network;wifi;display;

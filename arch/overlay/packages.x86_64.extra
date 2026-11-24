@@ -1,47 +1,26 @@
 # Enclave OS — packages appended to releng/packages.x86_64 by build-iso.sh.
-# Desktop: a lean XFCE session on X11. KDE Plasma was dropped — Plasma 6.8 is
-# Wayland-only and KWin-Wayland black-screens on VMware's virtual GPU. XFCE on
-# Xorg renders reliably in VMs and is lighter.
+# Desktop: Enclave Shell, Enclave's own Wayland desktop (Qt 6 / QML), with
+# labwc managing windows underneath — see the "Enclave Shell" section below
+# and docs/superpowers/specs/2026-11-24-enclave-shell-design.md. XFCE and the
+# old X11 pieces (panel, picom, GTK Start menu, X11 bubble) were removed.
 
 # --- Graphical boot splash (hides the boot logs behind an Enclave skin) ---
 plymouth
 
-# --- Display manager (SDDM, with Enclave's greeter theme, runs under X11) ---
+# --- Display manager. SDDM's greeter itself runs on X11 (its Wayland greeter
+#     black-screens on VMware's virtual GPU); the session it starts is Wayland.
 sddm
-
-# --- Xorg (XFCE is an X11 desktop) ---
 xorg-server
 xorg-xauth
-xorg-xinit
 xf86-input-libinput
 
-# --- XFCE desktop (curated, not the full group) ---
-xfce4-session
-xfwm4
-xfce4-panel
-xfdesktop
-xfce4-settings
-xfconf
-garcon
-# Taskbar: pinned + running apps in one row (Windows 11 / macOS dock behaviour)
-xfce4-docklike-plugin
-xfce4-notifyd
-xfce4-pulseaudio-plugin
-xfce4-power-manager
-xfce4-screenshooter
+# --- Desktop services ---
 # Task Manager (Ctrl+Shift+Esc)
 xfce4-taskmanager
+# nm-connection-editor: network settings from the Control Center
 network-manager-applet
 xdg-desktop-portal
 xdg-desktop-portal-gtk
-# picom: the Hyprland-style look on X11 — blur, rounded corners, shadows,
-# fade animations, transparency (replaces xfwm4's built-in compositor).
-picom
-# Enclave's signature floating window-control bubble (GTK + libwnck, which it
-# uses to act on the active window).
-python-gobject
-libwnck3
-python-cairo
 
 # --- Theme fallbacks + UI font ---
 # The Enclave GTK/window theme, icons and cursor are built from pinned Fluent
@@ -130,7 +109,7 @@ python-pipx
 python-virtualenv
 python-keyring
 
-# --- Enclave Shell (Enclave's own Wayland desktop; "Enclave (Wayland preview)"
+# --- Enclave Shell (Enclave's own Wayland desktop; the "Enclave"
 #     session — see docs/superpowers/specs/2026-11-24-enclave-shell-design.md) ---
 labwc
 xorg-xwayland
@@ -141,4 +120,12 @@ qt6-wayland
 qt6-svg
 xdg-desktop-portal-wlr
 adwaita-icon-theme
+papirus-icon-theme
 grim
+slurp
+wtype
+wl-clipboard
+libnotify
+mako
+polkit-gnome
+wdisplays

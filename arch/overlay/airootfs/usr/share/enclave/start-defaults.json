@@ -8,9 +8,9 @@
     "org.xfce.ristretto.desktop",
     "io.github.celluloid_player.Celluloid.desktop",
     "xfce4-terminal.desktop",
-    "xfce4-screenshooter.desktop",
+    "enclave-screenshot.desktop",
     "xfce4-taskmanager.desktop",
-    "xfce-settings-manager.desktop",
+    "enclave-settings.desktop",
     "enclave-install.desktop"
   ],
   "taskbar": [

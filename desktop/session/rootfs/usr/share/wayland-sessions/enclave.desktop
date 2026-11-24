@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Enclave (Wayland preview)
+Name=Enclave
 Comment=Enclave Shell — Enclave's own desktop, on Wayland
 Exec=/usr/bin/enclave-session
 TryExec=/usr/bin/enclave-shell

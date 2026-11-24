@@ -1,7 +1,6 @@
 #include "theme.h"
 
 #include <QColor>
-#include <QDir>
 #include <QFile>
 #include <QGuiApplication>
 #include <QIcon>
@@ -43,13 +42,13 @@ Theme::Theme(QObject *parent) : QObject(parent)
 {
     load();
     QSettings s(settingsPath(), QSettings::IniFormat);
-    m_mode = s.value("appearance/mode", "light").toString();
+    m_mode = s.value("appearance/mode", "dark").toString();
     m_reducedMotion = s.value("appearance/reducedMotion", false).toBool();
     connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this] {
         if (m_mode == "system")
             emit changed();
     });
-    // Symbolic UI icons (window controls, power) when the Enclave theme lacks one.
+    // Last resort for symbolic UI icons no theme in the chain has.
     QIcon::setFallbackThemeName("Adwaita");
     QIcon::setThemeName(iconTheme());
     connect(this, &Theme::changed, this, [this] { QIcon::setThemeName(iconTheme()); });
@@ -79,7 +78,8 @@ void Theme::load()
         m_radius = numbers(root["radius"].toObject());
         m_motion = numbers(root["motion"].toObject());
         m_font = root["type"].toObject()["family"].toString("Inter");
-        m_taskbarHeight = root["taskbar"].toObject()["height"].toInt(52);
+        m_taskbarHeight = root["taskbar"].toObject()["height"].toInt(76);
+        m_topBarHeight = root["topbar"].toObject()["height"].toInt(36);
         return;
     }
     qWarning("enclave-shell: Ember tokens not found; using built-in fallback");
@@ -117,15 +117,16 @@ QVariantMap Theme::motion() const
 
 QString Theme::iconTheme() const
 {
-    const QString wanted = dark() ? "Enclave-orange-dark" : "Enclave-orange-light";
-    for (const QString &dir : QStandardPaths::locateAll(QStandardPaths::GenericDataLocation,
-                                                        "icons", QStandardPaths::LocateDirectory))
-        if (QDir(dir + "/" + wanted).exists())
-            return wanted;
-    for (const QString &dir : QStandardPaths::locateAll(QStandardPaths::GenericDataLocation,
-                                                        "icons", QStandardPaths::LocateDirectory))
-        if (QDir(dir + "/Adwaita").exists())
-            return "Adwaita";
+    // Enclave Icons first; Papirus (their base) if they are missing, then the
+    // GTK/freedesktop defaults.
+    const QStringList wanted = dark() ? QStringList{"Enclave-dark", "Papirus-Dark", "Adwaita"}
+                                      : QStringList{"Enclave", "Papirus", "Adwaita"};
+    const QStringList roots = QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, "icons",
+                                                        QStandardPaths::LocateDirectory);
+    for (const QString &name : wanted)
+        for (const QString &dir : roots)
+            if (QFile::exists(dir + "/" + name + "/index.theme"))
+                return name;
     return "hicolor";
 }
 

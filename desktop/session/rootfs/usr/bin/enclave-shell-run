@@ -4,7 +4,7 @@
 n=0
 while :; do
   start=$(date +%s)
-  enclave-shell && exit 0
+  env -u QT_QPA_PLATFORMTHEME enclave-shell && exit 0
   # Give up after repeated instant crashes so a broken build can't spin.
   if [ $(( $(date +%s) - start )) -lt 5 ]; then n=$((n + 1)); else n=0; fi
   [ "$n" -ge 5 ] && exit 1

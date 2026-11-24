@@ -1,0 +1,14 @@
+# Enclave OS — GTK apps on Wayland read their look from GSettings (there is
+# no XFCE settings daemon any more). Compiled by glib2's pacman hook.
+[org.gnome.desktop.interface]
+gtk-theme='Enclave'
+icon-theme='Enclave'
+cursor-theme='Enclave-cursors'
+cursor-size=24
+font-name='Inter 10'
+document-font-name='Inter 10'
+monospace-font-name='DejaVu Sans Mono 10'
+color-scheme='prefer-light'
+
+[org.gnome.desktop.wm.preferences]
+button-layout='icon:minimize,maximize,close'

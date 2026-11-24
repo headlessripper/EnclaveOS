@@ -100,7 +100,7 @@ already does for the panel plugins, and installs it into airootfs.
 | Existing | Decision |
 |---|---|
 | Arch base, archiso, Calamares, SDDM, branding | keep |
-| XFCE / xfwm4 / picom | keep as the **default** session until Enclave Shell passes the release gates, then retire |
+| XFCE / xfwm4 / picom | **retired** (2026-11-24): Enclave Shell is the only session |
 | GTK3 Start menu, X11 bubble | reference designs; reimplemented in QML |
 | Audit reports | kept as history |
 
@@ -113,7 +113,7 @@ Each phase ends in something testable.
    blank disk, a reboot without the ISO, and checking that the created user
    survives cleanup.
 1. **Wayland platform** — labwc, XWayland, portals (`xdg-desktop-portal-wlr`
-   and `-gtk`), and an SDDM session "Enclave (Wayland preview)" that starts
+   and `-gtk`), and the SDDM session "Enclave" that starts
    `enclave-session`. Keyboard, pointer and output configuration through labwc.
 2. **Shell foundation** — the `enclave-shell` process and its lifecycle (it
    restarts on crash), layer-shell surfaces, the Ember theme engine, an
@@ -131,7 +131,7 @@ Each phase ends in something testable.
 7. **Enclave Intelligence** — advisory assistant (llama.cpp, OpenVox),
    isolated by process and permissions, not just a flag.
 
-## 7. Release gates (before Wayland becomes the default)
+## 7. Release gates (before a release)
 
 The shell starts in under 3 s, with no crashes in normal use. Both themes look
 correct on every surface. Keyboard navigation works everywhere. XWayland apps

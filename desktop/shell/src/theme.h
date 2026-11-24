@@ -19,6 +19,7 @@ class Theme : public QObject {
     Q_PROPERTY(QVariantMap motion READ motion NOTIFY changed)
     Q_PROPERTY(QString fontFamily READ fontFamily CONSTANT)
     Q_PROPERTY(int taskbarHeight READ taskbarHeight CONSTANT)
+    Q_PROPERTY(int topBarHeight READ topBarHeight CONSTANT)
     Q_PROPERTY(bool reducedMotion READ reducedMotion WRITE setReducedMotion NOTIFY changed)
     Q_PROPERTY(QString iconTheme READ iconTheme NOTIFY changed)
     Q_PROPERTY(QString source READ source CONSTANT)
@@ -36,6 +37,7 @@ public:
     QVariantMap motion() const;
     QString fontFamily() const { return m_font; }
     int taskbarHeight() const { return m_taskbarHeight; }
+    int topBarHeight() const { return m_topBarHeight; }
     bool reducedMotion() const { return m_reducedMotion; }
     void setReducedMotion(bool on);
     QString iconTheme() const;
@@ -54,6 +56,7 @@ private:
     QString m_mode = "light";
     QVariantMap m_light, m_dark, m_brand, m_status, m_radius, m_motion;
     QString m_font = "Inter";
-    int m_taskbarHeight = 52;
+    int m_taskbarHeight = 76;
+    int m_topBarHeight = 36;
     bool m_reducedMotion = false;
 };

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Enclave OS — Phase 1 (Windows-like XFCE desktop) static assertions.
-# Validates the XFCE skel config + SDDM greeter without a running session.
+# Enclave OS — Phase 1 (the desktop's defaults and look) static assertions.
+# XFCE is gone: the desktop is Enclave Shell on labwc (see phase5). This
+# checks what surrounds it: session defaults, look (GTK, icons, cursor, font,
+# wallpapers), default apps, boot screens and the SDDM greeter.
 # Run from the repo root:  bash tests/phase1-asserts.sh
 set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
@@ -8,107 +10,95 @@ cd "$(dirname "$0")/.." || exit 1
 fail=0
 pass() { echo "PASS $1"; }
 bad()  { echo "FAIL $1"; fail=1; }
-has()  { if [ -f "$1" ] && grep -qE "$2" "$1"; then pass "$3"; else bad "$3 ($1 !~ $2)"; fi; }
+has()  { if [ -f "$1" ] && grep -qE -- "$2" "$1"; then pass "$3"; else bad "$3 ($1 !~ $2)"; fi; }
+lacks() { if [ -f "$1" ] && grep -qE -- "$2" "$1"; then bad "$3 ($1 =~ $2)"; else pass "$3"; fi; }
 exists() { if [ -e "$1" ]; then pass "$2"; else bad "$2 (missing $1)"; fi; }
+gone() { if [ -e "$1" ]; then bad "$2 (still present: $1)"; else pass "$2"; fi; }
 
 AIR="arch/overlay/airootfs"
-XFC="$AIR/etc/skel/.config/xfce4"
-XML="$XFC/xfconf/xfce-perchannel-xml"
+PKG="arch/overlay/packages.x86_64.extra"
 
-# --- Windows-familiar panel (bottom bar: start menu, tasklist, tray, clock) ---
-has "$XML/xfce4-panel.xml" 'position.*p=8'                   "panel is at the bottom"
-has "$XML/xfce4-panel.xml" 'value="enclave-start\.desktop"'  "panel has the Enclave Start button"
-has "$XML/xfce4-panel.xml" 'value="docklike"'                "taskbar has pinned + running apps (Docklike)"
-has "$XML/xfce4-panel.xml" '"clock"'                         "panel has a clock"
-has "$XML/xfce4-panel.xml" 'showdesktop'                     "taskbar has a show-desktop corner"
-has "$XML/xfce4-panel.xml" 'name="plugin-1" type="string" value="enclave-balancer"' "taskbar truly centred (balancer is the first plugin)"
-exists "arch/plugins/enclave-balancer/enclave-balancer.c"   "centring plugin source present"
-has "arch/plugins/enclave-balancer/enclave-balancer.desktop" '^X-XFCE-Module=enclave-balancer$' "centring plugin module name"
-has "scripts/build-iso.sh" 'libxfce4panel-2.0'              "build compiles the Enclave panel plugins"
-has "arch/overlay/packages.x86_64.extra" '^xfce4-docklike-plugin$' "pkg: xfce4-docklike-plugin"
-has "$AIR/etc/xdg/xfce4/panel/docklike.rc" '^pinned=.*zen'   "taskbar pins Zen Browser"
+# --- XFCE and the old X11 desktop are gone ---
+for p in xfce4-panel xfwm4 xfdesktop xfce4-session picom libwnck3 xfce4-docklike-plugin; do
+  lacks "$PKG" "^$p\$" "no $p in the image"
+done
+gone "$AIR/etc/skel/.config/xfce4"            "no XFCE session config"
+gone "$AIR/usr/local/bin/enclave-bubble"      "old GTK bubble removed (the shell has its own)"
+gone "arch/plugins"                           "old XFCE panel plugins removed"
 
-# --- Start menu (Enclave's own: pinned grid, Recommended, All apps, search) ---
-ST="$AIR/usr/local/bin/enclave-start"
-exists "$ST"                                                  "Enclave Start menu present"
-has "$ST" 'Recommended'                                       "start menu: Recommended section"
-has "$ST" 'All apps'                                          "start menu: All apps list"
-has "$ST" 'enclave-applications\.menu'                        "start menu uses the de-cluttered app list"
-has "$ST" 'start-defaults\.json'                              "start menu: default pins"
-has "$ST" 'set_prgname\("enclave-start"\)'                      "start menu WM_CLASS Enclave-start (picom rule match)"
-exists "$AIR/usr/share/enclave/start-defaults.json"           "default pinned apps present"
-has "$AIR/usr/local/bin/enclave-start-toggle" 'org\.gtk\.Actions\.Activate' "Start button toggles the running menu"
-has "$AIR/etc/skel/.config/autostart/enclave-start.desktop" 'enclave-start --background' "start menu preloads at login"
-has "$XFC/panel/launcher-3/enclave-start.desktop" '^Icon=/usr/share/enclave/enclave-logo\.svg' "start button uses the Enclave logo"
-has "$XML/xfce4-panel.xml" 'name="plugin-3" type="string" value="launcher"' "Start button is panel plugin 3 (matches launcher-3/)"
-has "$AIR/etc/skel/.config/picom.conf" "class_g = 'Enclave-start'" "picom rounds the Start menu"
-exists "$AIR/usr/share/enclave/menus/enclave-applications.menu" "de-cluttered app list present"
-has "$AIR/usr/share/enclave/menus/enclave-applications.menu" '<Category>X-XFCE-SettingsDialog</Category>' "settings panels folded into Settings"
-if grep -q '^xfce4-whiskermenu-plugin$' arch/overlay/packages.x86_64.extra; then
-  bad "Whisker menu no longer shipped (replaced by enclave-start)"
+# --- session defaults ---
+has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=enclave\.desktop' "live session = Enclave"
+has "$AIR/etc/calamares/modules/displaymanager.conf" 'desktopFile: *"enclave"' "installed session = Enclave"
+has "$AIR/usr/share/enclave/start-defaults.json" '"taskbar"' "default dock pins"
+lacks "$AIR/usr/share/enclave/start-defaults.json" '"desktop"' "clean desktop: no default desktop icons"
+
+# --- the look: GTK theme, Enclave Icons, cursor, font ---
+has "$AIR/etc/skel/.config/gtk-3.0/settings.ini" '^gtk-icon-theme-name=Enclave$' "GTK 3 icons = Enclave Icons"
+has "$AIR/etc/skel/.config/gtk-4.0/settings.ini" '^gtk-icon-theme-name=Enclave$' "GTK 4 icons = Enclave Icons"
+has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "icon-theme='Enclave'" "Wayland GTK icons = Enclave Icons"
+has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "cursor-theme='Enclave-cursors'" "cursor = Enclave"
+has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "font-name='Inter" "UI font = Inter"
+has "$PKG" '^inter-font$'                                   "pkg: inter-font"
+ICONS="arch/icons/Enclave"
+has "$ICONS/index.theme" '^Inherits=Papirus,'               "Enclave Icons layer on Papirus"
+has "arch/icons/Enclave-dark/index.theme" '^Inherits=Papirus-Dark,' "dark variant inherits Papirus-Dark"
+has "$PKG" '^papirus-icon-theme$'                           "pkg: Papirus (base for Enclave Icons)"
+has "scripts/build-iso.sh" 'ln -s \.\./Enclave/scalable'    "Enclave-dark shares Enclave's icons"
+lacks "scripts/build-iso.sh" 'WhiteSur'                     "no WhiteSur fetch/installer in the build"
+exists "tools/make-icons.py"                                "Enclave Icons are reproducible"
+for i in apps/enclave apps/start-here apps/enclave-assistant apps/enclave-install apps/system-file-manager          apps/utilities-terminal apps/accessories-text-editor apps/image-viewer apps/multimedia-video-player          apps/preferences-system apps/applets-screenshooter apps/utilities-system-monitor          places/folder places/user-home places/folder-documents places/folder-download          places/user-trash places/user-trash-full devices/drive-harddisk mimetypes/inode-directory; do
+  exists "$ICONS/scalable/$i.svg"                           "Enclave icon: $i"
+done
+# Qt's SVG renderer (the shell) ignores these; icons must not rely on them.
+if grep -lE '<filter|<mask|clipPath|<image' "$ICONS"/scalable/*/*.svg >/dev/null 2>&1; then
+  bad "Enclave icons avoid filters/masks/clip paths"
 else
-  pass "Whisker menu no longer shipped (replaced by enclave-start)"
+  pass "Enclave icons avoid filters/masks/clip paths"
 fi
+# Every launcher Enclave ships has an Enclave icon.
+for f in "$AIR"/usr/share/applications/*.desktop "$AIR"/usr/local/share/applications/*.desktop          desktop/session/rootfs/usr/share/applications/*.desktop; do
+  n=$(sed -n 's/^Icon=//p' "$f" | head -1)
+  [ -n "$n" ] || continue
+  exists "$ICONS/scalable/apps/$n.svg"                      "$(basename "$f") has an Enclave icon ($n)"
+done
+has "desktop/session/rootfs/usr/bin/enclave-session" '^export QT_QPA_PLATFORMTHEME=gtk3' "Qt apps follow the GTK icon theme"
+has "desktop/session/rootfs/usr/bin/enclave-shell-run" 'env -u QT_QPA_PLATFORMTHEME enclave-shell' "the shell styles itself"
+has "$AIR/usr/share/applications/enclave-assistant.desktop" '^Icon=enclave-assistant$' "Assistant uses its themed icon"
+has "$AIR/usr/share/applications/enclave-install.desktop" '^Icon=enclave-install$' "Installer uses its themed icon"
+has "scripts/build-iso.sh" 'FLUENT_GTK_REV="[0-9a-f]{40}"'  "GTK theme source is pinned"
+has "$AIR/usr/share/enclave/menus/enclave-applications.menu" 'enclave-settings\.desktop' "one Settings entry"
 has "$AIR/usr/local/share/applications/org.xfce.ristretto.desktop" '^Name=Photos$' "image viewer branded 'Photos'"
 has "$AIR/usr/local/share/applications/io.github.celluloid_player.Celluloid.desktop" '^Name=Media Player$' "video player branded 'Media Player'"
-
-# --- theme (Fluent recolored to Enclave orange) + island panel ---
-has "$XML/xsettings.xml" 'ThemeName" type="string" value="Enclave"' "GTK theme = Enclave (Fluent/orange)"
-has "$XML/xfwm4.xml" 'theme" type="string" value="Enclave"'          "window decorations = Enclave"
-has "$XML/xsettings.xml" 'IconThemeName" type="string" value="Enclave-orange-light"' "icons = Enclave (Fluent)"
-has "$XML/xsettings.xml" 'CursorThemeName" type="string" value="Enclave-cursors"' "cursor = Enclave (Fluent)"
-has "$XML/xsettings.xml" 'FontName" type="string" value="Inter 10"' "UI font = Inter"
-has "arch/overlay/packages.x86_64.extra" '^inter-font$'      "pkg: inter-font"
-has "scripts/build-iso.sh" 'Fluent-icon-theme'               "build generates the Enclave icons + cursor"
-has "scripts/build-iso.sh" 'FLUENT_GTK_REV="[0-9a-f]{40}"'  "Fluent GTK source is pinned"
-has "scripts/build-iso.sh" 'show_app_icon=true'             "window frames show the app icon"
-has "$XML/xfwm4.xml" 'title_alignment" type="string" value="left"' "window titles left-aligned (Windows)"
-has "scripts/build-iso.sh" 'Fluent-gtk-theme'                       "build generates the Enclave (Fluent) theme"
-has "$XML/xfce4-panel.xml" 'expand" type="bool" value="true"'      "taskbar centres Start+apps (expanding spacers)"
-has "$AIR/etc/skel/.config/gtk-3.0/gtk.css" 'xfce4-panel'          "taskbar is styled (gtk.css)"
-has "$XML/xfce4-panel.xml" 'p=8'                                    "taskbar is at the bottom"
-has "$XML/xfce4-desktop.xml" 'show-filesystem" type="bool" value="false"' "no Linux 'File System' desktop icon"
-
-# --- wallpaper ---
-has "$XML/xfce4-desktop.xml" 'enclave-default\.svg'         "desktop wallpaper = Enclave"
-exists "arch/branding/wallpapers/enclave-default.svg"       "default wallpaper present"
-
-# --- Enclave Files (Thunar) + picom (Hyprland look) ---
-has "$XML/thunar.xml" 'ThunarShortcutsPane'                "Enclave Files has a Places sidebar"
-has "$XML/thunar.xml" 'misc-single-click" type="bool" value="false"' "Enclave Files uses double-click"
 has "$AIR/usr/local/share/applications/thunar.desktop" '^Name=Files' "file manager branded 'Files'"
-has "$AIR/usr/local/share/applications/xfce-settings-manager.desktop" '^Name=Settings$' "one 'Settings' app"
-has "$XML/xfce4-desktop.xml" 'show-home" type="bool" value="false"' "clean desktop (no Home icon)"
-has "$XML/xfce4-keyboard-shortcuts.xml" 'enclave-start-toggle'   "Windows key opens Start"
-exists "$AIR/etc/skel/.config/Thunar/uca.xml"              "Enclave Files custom actions"
-has "arch/overlay/packages.x86_64.extra" '^picom$'         "pkg: picom (Hyprland-style compositor)"
-has "$XML/xfwm4.xml" 'use_compositing" type="bool" value="false"' "xfwm4 compositor off (picom takes over)"
-has "$AIR/etc/skel/.config/picom.conf" 'blur-method'       "picom: blur enabled"
-has "$AIR/etc/skel/.config/picom.conf" 'corner-radius'     "picom: rounded corners"
-has "$AIR/etc/skel/.config/picom.conf" '^rules'             "picom: v12+ rules syntax"
-has "$AIR/etc/skel/.config/autostart/picom.desktop" 'enclave-compositor' "compositor autostarts (with fallbacks)"
-has "$AIR/usr/local/bin/enclave-compositor" 'use_compositing' "compositor falls back to xfwm4's" 
 
-# --- signature floating bubble ---
-exists "$AIR/usr/local/bin/enclave-bubble"                 "floating bubble app present"
-has "$AIR/usr/local/bin/enclave-bubble" 'Wnck'             "bubble controls the active window (libwnck)"
-has "$AIR/usr/local/bin/enclave-bubble" 'is_composited'      "bubble handles running without a compositor"
-exists "$AIR/etc/skel/.config/autostart/enclave-bubble.desktop" "bubble autostarts"
-has "arch/overlay/packages.x86_64.extra" '^python-gobject$' "pkg: python-gobject (bubble GTK)"
-has "arch/overlay/packages.x86_64.extra" '^libwnck3$'      "pkg: libwnck3 (bubble window control)"
-has "arch/overlay/packages.x86_64.extra" '^python-cairo$'  "pkg: python-cairo (bubble drawing)"
+# --- wallpapers: Ember Horizon, light and dark ---
+for w in enclave-default enclave-default-light enclave-login; do
+  exists "arch/branding/wallpapers/$w.svg"                  "wallpaper: $w"
+done
+exists "tools/make-wallpapers.py"                           "wallpapers are reproducible"
 
 # --- default apps ---
-has "arch/overlay/packages.x86_64.extra" '^zen-browser-bin$' "pkg: Zen Browser"
-has "scripts/build-iso.sh" 'AUR_PKGS=[(].*zen-browser-bin'   "Zen Browser built from the AUR"
-has "arch/overlay/packages.x86_64.extra" '^thunderbird$'     "pkg: Thunderbird"
+has "$PKG" '^zen-browser-bin$'                              "pkg: Zen Browser"
+has "scripts/build-iso.sh" 'AUR_PKGS=[(].*zen-browser-bin'  "Zen Browser built from the AUR"
+has "$PKG" '^thunderbird$'                                  "pkg: Thunderbird"
 has "$AIR/etc/xdg/mimeapps.list" '^x-scheme-handler/https=zen\.desktop' "Zen is the default browser"
 has "$AIR/etc/xdg/mimeapps.list" '^x-scheme-handler/mailto=org\.mozilla\.Thunderbird\.desktop' "Thunderbird is the default mail app"
+
+# --- boot: Ember Plymouth splash, quiet kernel, quick menus ---
+exists "arch/plymouth/enclave/enclave.script"               "Plymouth Enclave script theme"
+has "arch/plymouth/enclave/enclave.plymouth" '^ModuleName=script$' "Plymouth theme is a script theme"
+has "arch/plymouth/enclave/enclave.script" 'SetDisplayPasswordFunction' "splash asks for disk passphrases"
+has "$AIR/etc/plymouth/plymouthd.conf" '^Theme=enclave$'    "Plymouth uses the Enclave theme"
+has "scripts/build-iso.sh" 'quiet splash loglevel=3'        "live boot is quiet"
+has "$AIR/etc/calamares/modules/grubcfg.conf" 'GRUB_TIMEOUT_STYLE: "hidden"' "installed boot hides the GRUB menu"
+has "$AIR/etc/calamares/modules/grubcfg.conf" '"splash"'    "installed boot shows the splash"
+has "scripts/build-iso.sh" 's/\^timeout \.\*/timeout 3/'    "UEFI menu waits 3 s"
+has "arch/branding/enclave-boot.svg" 'FF7A1A'               "BIOS menu background in Ember"
 
 # --- executables really are executable in the image (mkarchiso drops file
 #     modes; only profiledef file_permissions survive — alpha.10 shipped 0644) ---
 has "scripts/build-iso.sh" 'file_permissions\+='           "build registers Enclave executables in file_permissions"
-if find "$AIR/usr/local/bin" -name '__pycache__' | grep -q .; then
+if find "$AIR/usr/local/bin" -name '__pycache__' 2>/dev/null | grep -q .; then
   bad "no __pycache__ in the overlay"
 else
   pass "no __pycache__ in the overlay"
@@ -121,13 +111,12 @@ else
   pass "no KDE/Plasma overlay leftovers"
 fi
 
-# --- SDDM login theme (Windows-familiar greeter, DE-agnostic, runs under X11) ---
+# --- SDDM login theme (runs under X11; the session itself is Wayland) ---
 SDDM="$AIR/usr/share/sddm/themes/enclave"
 has "$SDDM/metadata.desktop" 'Type=sddm-theme'              "sddm theme metadata"
 has "$SDDM/metadata.desktop" '^MainScript=Main.qml'         "sddm theme main script"
 exists "$SDDM/Main.qml"                                      "sddm theme Main.qml present"
 has "$SDDM/Main.qml" 'sddm\.login'                          "sddm theme performs login"
-has "$SDDM/theme.conf" 'accentColor=#ff6b1a'               "sddm theme uses Enclave accent"
 has "$AIR/etc/sddm.conf.d/05-enclave-theme.conf" '^Current=enclave' "sddm uses the Enclave theme"
 exists "arch/branding/wallpapers/enclave-login.svg"         "login background present"
 

@@ -28,10 +28,12 @@ public:
         if (name.startsWith('/'))
             icon = QIcon(name);
         else if (!name.isEmpty())
-            icon = QIcon::fromTheme(name);
-        if (icon.isNull())
+            icon = fromThemeWithFallback(name);
+        // A missing app icon gets the generic one; a missing symbolic (tinted)
+        // glyph stays empty, never a solid tinted square.
+        if (icon.isNull() && !tint.isValid())
             icon = QIcon::fromTheme("application-x-executable");
-        QPixmap pm = icon.pixmap(QSize(edge, edge));
+        QPixmap pm = icon.isNull() ? QPixmap() : icon.pixmap(QSize(edge, edge));
         if (pm.isNull()) {
             pm = QPixmap(edge, edge);
             pm.fill(Qt::transparent);
@@ -44,5 +46,24 @@ public:
         if (size)
             *size = pm.size();
         return pm;
+    }
+
+private:
+    // freedesktop naming fallback: "a-b-c-symbolic" → "a-b-symbolic" → "a-symbolic".
+    static QIcon fromThemeWithFallback(QString name)
+    {
+        const bool symbolic = name.endsWith("-symbolic");
+        if (symbolic)
+            name.chop(9);
+        while (!name.isEmpty()) {
+            const QString candidate = symbolic ? name + "-symbolic" : name;
+            if (QIcon::hasThemeIcon(candidate))
+                return QIcon::fromTheme(candidate);
+            const int dash = name.lastIndexOf('-');
+            if (dash <= 0)
+                break;
+            name.truncate(dash);
+        }
+        return {};
     }
 };

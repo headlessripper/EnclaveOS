@@ -1,0 +1,27 @@
+# Enclave OS — notifications (mako), styled with Enclave Ember.
+# Porcelain card, warm-grey border, orange accent bar for urgent ones.
+font=Inter 10
+background-color=#FFFFFFF7
+text-color=#202124
+border-color=#EAE8E2
+border-size=1
+border-radius=12
+padding=14
+margin=12
+width=360
+height=160
+anchor=bottom-right
+outer-margin=0,8,72,0
+icons=1
+max-icon-size=40
+default-timeout=6000
+layer=overlay
+
+[urgency=high]
+border-color=#FF7A1A
+border-size=2
+default-timeout=0
+
+# Control Center's Do Not Disturb: `makoctl mode -t do-not-disturb`
+[mode=do-not-disturb]
+invisible=1

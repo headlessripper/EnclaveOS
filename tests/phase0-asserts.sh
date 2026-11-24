@@ -26,7 +26,7 @@ has "$AIR/etc/hostname"       '^enclave$'                    "hostname = enclave
 
 # --- packages / repos ---
 has "$O/packages.x86_64.extra" '^sddm$'                      "pkg: sddm"
-has "$O/packages.x86_64.extra" '^xfce4-session$'            "pkg: xfce4-session (XFCE desktop)"
+has "$O/packages.x86_64.extra" '^labwc$'                    "pkg: labwc (under Enclave Shell)"
 has "$O/packages.x86_64.extra" '^networkmanager$'            "pkg: networkmanager"
 has "$O/pacman.conf"           '^\[multilib\]'               "pacman: multilib enabled"
 # KDE/Plasma must be gone (Wayland-only, black-screens on VMware).
@@ -41,7 +41,7 @@ exists "$AIR/usr/local/bin/enclave-live-setup.sh"            "live-setup script 
 has "$AIR/etc/systemd/system/enclave-live-setup.service" 'enclave-live-setup.sh' "live-setup unit runs script"
 has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^User=enclave'   "sddm autologin user = enclave"
 # XFCE is an X11 desktop — renders reliably on VMware (no Wayland black screen).
-has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=xfce\.desktop' "autologin uses the XFCE session"
+has "$AIR/etc/sddm.conf.d/10-enclave-autologin.conf" '^Session=enclave\.desktop' "autologin uses the Enclave session"
 has "$O/packages.x86_64.extra" '^xorg-server$'              "pkg: xorg-server (X11)"
 has "$O/packages.x86_64.extra" '^xf86-input-libinput$'      "pkg: xf86-input-libinput (X input)"
 has "$AIR/etc/sddm.conf.d/05-enclave-theme.conf" '^DisplayServer=x11' "sddm greeter runs under X11"

@@ -152,7 +152,7 @@ void AppRegistry::loadMenuRules()
     QFile f(kMenuFile);
     if (!f.open(QIODevice::ReadOnly)) {
         m_excludeCategories = kSettingsCategories;
-        m_includeFiles = {"xfce-settings-manager.desktop"};
+        m_includeFiles = {"enclave-settings.desktop"};
         return;
     }
     QXmlStreamReader xml(&f);
@@ -277,6 +277,54 @@ QVariantMap AppRegistry::app(const QString &id) const
             {"settings", it->settings}};
 }
 
+// freedesktop main categories folded into Start's groups (first match wins).
+static const QList<QPair<QString, QStringList>> kGroups = {
+    {"Internet",    {"Network", "WebBrowser", "Email", "Chat"}},
+    {"Office",      {"Office", "WordProcessor", "Spreadsheet", "Presentation"}},
+    {"Development", {"Development", "IDE"}},
+    {"Graphics",    {"Graphics", "Photography"}},
+    {"Multimedia",  {"AudioVideo", "Audio", "Video", "Player"}},
+    {"Games",       {"Game"}},
+    {"Education",   {"Education", "Science"}},
+    {"System",      {"System", "Settings", "Monitor", "PackageManager"}},
+    {"Accessories", {"Utility", "Accessibility", "TextEditor", "FileManager", "Archiving"}},
+};
+
+QString AppRegistry::groupOf(const AppEntry &a)
+{
+    for (const auto &g : kGroups)
+        for (const QString &c : g.second)
+            if (a.categories.contains(c))
+                return g.first;
+    return QStringLiteral("Accessories");
+}
+
+QStringList AppRegistry::categories() const
+{
+    QSet<QString> used;
+    for (const AppEntry &a : m_apps)
+        used.insert(groupOf(a));
+    QStringList out;
+    QStringList order;
+    for (const auto &g : kGroups)
+        order << g.first;
+    std::sort(order.begin(), order.end());
+    for (const QString &g : order)
+        if (used.contains(g))
+            out << g;
+    return out;
+}
+
+QVariantList AppRegistry::appsIn(const QString &category) const
+{
+    QVariantList out;
+    for (const AppEntry &a : m_apps)
+        if (category.isEmpty() || groupOf(a) == category)
+            out << QVariantMap{{"appId", a.id}, {"name", a.name}, {"icon", a.icon},
+                               {"comment", a.comment.isEmpty() ? a.genericName : a.comment}};
+    return out;
+}
+
 QString AppRegistry::expandExec(const AppEntry &app)
 {
     QString out;
@@ -383,18 +431,21 @@ void AppRegistry::loadPins()
     const QJsonObject user = read(userPinsPath());
     m_startPins = list(user.contains("pinned") ? user["pinned"] : defaults["pinned"]);
     m_taskbarPins = list(user.contains("taskbar") ? user["taskbar"] : defaults["taskbar"]);
+    // Desktop icons: none unless the defaults or the user add some (clean desktop).
+    m_desktopPins = list(user.contains("desktop") ? user["desktop"] : defaults["desktop"]);
 }
 
 void AppRegistry::savePins() const
 {
     QJsonObject o;
-    {   // keep keys written by other tools (the X11 Start menu shares this file)
+    {   // keep keys this version does not know about
         QFile f(userPinsPath());
         if (f.open(QIODevice::ReadOnly))
             o = QJsonDocument::fromJson(f.readAll()).object();
     }
     o["pinned"] = QJsonArray::fromStringList(m_startPins);
     o["taskbar"] = QJsonArray::fromStringList(m_taskbarPins);
+    o["desktop"] = QJsonArray::fromStringList(m_desktopPins);
     QDir().mkpath(QFileInfo(userPinsPath()).path());
     QFile f(userPinsPath());
     if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
@@ -415,6 +466,15 @@ void AppRegistry::pinTaskbar(const QString &id, bool pinned)
     m_taskbarPins.removeAll(id);
     if (pinned)
         m_taskbarPins << id;
+    savePins();
+    emit pinsChanged();
+}
+
+void AppRegistry::pinDesktop(const QString &id, bool pinned)
+{
+    m_desktopPins.removeAll(id);
+    if (pinned)
+        m_desktopPins << id;
     savePins();
     emit pinsChanged();
 }

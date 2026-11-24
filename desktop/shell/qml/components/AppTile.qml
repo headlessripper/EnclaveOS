@@ -11,7 +11,7 @@ Item {
     signal rightClicked()
 
     implicitWidth: 96
-    implicitHeight: 82
+    implicitHeight: 92
 
     Rectangle {
         anchors.fill: parent
@@ -24,11 +24,11 @@ Item {
 
     Column {
         anchors.centerIn: parent
-        spacing: 8
+        spacing: 6
         Image {
             anchors.horizontalCenter: parent.horizontalCenter
-            width: 32; height: 32
-            sourceSize: Qt.size(64, 64)
+            width: 42; height: 42
+            sourceSize: Qt.size(84, 84)
             source: root.icon === "" ? "" : "image://icon/" + root.icon
         }
         Text {

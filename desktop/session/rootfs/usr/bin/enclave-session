@@ -1,6 +1,6 @@
 #!/bin/sh
 # Enclave OS — start the Enclave Shell session (Wayland, labwc underneath).
-# Selected from the login screen as "Enclave (Wayland preview)".
+# Selected from the login screen as "Enclave" (the only session).
 
 export XDG_CURRENT_DESKTOP=Enclave:wlroots
 export XDG_SESSION_DESKTOP=enclave
@@ -10,6 +10,12 @@ export GDK_BACKEND="wayland,x11"
 export MOZ_ENABLE_WAYLAND=1
 export SDL_VIDEODRIVER="wayland,x11"
 export _JAVA_AWT_WM_NONREPARENTING=1
+# Qt apps (the installer, anything a user adds) follow the GTK settings:
+# Enclave Icons, the font and light/dark. The shell styles itself and opts
+# out (enclave-shell-run).
+export QT_QPA_PLATFORMTHEME=gtk3
+export XCURSOR_THEME=Enclave-cursors
+export XCURSOR_SIZE=24
 
 # No GPU render node (some VMs, broken drivers): render in software
 # instead of failing to start.
