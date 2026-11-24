@@ -129,3 +129,16 @@ python-pip
 python-pipx
 python-virtualenv
 python-keyring
+
+# --- Enclave Shell (Enclave's own Wayland desktop; "Enclave (Wayland preview)"
+#     session — see docs/superpowers/specs/2026-11-24-enclave-shell-design.md) ---
+labwc
+xorg-xwayland
+layer-shell-qt
+qt6-base
+qt6-declarative
+qt6-wayland
+qt6-svg
+xdg-desktop-portal-wlr
+adwaita-icon-theme
+grim

@@ -1,0 +1,6 @@
+# Enclave OS — labwc autostart for the Enclave Shell session.
+# (labwc already exports WAYLAND_DISPLAY etc. to D-Bus/systemd.)
+QT_FORCE_STDERR_LOGGING=1 enclave-shell-run >"${XDG_RUNTIME_DIR:-/tmp}/enclave-shell.log" 2>&1 &
+# Authentication dialogs for apps that ask for admin rights.
+[ -x /usr/lib/xfce-polkit/xfce-polkit ] && /usr/lib/xfce-polkit/xfce-polkit &
+[ -x /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 ] && /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &

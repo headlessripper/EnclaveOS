@@ -12,5 +12,12 @@
     "xfce4-taskmanager.desktop",
     "xfce-settings-manager.desktop",
     "enclave-install.desktop"
+  ],
+  "taskbar": [
+    "thunar.desktop",
+    "zen.desktop",
+    "org.mozilla.Thunderbird.desktop",
+    "enclave-assistant.desktop",
+    "xfce4-terminal.desktop"
   ]
 }

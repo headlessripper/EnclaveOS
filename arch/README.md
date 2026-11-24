@@ -28,7 +28,8 @@ and loop devices — so pick the path that matches your machine:
 
 **On Arch (WSL-Arch or an Arch VM):**
 ```bash
-sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache xfce4-panel
+sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache xfce4-panel \
+  cmake wlr-protocols wayland-protocols qt6-base qt6-declarative qt6-wayland qt6-svg layer-shell-qt
 sudo ../scripts/build-iso.sh
 ```
 
@@ -58,6 +59,22 @@ The Start menu shows one flat, de-cluttered app list
 (`airootfs/usr/share/enclave/menus/enclave-applications.menu`): individual
 settings panels live inside the single **Settings** app, and technician tools
 pulled in by the base system are hidden.
+
+## Enclave Shell (Wayland preview session)
+
+Enclave's own desktop lives in `../desktop/` and is compiled by
+`build-iso.sh` (step 6b3) into the image:
+
+| Piece | File |
+|---|---|
+| Colours, radii, motion (Enclave Ember) | `desktop/design-system/tokens/ember.json` |
+| Shell (taskbar, Start, bubble, wallpaper) | `desktop/shell/` → `/usr/bin/enclave-shell` |
+| Session launcher | `desktop/session/rootfs/usr/bin/enclave-session` |
+| Window manager config (labwc) | `desktop/session/rootfs/usr/share/enclave/labwc/` |
+| Window frames | `desktop/session/rootfs/usr/share/themes/Enclave-Ember/labwc/themerc` |
+
+The XFCE session below remains the default (and the live session) until the
+shell is validated.
 
 ## Where the desktop look comes from
 

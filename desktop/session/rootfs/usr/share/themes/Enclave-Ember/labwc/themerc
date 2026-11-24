@@ -1,0 +1,56 @@
+# Enclave Ember — window frames for the Enclave Shell session (labwc).
+# Colours from desktop/design-system/tokens/ember.json (light expression):
+# Porcelain title bars, warm-grey when inactive, orange only for focus cues.
+
+border.width: 1
+window.active.border.color: #0000001A
+window.inactive.border.color: #00000012
+
+window.titlebar.padding.width: 6
+window.titlebar.padding.height: 4
+window.active.title.bg.color: #F7F6F3
+window.inactive.title.bg.color: #EAE8E2
+window.active.label.text.color: #202124
+window.inactive.label.text.color: #6B6860
+window.label.text.justify: left
+
+window.button.width: 40
+window.button.height: 30
+window.button.spacing: 0
+window.button.hover.bg.color: #0000000F
+window.button.hover.bg.corner-radius: 6
+window.active.button.unpressed.image.color: #202124
+window.inactive.button.unpressed.image.color: #6B6860
+
+window.active.shadow.size: 40
+window.inactive.shadow.size: 24
+window.active.shadow.color: #00000040
+window.inactive.shadow.color: #00000024
+
+menu.width.min: 180
+menu.width.max: 320
+menu.border.width: 1
+menu.border.color: #0000001A
+menu.items.bg.color: #FFFFFF
+menu.items.text.color: #202124
+menu.items.active.bg.color: #FFD0A6
+menu.items.active.text.color: #202124
+menu.items.padding.x: 12
+menu.items.padding.y: 6
+menu.separator.color: #EAE8E2
+menu.title.bg.color: #F7F6F3
+menu.title.text.color: #202124
+
+osd.bg.color: #F7F6F3
+osd.border.color: #0000001A
+osd.border.width: 1
+osd.label.text.color: #202124
+osd.window-switcher.style-thumbnail.item.active.border.color: #FF7A1A
+osd.window-switcher.style-thumbnail.item.active.bg.color: #FF7A1A26
+osd.window-switcher.style-classic.item.active.border.color: #FF7A1A
+osd.window-switcher.style-classic.item.active.bg.color: #FF7A1A26
+
+snapping.overlay.region.bg.color: #FF7A1A33
+snapping.overlay.edge.bg.color: #FF7A1A33
+snapping.overlay.region.border.color: #FF7A1A
+snapping.overlay.edge.border.color: #FF7A1A

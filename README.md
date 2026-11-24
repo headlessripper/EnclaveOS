@@ -10,6 +10,11 @@ you already rely on (Windows, Android, Linux) running side by side.
   (pinned apps, Recommended, All apps, instant search), Fluent-based Enclave
   theme / icons / cursor, Inter font, picom shadows + blur, and Enclave's
   signature floating **control bubble**.
+- **Enclave Shell (in progress):** Enclave's own desktop — Qt 6 / QML on
+  Wayland (labwc underneath), in the **Enclave Ember** design system (orange
+  identity, adaptive light/dark). Pick **Enclave (Wayland preview)** on the
+  login screen; XFCE stays the default until the shell passes its release
+  gates. See `desktop/` and `docs/superpowers/specs/2026-11-24-enclave-shell-design.md`.
 - **Default apps:** Zen Browser, Thunderbird, Files, Text Editor, Photos
   (Ristretto), Media Player (Celluloid), Task Manager.
 - **Apps:** Linux (Flatpak/AUR), Windows (Wine/Proton), Android (Waydroid).
@@ -31,7 +36,8 @@ you already rely on (Windows, Android, Linux) running side by side.
 
 ```bash
 # On Arch (WSL-Arch or a VM):
-sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache xfce4-panel
+sudo pacman -S --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache xfce4-panel \
+  cmake wlr-protocols wayland-protocols qt6-base qt6-declarative qt6-wayland qt6-svg layer-shell-qt
 sudo scripts/build-iso.sh
 
 # On WSL Ubuntu / any host with Docker:

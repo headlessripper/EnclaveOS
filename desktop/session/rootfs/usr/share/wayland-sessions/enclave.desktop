@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Enclave (Wayland preview)
+Comment=Enclave Shell — Enclave's own desktop, on Wayland
+Exec=/usr/bin/enclave-session
+TryExec=/usr/bin/enclave-shell
+Type=Application
+DesktopNames=Enclave;wlroots

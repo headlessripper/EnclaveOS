@@ -224,6 +224,31 @@ for plug in "$ARCH_DIR"/plugins/*/; do
   install -m644 "$plug/$name.desktop" "$AIR/usr/share/xfce4/panel/plugins/$name.desktop"
 done
 
+# --- 6b3. Enclave Shell (Enclave's own Wayland desktop, Qt 6 / QML) and its
+#          labwc session ("Enclave (Wayland preview)" on the login screen).
+#          Compiled against the same Arch Qt the image installs. ---
+DESKTOP_DIR="$REPO/desktop"
+if [ -d "$DESKTOP_DIR/shell" ]; then
+  command -v cmake >/dev/null 2>&1 || die "cmake not found (pacman -S cmake) — needed for Enclave Shell"
+  [ -f /usr/share/wlr-protocols/unstable/wlr-foreign-toplevel-management-unstable-v1.xml ] \
+    || die "wlr-protocols not found (pacman -S wlr-protocols) — needed for Enclave Shell"
+  log "compiling Enclave Shell"
+  SHELLBUILD="${ENCLAVE_WORK:-$REPO/build}/enclave-shell"
+  rm -rf "$SHELLBUILD" "$SHELLBUILD.log"
+  run_logged "$SHELLBUILD.log" cmake -S "$DESKTOP_DIR/shell" -B "$SHELLBUILD" \
+    -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr || die "Enclave Shell: cmake configure failed"
+  run_logged "$SHELLBUILD.log" cmake --build "$SHELLBUILD" -j"$(nproc)" || die "Enclave Shell failed to compile"
+  run_logged "$SHELLBUILD.log" env DESTDIR="$AIR" cmake --install "$SHELLBUILD" || die "Enclave Shell failed to install"
+  [ -x "$AIR/usr/bin/enclave-shell" ] || die "Enclave Shell did not install"
+  cp -a "$DESKTOP_DIR/session/rootfs/." "$AIR/"
+  install -Dm644 "$DESKTOP_DIR/design-system/tokens/ember.json" \
+    "$AIR/usr/share/enclave/design-system/ember.json"
+  for f in enclave-shell enclave-session enclave-shell-run; do
+    add_file_perm "/usr/bin/$f" 755
+  done
+  log "  Enclave Shell + Wayland session installed"
+fi
+
 # --- 6c. Plymouth boot splash: skin the boot logs with an Enclave theme.
 #     Built by recolouring the bundled "spinner" theme (reliable, known-good). ---
 if [ -d /usr/share/plymouth/themes/spinner ]; then

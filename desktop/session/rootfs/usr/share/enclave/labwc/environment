@@ -1,0 +1,2 @@
+# Enclave OS — extra environment for labwc (enclave-session sets the rest).
+XKB_DEFAULT_LAYOUT=us

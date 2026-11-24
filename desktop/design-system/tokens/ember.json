@@ -1,0 +1,54 @@
+{
+  "$comment": "glass is near-opaque on purpose: the compositor has no blur yet, and see-through panels without blur look broken. Enclave Ember — the single source of truth for Enclave colours, shape and motion. Orange is the identity; it marks important interactions, active states and branding, never the background of everything. Read by enclave-shell (installed to /usr/share/enclave/design-system/ember.json).",
+  "name": "Enclave Ember",
+  "version": 1,
+  "brand": {
+    "ember":  "#FF7A1A",
+    "solar":  "#FFAC55",
+    "burnt":  "#E95B16",
+    "glow":   "#FFD0A6"
+  },
+  "status": {
+    "success": "#2FBF71",
+    "warning": "#F5B82E",
+    "danger":  "#E5484D",
+    "info":    "#3B82F6"
+  },
+  "dark": {
+    "background":    "#101114",
+    "surface":       "#1A1C21",
+    "elevated":      "#272A31",
+    "text":          "#F5F3EF",
+    "textSecondary": "#A7A39B",
+    "border":        "#FFFFFF14",
+    "hover":         "#FFFFFF10",
+    "pressed":       "#FFFFFF1A",
+    "accent":        "#FF7A1A",
+    "accentText":    "#101114",
+    "accentSoft":    "#FF7A1A26",
+    "glass":         "#1A1C21F5",
+    "shadow":        "#00000080",
+    "scrim":         "#00000066"
+  },
+  "light": {
+    "background":    "#F7F6F3",
+    "surface":       "#FFFFFF",
+    "elevated":      "#EAE8E2",
+    "text":          "#202124",
+    "textSecondary": "#6B6860",
+    "border":        "#0000001A",
+    "hover":         "#0000000A",
+    "pressed":       "#00000014",
+    "accent":        "#E95B16",
+    "accentText":    "#FFFFFF",
+    "accentSoft":    "#FF7A1A1F",
+    "glass":         "#F7F6F3F7",
+    "shadow":        "#00000033",
+    "scrim":         "#00000033"
+  },
+  "radius": { "small": 6, "medium": 12, "large": 20, "floating": 24, "pill": 999 },
+  "spacing": { "unit": 8 },
+  "type": { "family": "Inter", "body": 10, "small": 9, "title": 14, "display": 22 },
+  "motion": { "fast": 150, "standard": 200, "slow": 250 },
+  "taskbar": { "height": 52 }
+}

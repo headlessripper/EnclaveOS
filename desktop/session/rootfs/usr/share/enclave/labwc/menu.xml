@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Enclave OS — desktop right-click is handled by Enclave Shell; this is
+     only the compositor's window menu fallback. -->
+<openbox_menu>
+  <menu id="root-menu" label="">
+    <item label="Terminal"><action name="Execute" command="xfce4-terminal" /></item>
+    <item label="Files"><action name="Execute" command="thunar" /></item>
+    <separator />
+    <item label="Reload desktop"><action name="Reconfigure" /></item>
+  </menu>
+</openbox_menu>

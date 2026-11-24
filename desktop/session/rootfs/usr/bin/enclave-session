@@ -1,0 +1,33 @@
+#!/bin/sh
+# Enclave OS — start the Enclave Shell session (Wayland, labwc underneath).
+# Selected from the login screen as "Enclave (Wayland preview)".
+
+export XDG_CURRENT_DESKTOP=Enclave:wlroots
+export XDG_SESSION_DESKTOP=enclave
+export XDG_SESSION_TYPE=wayland
+export QT_QPA_PLATFORM="wayland;xcb"
+export GDK_BACKEND="wayland,x11"
+export MOZ_ENABLE_WAYLAND=1
+export SDL_VIDEODRIVER="wayland,x11"
+export _JAVA_AWT_WM_NONREPARENTING=1
+
+# No GPU render node (some VMs, broken drivers): render in software
+# instead of failing to start.
+if ! ls /dev/dri/renderD* >/dev/null 2>&1; then
+  export WLR_RENDERER=pixman
+  export ENCLAVE_SOFTWARE_RENDERING=1
+fi
+# Virtual GPUs often draw a broken hardware cursor.
+if command -v systemd-detect-virt >/dev/null && systemd-detect-virt -q --vm; then
+  export WLR_NO_HARDWARE_CURSORS=1
+fi
+
+# exec keeps this pid, so the shell can end the session without knowing
+# which compositor runs it.
+export ENCLAVE_COMPOSITOR_PID=$$
+
+# The user's own labwc config wins; otherwise Enclave's defaults.
+if [ -f "$HOME/.config/labwc/rc.xml" ]; then
+  exec labwc "$@"
+fi
+exec labwc -C /usr/share/enclave/labwc "$@"
