@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Enclave voice — OpenVox conversational agent (mic -> STT -> assistant ->
+# streaming TTS, with barge-in). Advisory only; it never operates the system.
+set -euo pipefail
+if command -v openvox >/dev/null 2>&1; then
+  exec openvox agent --config /etc/enclave/assistant.toml "$@"
+elif python -c 'import openvox' >/dev/null 2>&1; then
+  exec python -m openvox.agent "$@"
+fi
+msg="Voice isn't set up yet. Run:  enclave-assistant-setup voice"
+if command -v kdialog >/dev/null 2>&1; then kdialog --msgbox "$msg"; else echo "$msg"; fi
+exit 1

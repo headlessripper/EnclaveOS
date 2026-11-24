@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Enclave — manage local GGUF models for the assistant's local runner.
+#   enclave-models list
+#   enclave-models add <url> | add hf:<repo>/<file.gguf>
+# Gated Hugging Face models: store a read token in KWallet/keyring first.
+set -euo pipefail
+DIR="${XDG_DATA_HOME:-$HOME/.local/share}/enclave/models"
+install -d "$DIR"
+
+case "${1:-list}" in
+  list)
+    ls -1 "$DIR"/*.gguf 2>/dev/null || echo "(no models in $DIR)"
+    ;;
+  add)
+    src="${2:?usage: enclave-models add <url|hf:repo/file.gguf>}"
+    case "$src" in
+      hf:*) f="${src#hf:}"
+            url="https://huggingface.co/${f%/*}/resolve/main/${f##*/}" ;;
+      *)    url="$src" ;;
+    esac
+    out="$DIR/$(basename "${url%%\?*}")"
+    echo "[enclave] downloading -> $out"
+    curl -L --fail -o "$out" "$url"
+    echo "[enclave] added. Point the runner at: $DIR"
+    ;;
+  *) echo "usage: enclave-models [list|add <url>]" >&2; exit 2 ;;
+esac

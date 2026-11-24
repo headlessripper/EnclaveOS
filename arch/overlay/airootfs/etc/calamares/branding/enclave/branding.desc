@@ -1,0 +1,36 @@
+---
+componentName: enclave
+
+welcomeStyleCalamares: true
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 820px,560px
+windowPlacement: center
+sidebar: widget
+navigation: widget
+
+strings:
+  productName:         Enclave OS
+  shortProductName:    Enclave
+  version:             0.1 alpha
+  shortVersion:        0.1
+  versionedName:       Enclave OS 0.1 alpha
+  shortVersionedName:  Enclave 0.1
+  bootloaderEntryName: Enclave OS
+  productUrl:          https://github.com/headlessripper/EnclaveOS
+  supportUrl:          https://github.com/headlessripper/EnclaveOS/issues
+  releaseNotesUrl:     https://github.com/headlessripper/EnclaveOS/releases
+
+images:
+  productLogo:    "enclave-logo.svg"
+  productIcon:    "enclave-logo.svg"
+  productWelcome: "enclave-logo.svg"
+
+slideshow: "show.qml"
+slideshowAPI: 2
+
+style:
+  sidebarBackground:    "#0E1621"
+  sidebarText:          "#F3F5F8"
+  sidebarTextSelect:    "#FF7A3D"
+  sidebarTextHighlight: "#FF7A3D"

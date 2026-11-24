@@ -1,0 +1,117 @@
+# Enclave OS — packages appended to releng/packages.x86_64 by build-iso.sh.
+# Desktop: a lean XFCE session on X11. KDE Plasma was dropped — Plasma 6.8 is
+# Wayland-only and KWin-Wayland black-screens on VMware's virtual GPU. XFCE on
+# Xorg renders reliably in VMs and is lighter.
+
+# --- Graphical boot splash (hides the boot logs behind an Enclave skin) ---
+plymouth
+
+# --- Display manager (SDDM, with Enclave's greeter theme, runs under X11) ---
+sddm
+
+# --- Xorg (XFCE is an X11 desktop) ---
+xorg-server
+xorg-xauth
+xorg-xinit
+xf86-input-libinput
+
+# --- XFCE desktop (curated, not the full group) ---
+xfce4-session
+xfwm4
+xfce4-panel
+xfdesktop
+xfce4-settings
+xfconf
+garcon
+xfce4-whiskermenu-plugin
+xfce4-notifyd
+xfce4-pulseaudio-plugin
+xfce4-power-manager
+xfce4-screenshooter
+network-manager-applet
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+# picom: the Hyprland-style look on X11 — blur, rounded corners, shadows,
+# fade animations, transparency (replaces xfwm4's built-in compositor).
+picom
+# Enclave's signature floating window-control bubble (GTK) + the tools it uses
+# to act on the active window.
+python-gobject
+xdotool
+wmctrl
+
+# --- GTK theme + icons (clean, Windows-familiar) ---
+# Adwaita ships in gnome-themes-extra (always available). Papirus = flat icons.
+gnome-themes-extra
+papirus-icon-theme
+
+# --- Core apps for a usable first session ---
+thunar
+thunar-volman
+gvfs
+tumbler
+xfce4-terminal
+xarchiver
+mousepad
+
+# --- Networking ---
+networkmanager
+
+# --- Audio (PipeWire stack) ---
+pipewire
+pipewire-alsa
+pipewire-pulse
+wireplumber
+pavucontrol
+
+# --- Graphics / Mesa ---
+mesa
+vulkan-icd-loader
+
+# --- Fonts ---
+noto-fonts
+noto-fonts-emoji
+ttf-dejavu
+
+# --- VM guest integration (dev/test target is VMware; cover common VMs) ---
+open-vm-tools
+spice-vdagent
+qemu-guest-agent
+
+# --- Phase 2: universal apps (official + multilib only) ---
+# Linux apps:
+flatpak
+xdg-user-dirs
+# Windows apps (Wine); Proton/Steam/Waydroid are AUR/heavy -> enclave-appsetup:
+wine
+winetricks
+cabextract
+ttf-liberation
+# 32-bit runtime bits Wine/Proton need:
+lib32-mesa
+lib32-vulkan-icd-loader
+lib32-gnutls
+lib32-pipewire
+vulkan-tools
+
+# --- Phase 4: graphical installer (Calamares) ---
+# calamares itself is built from the AUR into a local repo at build time
+# (no trustworthy prebuilt exists for Arch); see scripts/build-iso.sh.
+# These are what Calamares shells out to while installing to disk:
+calamares
+grub
+efibootmgr
+squashfs-tools
+parted
+dosfstools
+e2fsprogs
+mkinitcpio
+
+# --- Phase 3: advisory assistant + voice runtime (official bits only) ---
+# The assistant app (Alpha Code chat layer), the local model runner (llama.cpp),
+# and OpenVox are installed opt-in by enclave-assistant-setup (AUR/pip/heavy).
+python
+python-pip
+python-pipx
+python-virtualenv
+python-keyring

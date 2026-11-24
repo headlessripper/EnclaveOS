@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Enclave Assistant
+GenericName=AI assistant
+Comment=Ask and get help — advisory, never operates your system
+Exec=enclave-assistant
+Icon=/usr/share/enclave/enclave-logo.svg
+Terminal=false
+Categories=Utility;Education;
+Keywords=ai;assistant;help;chat;voice;

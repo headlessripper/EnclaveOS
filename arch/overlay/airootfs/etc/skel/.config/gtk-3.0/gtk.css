@@ -1,0 +1,23 @@
+/* Enclave OS — taskbar styling.
+   A clean, translucent full-width bottom bar (Windows-11 feel), layered on the
+   Enclave (Fluent) theme. Buttons get soft rounded hit areas; the active app
+   button carries the Enclave orange. */
+
+.xfce4-panel {
+  background-color: rgba(252, 252, 253, 0.90);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 -1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.xfce4-panel button {
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin: 3px 2px;
+}
+.xfce4-panel button:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+.xfce4-panel button:checked {
+  background-color: rgba(255, 122, 61, 0.16);
+  box-shadow: inset 0 -2px 0 0 #ff6b1a;
+}

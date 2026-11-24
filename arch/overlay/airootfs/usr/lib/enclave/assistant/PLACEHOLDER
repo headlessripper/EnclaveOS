@@ -1,0 +1,4 @@
+The Enclave assistant app (the Alpha Code chat layer, packaged as an .enc app)
+installs here as `enclave-assistant`. Until the extraction lands (see
+../../../../../arch/assistant.md), this directory holds only this placeholder and
+`enclave-assistant` reports that the app isn't installed.

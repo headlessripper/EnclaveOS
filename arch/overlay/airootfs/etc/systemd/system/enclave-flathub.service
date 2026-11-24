@@ -1,0 +1,14 @@
+[Unit]
+Description=Enclave — register Flathub remote
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/usr/local/bin/enclave-flathub.sh
+ConditionPathExists=!/var/lib/enclave/flathub.done
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/enclave-flathub.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Enclave Bubble
+Comment=Floating window-control bubble
+Exec=/usr/local/bin/enclave-bubble
+OnlyShowIn=XFCE;
+Terminal=false
+NoDisplay=true
+X-XFCE-Autostart-Override=true

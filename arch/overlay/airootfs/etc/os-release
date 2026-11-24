@@ -1,0 +1,11 @@
+NAME="Enclave OS"
+PRETTY_NAME="Enclave OS"
+ID=enclave
+ID_LIKE=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;255;122;61"
+HOME_URL="https://github.com/headlessripper/EnclaveOS"
+DOCUMENTATION_URL="https://github.com/headlessripper/EnclaveOS"
+SUPPORT_URL="https://github.com/headlessripper/EnclaveOS"
+BUG_REPORT_URL="https://github.com/headlessripper/EnclaveOS/issues"
+LOGO=enclave

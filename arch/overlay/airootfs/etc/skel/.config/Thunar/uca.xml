@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+  <action>
+    <icon>utilities-terminal</icon>
+    <name>Open Terminal Here</name>
+    <unique-id>enclave-terminal</unique-id>
+    <command>xfce4-terminal --working-directory %f</command>
+    <description>Open a terminal in this folder</description>
+    <patterns>*</patterns>
+    <startup-notify/>
+    <directories/>
+  </action>
+  <action>
+    <icon>system-users</icon>
+    <name>Open as Administrator</name>
+    <unique-id>enclave-admin</unique-id>
+    <command>pkexec thunar %f</command>
+    <description>Open this folder with administrator rights</description>
+    <patterns>*</patterns>
+    <directories/>
+  </action>
+  <action>
+    <icon>document-open</icon>
+    <name>Open with Enclave Files</name>
+    <unique-id>enclave-open-here</unique-id>
+    <command>thunar %f</command>
+    <description>Open in a new Enclave Files window</description>
+    <patterns>*</patterns>
+    <directories/>
+  </action>
+  <action>
+    <icon>package-x-generic</icon>
+    <name>Extract Here</name>
+    <unique-id>enclave-extract</unique-id>
+    <command>xarchiver --extract-here %f</command>
+    <description>Extract the selected archive here</description>
+    <patterns>*.zip;*.rar;*.7z;*.tar;*.tar.gz;*.tgz;*.tar.xz;*.tar.bz2;*.gz;*.xz;*.bz2</patterns>
+    <other-files/>
+  </action>
+  <action>
+    <icon>package-x-generic</icon>
+    <name>Compress…</name>
+    <unique-id>enclave-compress</unique-id>
+    <command>xarchiver --add-to %F</command>
+    <description>Compress the selection into an archive</description>
+    <patterns>*</patterns>
+    <directories/>
+    <other-files/>
+  </action>
+</actions>

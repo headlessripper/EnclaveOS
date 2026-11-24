@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Enclave — install/launch an Android app (.apk) via Waydroid. If Android
+# support isn't set up yet, point the user at enclave-appsetup.
+set -euo pipefail
+
+notify() { command -v notify-send >/dev/null 2>&1 && notify-send "Enclave" "$1" || echo "$1"; }
+
+if ! command -v waydroid >/dev/null 2>&1; then
+  notify "Android apps aren't set up yet. Run:  enclave-appsetup android"
+  exit 1
+fi
+
+apk="${1:-}"
+[ -n "$apk" ] || { echo "usage: enclave-run-android <app.apk>" >&2; exit 2; }
+
+# Make sure the container is up, then install.
+systemctl is-active --quiet waydroid-container.service || sudo systemctl start waydroid-container.service || true
+waydroid app install "$apk"
+notify "Installed to Android. Find it in the Waydroid app list."

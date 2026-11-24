@@ -1,0 +1,31 @@
+name: Build Enclave ISO
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static checks (all phases)
+        run: for p in 0 1 2 3 4; do bash "tests/phase$p-asserts.sh"; done
+
+      - name: Build ISO (in archlinux container)
+        run: |
+          docker run --rm --privileged \
+            -v "$PWD":/enclave -w /enclave \
+            archlinux:latest bash -c '
+              sed -i "/^\[options\]/a XferCommand = /usr/bin/curl -fL -C - --retry 30 --retry-delay 3 --retry-all-errors --connect-timeout 30 -o %o %u" /etc/pacman.conf &&
+              pacman -Syu --noconfirm --needed archiso git base-devel sudo sassc librsvg plymouth &&
+              bash scripts/build-iso.sh'
+
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: enclave-iso
+          path: dist/*.iso
+          if-no-files-found: error

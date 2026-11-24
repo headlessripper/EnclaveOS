@@ -6,12 +6,13 @@
     "${modulesPath}/image/repart.nix"
     ./modules/common.nix
     ./modules/branding.nix
+    ./modules/desktop.nix   # Phase 1a: the Enclave Plasma desktop
+    ./modules/home.nix      # plasma-manager look (theme, island taskbar, icons)
   ];
 
   # Boot via systemd-boot + a Unified Kernel Image on the ESP.
   boot.loader.grub.enable = false;
   boot.loader.systemd-boot.enable = lib.mkForce false;
-  boot.plymouth.enable = lib.mkForce false;
   boot.uki.name = "enclave";
 
   # Storage controller drivers so the initrd can see the disk in VMware/QEMU/etc.
@@ -64,7 +65,8 @@
           Type = "root";
           Format = "ext4";
           Label = "nixos";
-          Minimize = "guess";
+          # Plasma needs room; give the desktop headroom to run and update.
+          SizeMinBytes = "16G";
         };
       };
     };
