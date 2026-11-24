@@ -143,7 +143,10 @@ class Bubble(Gtk.Window):
 
         # Start near the top-centre (titles are left-aligned, so this spot is
         # free on most windows).
-        self.move(max(0, screen.get_width() // 2 - 90), 10)
+        display = Gdk.Display.get_default()
+        mon = display.get_primary_monitor() or display.get_monitor(0)
+        geo = mon.get_geometry()
+        self.move(geo.x + max(0, geo.width // 2 - 90), geo.y + 10)
 
     # --- target window ---------------------------------------------------
     def _target(self):
