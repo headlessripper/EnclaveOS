@@ -1,0 +1,12 @@
+[Desktop Entry]
+# Enclave OS live desktop — stand-in for the sound mixer (pavucontrol), which
+# the installer downloads (removed on install, where its own entry takes over).
+# Hidden from Start, like on the installed system; Settings > Sound opens it.
+Type=Application
+Name=Volume Control
+Comment=Adjust the volume level
+Exec=pavucontrol
+Icon=multimedia-volume-control
+Terminal=false
+NoDisplay=true
+Categories=AudioVideo;Audio;Mixer;Settings;

@@ -1,0 +1,13 @@
+#!/bin/sh
+# Enclave OS live desktop — stand-in for an app that installs with the system.
+# The ISO stays small: apps like Mail and Media Player are downloaded by the
+# installer, but the live desktop still shows them so it looks the same as an
+# installed Enclave OS. Opening one explains that. (Removed on install.)
+#   enclave-preview-app "App name"
+name="${1:-This app}"
+msg="$name downloads while Enclave OS installs. Choose Install Enclave OS on the desktop to get it."
+if command -v notify-send >/dev/null 2>&1; then
+  notify-send -a "Enclave OS" -i enclave-install "$name comes with Enclave OS" "$msg"
+else
+  echo "$msg" >&2
+fi

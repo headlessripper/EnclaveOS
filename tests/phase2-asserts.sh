@@ -13,13 +13,14 @@ parses() { if bash -n "$1"; then pass "$2 parses"; else bad "$2 parse"; fi; }
 
 AIR="arch/overlay/airootfs"
 BIN="$AIR/usr/local/bin"
-P="arch/overlay/packages.x86_64.extra"
+# Downloaded by the installer (netinstall), not on the live ISO.
+P="arch/overlay/packages.netinstall"
 
 # --- packages ---
-has "$P" '^flatpak$'   "pkg: flatpak"
-has "$P" '^wine$'      "pkg: wine"
-has "$P" '^winetricks$' "pkg: winetricks"
-has "$P" '^lib32-mesa$' "pkg: lib32 runtime (Proton/Wine)"
+has "$P" '^flatpak$'   "netinstall: flatpak"
+has "$P" '^wine$'      "netinstall: wine"
+has "$P" '^winetricks$' "netinstall: winetricks"
+has "$P" '^lib32-mesa$' "netinstall: lib32 runtime (Proton/Wine)"
 
 # --- launchers ---
 exists "$BIN/enclave-run-windows"  "windows launcher present"

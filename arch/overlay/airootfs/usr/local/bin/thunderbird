@@ -1,0 +1,3 @@
+#!/bin/sh
+# Live-desktop stand-in (Mail installs with Enclave OS): see enclave-preview-app.
+exec enclave-preview-app "Thunderbird"

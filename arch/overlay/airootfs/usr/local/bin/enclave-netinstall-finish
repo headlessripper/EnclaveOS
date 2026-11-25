@@ -1,0 +1,20 @@
+#!/bin/sh
+# Enclave OS installer — after the apps are downloaded: put the system's own
+# resolver back and remove the live desktop's preview stand-ins (the real
+# apps are installed now).
+#   enclave-netinstall-finish <target-root>
+set -eu
+R="${1:?usage: enclave-netinstall-finish <target-root>}"
+
+if [ -e "$R/etc/resolv.conf.enclave-saved" ] || [ -L "$R/etc/resolv.conf.enclave-saved" ]; then
+  rm -f "$R/etc/resolv.conf"
+  mv -f "$R/etc/resolv.conf.enclave-saved" "$R/etc/resolv.conf"
+fi
+
+list="$R/usr/share/enclave/netinstall/preview-files"
+if [ -f "$list" ]; then
+  grep -vE '^\s*(#|$)' "$list" | while read -r f; do
+    case "$f" in /*) rm -f "$R$f" ;; esac
+  done
+fi
+echo "enclave-netinstall-finish: done"

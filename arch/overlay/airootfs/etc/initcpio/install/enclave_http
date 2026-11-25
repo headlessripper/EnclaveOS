@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Enclave OS netboot: see /etc/initcpio/hooks/enclave_http.
+
+build() {
+    add_runscript
+    add_binary curl
+    add_file /etc/ssl/certs/ca-certificates.crt
+}
+
+help() {
+    cat <<HELPEOF
+Downloads the Enclave OS live image (enclave-airootfs.sfs) from the flat URL
+given by enclave_http= (e.g. a GitHub Release) into RAM and boots it.
+HELPEOF
+}

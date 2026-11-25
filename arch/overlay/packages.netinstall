@@ -1,0 +1,43 @@
+# Enclave OS — apps the INSTALLED system gets, downloaded by the installer.
+# Calamares installs these (pacman, from the Arch mirrors) right after it has
+# copied the live system to the disk, so they never take space on the ISO.
+# The live desktop still shows the pinned ones (Mail, Media Player): small
+# preview stand-ins explain they come with the install, and are removed then.
+# Format: one package per line; '#' comments. Needs an internet connection
+# during install (the installer checks for one).
+
+# --- Mail and media ---
+thunderbird
+celluloid
+pavucontrol
+
+# --- Fonts: every script (the live ISO only carries Inter, DejaVu, emoji) ---
+noto-fonts
+noto-fonts-cjk
+ttf-liberation
+
+# --- Linux apps from Flathub ---
+flatpak
+
+# --- Windows apps (Wine) and the 32-bit runtime it needs (multilib) ---
+wine
+winetricks
+cabextract
+lib32-mesa
+lib32-vulkan-icd-loader
+lib32-gnutls
+lib32-pipewire
+vulkan-tools
+
+# --- Firmware for less common hardware (the live ISO keeps the common set) ---
+linux-firmware-marvell
+
+# --- Assistant / developer runtime (the assistant itself stays opt-in) ---
+python-pip
+python-pipx
+python-virtualenv
+python-keyring
+
+# --- Manuals ---
+man-db
+man-pages

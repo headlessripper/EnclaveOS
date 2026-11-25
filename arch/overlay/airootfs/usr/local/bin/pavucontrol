@@ -1,0 +1,3 @@
+#!/bin/sh
+# Live-desktop stand-in (the sound mixer installs with Enclave OS): see enclave-preview-app.
+exec enclave-preview-app "Volume Control"

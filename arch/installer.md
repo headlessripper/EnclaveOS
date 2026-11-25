@@ -31,6 +31,7 @@ would have no display to open on). The module sequence
 1. **partition** — erase-disk by default (manual still available); 512M EFI + ext4.
 2. **unpackfs** — copies the live squashfs (`/run/archiso/bootmnt/enclave/x86_64/airootfs.sfs`) to the target.
 3. **users** — creates the real account (sudo via `wheel`; no autologin).
+3b. **netinstall** — downloads the rest of the apps into the new system (see below).
 4. **initcpio / grub / bootloader** — regenerates initramfs and installs GRUB (UEFI) with the
    Enclave GRUB theme; the menu stays hidden unless Esc is held.
 5. **cleanup** (shellprocess, in chroot) — strips the live-only bits so the
@@ -43,6 +44,42 @@ would have no display to open on). The module sequence
 The Enclave SDDM **login theme** is kept (it lives in `05-enclave-theme.conf`,
 separate from the live-only `10-enclave-autologin.conf`), so the installed
 system shows the Enclave greeter.
+
+## Netinstall: a smaller ISO, the same desktop
+
+The live ISO carries the desktop preview only. Apps the live session doesn't
+need are listed in [`overlay/packages.netinstall`](overlay/packages.netinstall)
+(Thunderbird, Media Player, the sound mixer, Wine and the 32-bit libraries,
+Flatpak, the full Noto fonts, Python tooling, manual pages) and the installer
+downloads them from the Arch mirrors into the new system. So **the installer
+needs internet** (`welcome.conf` makes it a requirement).
+
+- `build-iso.sh` generates `etc/calamares/modules/packages.conf` from the
+  list and refuses a package that is also in `packages.x86_64.extra`.
+- `shellprocess@netprep` → [`enclave-netinstall-prep`](overlay/airootfs/usr/local/bin/enclave-netinstall-prep):
+  lends the target the live DNS, copies the mirror list (falls back to
+  Arch's CDN), enables `[multilib]` and fills the pacman keyring.
+- `packages` installs the list (pacman, 4 retries).
+- `shellprocess@netdone` → [`enclave-netinstall-finish`](overlay/airootfs/usr/local/bin/enclave-netinstall-finish):
+  puts the target's `resolv.conf` back and deletes the live preview's
+  stand-ins (listed in `usr/share/enclave/netinstall/preview-files`).
+
+The live desktop looks the same as before: Thunderbird and Media Player are
+still in Start and the dock, as small stand-ins that say the app comes with
+Enclave OS once it is installed.
+
+## Netboot: the few-MB ISO
+
+`enclave-netboot.iso` (~2.5 MB, [`tools/make-netboot-iso.sh`](../tools/make-netboot-iso.sh))
+holds only iPXE. It gets an address over a wired network, downloads
+`enclave-vmlinuz` and `enclave-initramfs.img` over HTTPS from the GitHub
+Release, and the live initramfs's `enclave_http` hook
+([`etc/initcpio/hooks/enclave_http`](overlay/airootfs/etc/initcpio/hooks/enclave_http))
+downloads `enclave-airootfs.sfs` into RAM and boots it. It bind-mounts the
+download onto `/run/archiso/bootmnt`, so the installer's unpackfs finds the
+image where it always does. Needs UEFI, wired internet and 4 GB+ of memory.
+The build makes it from the full ISO (step 10); CI publishes all four files.
+The installed system drops the hook (cleanup).
 
 ## Look: Enclave Ember
 

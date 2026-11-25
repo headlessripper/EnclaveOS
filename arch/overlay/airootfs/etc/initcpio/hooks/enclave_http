@@ -1,0 +1,46 @@
+#!/usr/bin/ash
+# Enclave OS netboot (live initramfs): download the live system image from a
+# flat URL — a GitHub Release, whose assets can't sit in archiso's
+# <srv>/<basedir>/<arch>/ layout — into RAM and boot it.
+#   kernel parameters:  ip=dhcp enclave_http=https://…/download/<tag>/
+#   downloads:          ${enclave_http}enclave-airootfs.sfs
+# The network comes up in archiso_pxe_common (runs earlier).
+
+run_hook() {
+    enclave_http="$(getarg 'enclave_http')"
+    if [ -n "$(getarg 'ip')" ] && [ -n "${enclave_http}" ]; then
+        # The image already lives in RAM (a tmpfs): never copy it a second
+        # time, and keep /run/archiso/bootmnt, where the installer reads it.
+        export copytoram="n"
+        export mount_handler="enclave_http_mount_handler"
+    fi
+}
+
+enclave_http_mount_handler() {
+    newroot="${1}"
+    # shellcheck disable=SC2154 # archisobasedir / arch come from the archiso hook
+    local dst="/run/archiso/httpspace/${archisobasedir}/${arch}"
+    local tries=0
+
+    msg ":: Mounting /run/archiso/httpspace (tmpfs)"
+    mount --mkdir -t tmpfs -o x-initrd.mount,size="$(getarg 'enclave_http_spc' '80%')",mode=0755 httpspace /run/archiso/httpspace
+    mkdir -p "${dst}"
+
+    msg ":: Downloading the Enclave OS live system from ${enclave_http}"
+    until curl -L -f -C - --retry 10 --retry-delay 3 --retry-all-errors --connect-timeout 30 \
+               -o "${dst}/airootfs.sfs" "${enclave_http}enclave-airootfs.sfs"; do
+        tries=$((tries + 1))
+        if [ "${tries}" -ge 5 ]; then
+            echo "ERROR: could not download the Enclave OS live system."
+            echo "   Check the network cable, then log out of this shell to try again."
+            launch_interactive_shell
+            tries=0
+        fi
+        sleep 5
+    done
+
+    mount --mkdir -o x-initrd.mount,bind /run/archiso/httpspace /run/archiso/bootmnt
+    archiso_mount_handler "${newroot}"
+}
+
+# vim: set ft=sh:

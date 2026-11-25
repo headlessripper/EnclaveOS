@@ -1,0 +1,8 @@
+# Live-only stand-ins for apps the installer downloads (packages.netinstall).
+# enclave-netinstall-finish deletes these from the installed system.
+/usr/local/bin/thunderbird
+/usr/local/bin/celluloid
+/usr/local/bin/enclave-preview-app
+/usr/local/share/applications/org.mozilla.Thunderbird.desktop
+/usr/local/bin/pavucontrol
+/usr/local/share/applications/pavucontrol.desktop

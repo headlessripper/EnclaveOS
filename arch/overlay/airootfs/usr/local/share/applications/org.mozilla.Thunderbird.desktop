@@ -1,0 +1,13 @@
+[Desktop Entry]
+# Enclave OS live desktop — stand-in for Thunderbird, which the installer
+# downloads (removed on install, where Thunderbird's own entry takes over).
+Type=Application
+Name=Thunderbird
+GenericName=Mail
+Comment=Read and write email
+Exec=thunderbird %u
+Icon=org.mozilla.Thunderbird
+Terminal=false
+Categories=Network;Email;
+MimeType=x-scheme-handler/mailto;message/rfc822;
+Keywords=mail;email;inbox;

@@ -35,6 +35,6 @@ exists "$AIR/usr/lib/enclave/assistant/PLACEHOLDER"         "assistant app insta
 has "$AIR/etc/enclave/assistant.toml" 'engine = "openvox"'  "voice: openvox engine"
 
 # --- runtime deps present in the image ---
-has "arch/overlay/packages.x86_64.extra" '^python-pipx$'    "pkg: python-pipx (openvox)"
+has "arch/overlay/packages.netinstall" '^python-pipx$'      "netinstall: python-pipx (openvox)"
 
 exit $fail

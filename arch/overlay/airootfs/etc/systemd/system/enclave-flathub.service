@@ -3,6 +3,8 @@ Description=Enclave — register Flathub remote
 After=network-online.target
 Wants=network-online.target
 ConditionPathExists=/usr/local/bin/enclave-flathub.sh
+# flatpak comes with the install (netinstall), not the live ISO
+ConditionPathExists=/usr/bin/flatpak
 ConditionPathExists=!/var/lib/enclave/flathub.done
 
 [Service]

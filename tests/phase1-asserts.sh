@@ -62,6 +62,8 @@ fi
 for f in "$AIR"/usr/share/applications/*.desktop "$AIR"/usr/local/share/applications/*.desktop          desktop/session/rootfs/usr/share/applications/*.desktop desktop/terminal/*.desktop; do
   n=$(sed -n 's/^Icon=//p' "$f" | head -1)
   [ -n "$n" ] || continue
+  # live-preview stand-ins for third-party apps keep that app's own icon
+  grep -qxF "${f#"$AIR"}" "$AIR/usr/share/enclave/netinstall/preview-files" 2>/dev/null && continue
   exists "$ICONS/scalable/apps/$n.svg"                      "$(basename "$f") has an Enclave icon ($n)"
 done
 has "desktop/session/rootfs/usr/bin/enclave-session" '^export QT_QPA_PLATFORMTHEME=gtk3' "Qt apps follow the GTK icon theme"
@@ -84,7 +86,8 @@ exists "tools/make-wallpapers.py"                           "wallpapers are repr
 # --- default apps ---
 has "$PKG" '^zen-browser-bin$'                              "pkg: Zen Browser"
 has "scripts/build-iso.sh" 'AUR_PKGS=[(].*zen-browser-bin'  "Zen Browser built from the AUR"
-has "$PKG" '^thunderbird$'                                  "pkg: Thunderbird"
+has "arch/overlay/packages.netinstall" '^thunderbird$'      "Thunderbird: installed by the installer (netinstall)"
+has "$AIR/usr/local/share/applications/org.mozilla.Thunderbird.desktop" '^Exec=thunderbird' "live preview: Thunderbird in Start"
 has "$AIR/etc/xdg/mimeapps.list" '^x-scheme-handler/https=zen\.desktop' "Zen is the default browser"
 has "$AIR/etc/xdg/mimeapps.list" '^x-scheme-handler/mailto=org\.mozilla\.Thunderbird\.desktop' "Thunderbird is the default mail app"
 

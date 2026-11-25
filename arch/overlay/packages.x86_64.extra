@@ -1,4 +1,7 @@
-# Enclave OS — packages appended to releng/packages.x86_64 by build-iso.sh.
+# Enclave OS — packages appended to releng/packages.x86_64 by build-iso.sh:
+# what the LIVE system needs (the desktop preview + the installer). Apps that
+# only the installed system needs are in packages.netinstall: Calamares
+# downloads them while installing, so the ISO stays small.
 # Desktop: Enclave Shell, Enclave's own Wayland desktop (Qt 6 / QML), with
 # Hyprland managing windows underneath (rounded corners, blur) — see the "Enclave Shell" section below
 # and docs/superpowers/specs/2026-11-24-enclave-shell-design.md. XFCE and the
@@ -35,11 +38,9 @@ gvfs
 tumbler
 xarchiver
 mousepad
-# Photos + media player
+# Photos (Media Player and Mail install with the system: packages.netinstall)
 ristretto
-celluloid
-# Mail (Zen Browser, the default browser, is built from the AUR by build-iso.sh)
-thunderbird
+# Zen Browser, the default browser, is built from the AUR by build-iso.sh
 zen-browser-bin
 xdg-utils
 
@@ -51,14 +52,12 @@ pipewire
 pipewire-alsa
 pipewire-pulse
 wireplumber
-pavucontrol
 
 # --- Graphics / Mesa ---
 mesa
 vulkan-icd-loader
 
-# --- Fonts ---
-noto-fonts
+# --- Fonts (the full Noto set installs with the system) ---
 noto-fonts-emoji
 ttf-dejavu
 
@@ -67,21 +66,10 @@ open-vm-tools
 spice-vdagent
 qemu-guest-agent
 
-# --- Phase 2: universal apps (official + multilib only) ---
-# Linux apps:
-flatpak
+# --- Phase 2: universal apps ---
+# Flatpak and Windows apps (Wine + its 32-bit stack) install with the system
+# (packages.netinstall); Proton/Steam/Waydroid stay opt-in (enclave-appsetup).
 xdg-user-dirs
-# Windows apps (Wine); Proton/Steam/Waydroid are AUR/heavy -> enclave-appsetup:
-wine
-winetricks
-cabextract
-ttf-liberation
-# 32-bit runtime bits Wine/Proton need:
-lib32-mesa
-lib32-vulkan-icd-loader
-lib32-gnutls
-lib32-pipewire
-vulkan-tools
 
 # --- Phase 4: graphical installer (Calamares) ---
 # calamares itself is built from the AUR into a local repo at build time
@@ -101,11 +89,8 @@ mkinitcpio
 # --- Phase 3: advisory assistant + voice runtime (official bits only) ---
 # The assistant app (Alpha Code chat layer), the local model runner (llama.cpp),
 # and OpenVox are installed opt-in by enclave-assistant-setup (AUR/pip/heavy).
+# (python stays: Calamares' job modules need it; pip & co install with the system)
 python
-python-pip
-python-pipx
-python-virtualenv
-python-keyring
 
 # --- Enclave Shell (Enclave's own Wayland desktop; the "Enclave"
 #     session — see docs/superpowers/specs/2026-11-24-enclave-shell-design.md) ---
