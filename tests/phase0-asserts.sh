@@ -57,14 +57,14 @@ fi
 
 # --- branding assets ---
 exists "$A/branding/enclave-logo.svg"                        "branding: logo svg"
-exists "$A/branding/enclave-boot.svg"                        "branding: boot splash svg"
+exists "$A/boot/art/background.svg"                          "branding: boot background svg"
 # Plymouth: skin the boot logs with an Enclave splash.
 has "$O/packages.x86_64.extra" '^plymouth$'                 "pkg: plymouth (boot splash)"
 has "$AIR/etc/plymouth/plymouthd.conf" '^Theme=enclave'     "plymouth default theme = enclave"
 has "$AIR/etc/mkinitcpio.conf.d/10-enclave-plymouth.conf" 'plymouth' "installed initramfs gets plymouth hook"
 has "scripts/build-iso.sh" 'themes/enclave'                 "build generates the Enclave plymouth theme"
-has "scripts/build-iso.sh" 'quiet splash'                   "build sets quiet splash on boot entries"
-has "scripts/build-iso.sh" 'rsvg-convert.*splash\.png|splash\.png.*rsvg-convert|syslinux/splash.png' "build rebrands the boot splash"
+has "arch/boot/grub/grub.cfg" 'quiet splash'               "boot entry is quiet with the splash"
+has "scripts/build-iso.sh" 'tools/make-boot-art\.sh'       "build renders the Enclave boot menu + splash art"
 
 # --- debloat ---
 has "$O/pacman.conf"       '^NoExtract = usr/share/man'  "debloat: NoExtract man/doc"

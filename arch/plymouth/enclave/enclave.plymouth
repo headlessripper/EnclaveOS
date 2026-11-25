@@ -1,7 +1,9 @@
 [Plymouth Theme]
 Name=Enclave
-Description=Enclave OS boot splash (Enclave Ember)
+Description=Enclave OS boot splash (Enclave Ember) — continues the boot menu
 ModuleName=script
+# The initramfs hook bundles this font as the splash's text font.
+Font=Inter 11
 
 [script]
 ImageDir=/usr/share/plymouth/themes/enclave

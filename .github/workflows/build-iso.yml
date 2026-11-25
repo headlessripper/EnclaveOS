@@ -20,7 +20,7 @@ jobs:
             -v "$PWD":/enclave -w /enclave \
             archlinux:latest bash -c '
               sed -i "/^\[options\]/a XferCommand = /usr/bin/curl -fL -C - --retry 30 --retry-delay 3 --retry-all-errors --connect-timeout 30 -o %o %u" /etc/pacman.conf &&
-              pacman -Syu --noconfirm --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache cmake wlr-protocols wayland-protocols qt6-base qt6-declarative qt6-wayland qt6-svg layer-shell-qt qtermwidget &&
+              pacman -Syu --noconfirm --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache cmake wlr-protocols wayland-protocols qt6-base qt6-declarative qt6-wayland qt6-svg layer-shell-qt qtermwidget grub inter-font ttf-jetbrains-mono &&
               bash scripts/build-iso.sh'
 
       - name: Upload ISO

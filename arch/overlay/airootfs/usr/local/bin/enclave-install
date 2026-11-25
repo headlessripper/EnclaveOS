@@ -1,0 +1,24 @@
+#!/bin/sh
+# Enclave OS — start the installer (Calamares) as root on the live user's own
+# Wayland desktop. pkexec would strip the session's environment, leaving
+# Calamares with no display to open on; the live user has passwordless sudo
+# (enclave-live-setup.sh), so pass the display through explicitly instead.
+set -eu
+
+if [ -n "${WAYLAND_DISPLAY:-}" ]; then
+    case "$WAYLAND_DISPLAY" in
+        /*) display="$WAYLAND_DISPLAY" ;;
+        *)  display="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/$WAYLAND_DISPLAY" ;;
+    esac
+    exec sudo -n env \
+        WAYLAND_DISPLAY="$display" \
+        QT_QPA_PLATFORM="wayland;xcb" \
+        XDG_SESSION_TYPE=wayland \
+        XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Enclave}" \
+        LANG="${LANG:-en_US.UTF-8}" \
+        calamares "$@"
+fi
+
+# X11 fallback
+exec sudo -n env DISPLAY="${DISPLAY:-:0}" XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" \
+    LANG="${LANG:-en_US.UTF-8}" calamares "$@"

@@ -1,0 +1,240 @@
+/* Enclave OS — installer pages (Calamares widgets), Enclave Ember, dark.
+ *
+ * Obsidian page, graphite fields with soft rounded corners, ember for focus,
+ * selection and the chosen option; quiet hairlines everywhere else.
+ * Calamares applies this to every page; the step rail and footer are QML
+ * (calamares-sidebar.qml); the footer buttons are styled at the end.
+ */
+
+* {
+    font-family: "Inter";
+}
+
+QWidget {
+    color: #F5F3EF;
+    background-color: #101114;
+    selection-background-color: #FF7A1A;
+    selection-color: #FFFFFF;
+    font-size: 10pt;
+}
+
+QLabel, QRadioButton, QCheckBox, QScrollArea, QStackedWidget {
+    background: transparent;
+}
+QScrollArea { border: none; }
+QScrollArea > QWidget > QWidget { background: transparent; }
+
+QLabel:disabled { color: #6B6862; }
+QLabel[link="true"], QLabel a { color: #FFAC55; }
+
+/* ---- text fields ---- */
+QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
+    background-color: #1A1C21;
+    border: 1px solid #2C2F36;
+    border-radius: 10px;
+    padding: 8px 12px;
+    min-height: 20px;
+    color: #F5F3EF;
+}
+QLineEdit:hover, QComboBox:hover { border-color: #3A3D45; }
+QLineEdit:focus, QComboBox:focus, QSpinBox:focus { border: 1px solid #FF7A1A; }
+QLineEdit:disabled, QComboBox:disabled { color: #6B6862; background-color: #15171B; }
+
+QComboBox::drop-down {
+    border: none;
+    width: 30px;
+}
+QComboBox::down-arrow {
+    image: url(/etc/calamares/branding/enclave/chevron-down.svg);
+    width: 12px;
+    height: 12px;
+}
+QComboBox QAbstractItemView {
+    background-color: #1A1C21;
+    border: 1px solid #2C2F36;
+    border-radius: 10px;
+    padding: 4px;
+    outline: 0;
+    selection-background-color: #2A1D14;
+    selection-color: #FFFFFF;
+}
+
+/* ---- lists (language, timezone, keyboard, disks) ---- */
+QListView, QTreeView, QTableView, QListWidget, QTreeWidget {
+    background-color: #15171B;
+    alternate-background-color: #17191E;
+    border: 1px solid #23262C;
+    border-radius: 12px;
+    padding: 4px;
+    outline: 0;
+}
+QListView::item, QTreeView::item, QListWidget::item {
+    padding: 6px 8px;
+    border-radius: 8px;
+}
+QListView::item:hover, QTreeView::item:hover, QListWidget::item:hover {
+    background-color: #1F2227;
+}
+QListView::item:selected, QTreeView::item:selected, QListWidget::item:selected, QTableView::item:selected {
+    background-color: #2A1D14;
+    color: #FFFFFF;
+}
+QHeaderView::section {
+    background-color: #15171B;
+    color: #A7A39B;
+    border: none;
+    border-bottom: 1px solid #23262C;
+    padding: 6px 8px;
+}
+QTableView { gridline-color: #23262C; }
+
+/* ---- buttons on the pages ---- */
+QPushButton, QToolButton {
+    background-color: #1C1E23;
+    border: 1px solid #2E3138;
+    border-radius: 10px;
+    padding: 8px 16px;
+    color: #F5F3EF;
+}
+QPushButton:hover, QToolButton:hover { background-color: #24272D; border-color: #3A3D45; }
+QPushButton:pressed, QToolButton:pressed { background-color: #2C2F36; }
+QPushButton:focus { border-color: #FF7A1A; }
+QPushButton:disabled, QToolButton:disabled { color: #5E5B56; border-color: #23262C; background-color: #16181C; }
+QPushButton:checked, QToolButton:checked { background-color: #2A1D14; border-color: #FF7A1A; }
+
+/* ---- choices ---- */
+QRadioButton, QCheckBox { spacing: 10px; }
+QRadioButton::indicator {
+    width: 16px; height: 16px;
+    border-radius: 10px;
+    border: 2px solid #4A4D55;
+    background: transparent;
+}
+QRadioButton::indicator:hover { border-color: #6A6D75; }
+QRadioButton::indicator:checked {
+    border: 5px solid #FF7A1A;
+    background-color: #FFFFFF;
+    width: 10px; height: 10px;
+}
+QCheckBox::indicator {
+    width: 16px; height: 16px;
+    border-radius: 5px;
+    border: 2px solid #4A4D55;
+    background: transparent;
+}
+QCheckBox::indicator:hover { border-color: #6A6D75; }
+QCheckBox::indicator:checked {
+    background-color: #FF7A1A;
+    border-color: #FF7A1A;
+    image: url(/etc/calamares/branding/enclave/check.svg);
+}
+
+/* ---- groups, tabs, separators ---- */
+QGroupBox {
+    border: 1px solid #23262C;
+    border-radius: 12px;
+    margin-top: 18px;
+    padding: 12px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 14px;
+    padding: 0 4px;
+    color: #A7A39B;
+}
+QTabWidget::pane { border: 1px solid #23262C; border-radius: 12px; top: -1px; }
+QTabBar::tab {
+    background: transparent;
+    color: #A7A39B;
+    padding: 8px 16px;
+    border-bottom: 2px solid transparent;
+}
+QTabBar::tab:selected { color: #FFFFFF; border-bottom: 2px solid #FF7A1A; }
+QSplitter::handle { background-color: #23262C; }
+QFrame[frameShape="4"], QFrame[frameShape="5"] { color: #23262C; background: #23262C; }
+
+/* ---- summary, logs, licences ---- */
+QTextBrowser, QTextEdit, QPlainTextEdit {
+    background-color: #15171B;
+    border: 1px solid #23262C;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+/* ---- install progress ---- */
+QProgressBar {
+    background-color: #23262C;
+    border: none;
+    border-radius: 4px;
+    max-height: 8px;
+    min-height: 8px;
+    text-align: center;
+    color: transparent;
+}
+QProgressBar::chunk {
+    border-radius: 4px;
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #E95B16, stop:1 #FFAC55);
+}
+
+/* ---- scrollbars ---- */
+QScrollBar:vertical { background: transparent; width: 10px; margin: 4px 2px; }
+QScrollBar:horizontal { background: transparent; height: 10px; margin: 2px 4px; }
+QScrollBar::handle:vertical { background: #33363E; border-radius: 3px; min-height: 32px; }
+QScrollBar::handle:horizontal { background: #33363E; border-radius: 3px; min-width: 32px; }
+QScrollBar::handle:hover { background: #4A4D55; }
+QScrollBar::add-line, QScrollBar::sub-line { width: 0; height: 0; }
+QScrollBar::add-page, QScrollBar::sub-page { background: none; }
+
+QToolTip {
+    background-color: #272A31;
+    color: #F5F3EF;
+    border: 1px solid #33363E;
+    border-radius: 8px;
+    padding: 5px 9px;
+}
+
+QMenu {
+    background-color: #1A1C21;
+    border: 1px solid #2C2F36;
+    border-radius: 10px;
+    padding: 5px;
+}
+QMenu::item { padding: 6px 16px; border-radius: 6px; }
+QMenu::item:selected { background-color: #2A1D14; }
+
+/* ---- Calamares parts ---- */
+#mainApp { background-color: #101114; }
+/* the page stack (a frame): give every page room to breathe */
+QStackedWidget { padding: 22px 30px 8px 30px; }
+QStackedWidget QStackedWidget { padding: 0; }
+
+/* summary: one card per area */
+#summaryItemTitle { font-size: 12pt; font-weight: 600; color: #FFFFFF; padding-top: 8px; }
+#summaryItemBody { color: #A7A39B; padding-left: 2px; }
+QPushButton#aboutButton, #donateButton, #supportButton, #releaseNotesButton, #knownIssuesButton {
+    background: transparent;
+    border: none;
+    color: #A7A39B;
+}
+
+/* ---- footer: Calamares' own buttons (keep Alt+N / Alt+B), Ember pills ---- */
+#view-button-next, #view-button-back, #view-button-cancel {
+    border-radius: 17px;     /* Qt drops rounding above half the height */
+    padding: 8px 22px;
+    min-height: 18px;
+    min-width: 64px;
+    font-size: 10.5pt;
+}
+#view-button-next {
+    background-color: #FF7A1A;
+    border: none;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+#view-button-next:hover { background-color: #FF8A33; }
+#view-button-next:pressed { background-color: #E95B16; }
+#view-button-next:focus { border: 2px solid #FFD0A6; }
+#view-button-next:disabled { background-color: #3A2A1E; color: #8A7A6E; }
+#view-button-back { background-color: #1C1E23; border: 1px solid #2E3138; }
+#view-button-cancel { background: transparent; border: 1px solid #26292F; color: #C9C5BE; }
+#view-button-cancel:hover { background-color: #1A1C21; border-color: #3A3D45; color: #F5F3EF; }

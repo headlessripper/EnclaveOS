@@ -62,7 +62,22 @@ has "$CAL/modules/shellprocess-prepare.conf" 'pacman-key --populate'       "prep
 # --- branding + launcher ---
 has "$CAL/branding/enclave/branding.desc" 'productName:\s+Enclave OS' "branding names Enclave OS"
 exists "$CAL/branding/enclave/show.qml"                       "installer slideshow present"
-has "$AIR/usr/share/applications/enclave-install.desktop" 'Exec=pkexec calamares' "Install launcher (menu)"
+has "$AIR/usr/share/applications/enclave-install.desktop" '^Exec=enclave-install$' "Install launcher (menu)"
+exists "$AIR/usr/local/bin/enclave-install"                    "installer wrapper present"
+has "$AIR/usr/local/bin/enclave-install" 'WAYLAND_DISPLAY='    "wrapper passes the Wayland display to Calamares"
+has "scripts/build-iso.sh" 'usr/local/bin/\$\(basename'   "installer wrapper is executable in the image (all of usr/local/bin)"
+has "$CAL/modules/shellprocess-cleanup.conf" 'enclave-install' "installed system drops the installer wrapper"
+
+# --- installer look: Enclave Ember UI ---
+has "$CAL/branding/enclave/branding.desc" '^sidebar:\s+qml'    "custom QML step rail"
+has "$CAL/branding/enclave/branding.desc" '^navigation:\s+widget' "widget navigation (keeps Alt+N/B/I)"
+exists "$CAL/branding/enclave/calamares-sidebar.qml"           "step rail QML present"
+lacks_() { if [ -f "$1" ] && grep -qE "$2" "$1"; then bad "$3 ($1 =~ $2)"; else pass "$3"; fi; }
+lacks_ "$CAL/branding/enclave/calamares-sidebar.qml" 'Debug\.' "rail does not use Debug (undefined in 3.4)"
+has "$CAL/branding/enclave/stylesheet.qss" '#view-button-next'  "Ember stylesheet styles the buttons"
+has "$CAL/branding/enclave/stylesheet.qss" 'FF7A1A'             "stylesheet in Ember"
+exists "$CAL/branding/enclave/welcome.svg"                     "welcome art present"
+has "$CAL/modules/users.conf" 'forbidden_names:.*enclave'      "installer refuses the live account name"
 has "$AIR/usr/share/enclave/start-defaults.json" 'enclave-install\.desktop' "Install pinned in Start (desktop stays clean)"
 
 exit $fail

@@ -1,106 +1,254 @@
 # Enclave OS — boot splash (Plymouth script theme), Enclave Ember.
 #
-# Obsidian screen, the Enclave mark fading in at the centre, and a slim track
-# underneath with an ember segment gliding along it while the system starts.
-# Disk-encryption passphrases get a calm prompt with dots; boot messages show
-# quietly at the bottom. Images are rendered at build time (scripts/build-iso.sh).
+# Continues the boot menu: the same background, mark and wordmark in the same
+# places (arch/boot/grub/theme.txt), so when the kernel starts the menu's button
+# simply gives way to a slim ember progress bar. Around that:
+#   * a soft ember glow breathing behind the mark,
+#   * progress driven by Plymouth's boot estimate, eased so it glides, with a
+#     light running along the filled part,
+#   * a quiet status line (boot messages, "Shutting down", "Restarting"…),
+#   * a passphrase card for encrypted disks (lock, field, dots).
+# Images come from tools/make-boot-art.sh.
 
-# Obsidian #101114
-Window.SetBackgroundTopColor(0.063, 0.067, 0.078);
-Window.SetBackgroundBottomColor(0.063, 0.067, 0.078);
+# ---------------------------------------------------------------- canvas
+Window.SetBackgroundTopColor(0.043, 0.047, 0.059);     # #0B0C0F
+Window.SetBackgroundBottomColor(0.086, 0.067, 0.051);  # #16110D
 
-screen.w = Window.GetWidth();
-screen.h = Window.GetHeight();
-screen.x = Window.GetX();
-screen.y = Window.GetY();
-centre.x = screen.x + screen.w / 2;
-centre.y = screen.y + screen.h / 2;
+sw = Window.GetWidth();
+sh = Window.GetHeight();
+sx = Window.GetX();
+sy = Window.GetY();
+cx = sx + sw / 2;
 
-# ---- the mark ----
-logo.image = Image("logo.png");
+# GRUB draws its images at their own size; match it, doubling on HiDPI screens.
+s = 1;
+if (sh >= 1600) s = 2;
+
+fun scaled (img) { return img.Scale(img.GetWidth() * s, img.GetHeight() * s); }
+fun clamp (v, lo, hi) { if (v < lo) return lo; if (v > hi) return hi; return v; }
+
+# background, covering the screen like GRUB's "crop"
+bg.image = Image("background.png");
+f = sw / bg.image.GetWidth();
+if (sh / bg.image.GetHeight() > f) f = sh / bg.image.GetHeight();
+bg.image = bg.image.Scale(bg.image.GetWidth() * f, bg.image.GetHeight() * f);
+bg.sprite = Sprite(bg.image);
+bg.sprite.SetPosition(sx + (sw - bg.image.GetWidth()) / 2, sy + (sh - bg.image.GetHeight()) / 2, -100);
+
+# ---------------------------------------------------------------- the mark
+logo.image = scaled(Image("logo.png"));
+logo.y = sy + sh * 0.27;
 logo.sprite = Sprite(logo.image);
-logo.sprite.SetX(centre.x - logo.image.GetWidth() / 2);
-logo.sprite.SetY(centre.y - logo.image.GetHeight() / 2 - 36);
-logo.sprite.SetOpacity(0);
+logo.sprite.SetPosition(cx - logo.image.GetWidth() / 2, logo.y, 10);
+logo.cy = logo.y + logo.image.GetHeight() / 2;
 
-# ---- the track and its gliding ember segment ----
-bar.w = 168;
-bar.h = 3;
-bar.x = centre.x - bar.w / 2;
-bar.y = centre.y + logo.image.GetHeight() / 2 + 18;
-track.image = Image("track.png").Scale(bar.w, bar.h);
-track.sprite = Sprite(track.image);
-track.sprite.SetPosition(bar.x, bar.y, 1);
-track.sprite.SetOpacity(0);
+glow.image = scaled(Image("glow.png"));
+glow.sprite = Sprite(glow.image);
+glow.sprite.SetPosition(cx - glow.image.GetWidth() / 2, logo.cy - glow.image.GetHeight() / 2, 5);
 
-seg.w = 48;
-seg.image = Image("fill.png").Scale(seg.w, bar.h);
-seg.sprite = Sprite(seg.image);
-seg.sprite.SetPosition(bar.x, bar.y, 2);
-seg.sprite.SetOpacity(0);
+word.image = scaled(Image("wordmark.png"));
+word.sprite = Sprite(word.image);
+word.sprite.SetPosition(cx - word.image.GetWidth() / 2, logo.y + 150 * s, 10);
 
-fade = 0;
+# ---------------------------------------------------------------- progress
+bar.w = 220 * s;
+bar.h = 4 * s;
+bar.x = cx - bar.w / 2;
+bar.y = sy + sh * 0.58 + 26 * s;        # where the menu's button was
+
+track.sprite = Sprite(Image("track.png").Scale(bar.w, bar.h));
+track.sprite.SetPosition(bar.x, bar.y, 20);
+fill.base = Image("fill.png");
+fill.sprite = Sprite();
+fill.sprite.SetPosition(bar.x, bar.y, 21);
+spark.image = scaled(Image("spark.png"));
+spark.sprite = Sprite(spark.image);
+spark.sprite.SetZ(22);
+spark.sprite.SetOpacity(0);
+
+# ---------------------------------------------------------------- status
+mode = Plymouth.GetMode();
+status.text = "Starting Enclave OS";
+show.bar = 1;
+if (mode == "shutdown") { status.text = "Shutting down"; show.bar = 0; }
+if (mode == "reboot")   { status.text = "Restarting"; show.bar = 0; }
+if (mode == "updates" || mode == "system-upgrade" || mode == "firmware-upgrade")
+    status.text = "Installing updates. Please keep your computer on.";
+
+status.sprite = Sprite();
+status.sprite.SetZ(20);
+fun set_status (text)
+{
+    global.status.image = Image.Text(text, 0.655, 0.639, 0.608, 1, "Inter 11");
+    status.sprite.SetImage(global.status.image);
+    status.sprite.SetPosition(cx - global.status.image.GetWidth() / 2, bar.y + 22 * s, 20);
+}
+set_status(status.text);
+
+# ---------------------------------------------------------------- animation
 tick = 0;
+progress = 0;      # what Plymouth reports
+shown = 0;         # what we draw (eased)
 asking = 0;
+fade = 0;          # whole-splash fade-in (instant continuity on boot)
+if (mode == "boot") fade = 1;
+
+fun boot_progress_callback (duration, value)
+{
+    global.progress = value;
+}
+Plymouth.SetBootProgressFunction(boot_progress_callback);
 
 fun refresh_callback ()
 {
     global.tick = tick + 1;
-    if (fade < 1) global.fade = fade + 0.03;
-    if (fade > 1) global.fade = 1;
+    if (fade < 1) global.fade = clamp(fade + 0.04, 0, 1);
+
+    # mark + breathing glow
     logo.sprite.SetOpacity(fade);
+    word.sprite.SetOpacity(fade);
+    breath = (Math.Sin(tick / 26) + 1) / 2;
+    glow.sprite.SetOpacity(fade * (0.45 + 0.55 * breath));
 
-    show = fade;
-    if (asking) show = 0;
-    track.sprite.SetOpacity(show * 0.9);
+    # never look stuck: creep forward while Plymouth's estimate is low
+    secs = tick / 50;
+    creep = 0.45 * secs / (secs + 14);
+    target = progress;
+    if (creep > target) target = creep;
+    global.shown = shown + (target - shown) * 0.05;
 
-    # ease back and forth along the track (a smooth sine glide)
-    t = (Math.Sin(tick / 22) + 1) / 2;
-    seg.sprite.SetX(bar.x + t * (bar.w - seg.w));
-    seg.sprite.SetOpacity(show);
+    visible = fade * show.bar;
+    if (asking) visible = 0;
+    track.sprite.SetOpacity(visible);
+
+    fw = Math.Int(bar.w * clamp(shown, 0, 1));
+    if (fw < bar.h) fw = bar.h;
+    if (visible > 0)
+    {
+        fill.sprite.SetImage(fill.base.Scale(fw, bar.h));
+        fill.sprite.SetOpacity(visible);
+        # a light running along the filled part (and only inside it)
+        sw2 = spark.image.GetWidth();
+        run = fw - sw2;
+        if (run > 12 * s)
+        {
+            p = (tick * 2 * s) % run;
+            spark.sprite.SetPosition(bar.x + p, bar.y + bar.h / 2 - spark.image.GetHeight() / 2, 22);
+            edge = clamp(p / (16 * s), 0, 1);
+            if (run - p < 16 * s) edge = clamp((run - p) / (16 * s), 0, 1);
+            spark.sprite.SetOpacity(visible * 0.8 * edge);
+        }
+        else spark.sprite.SetOpacity(0);
+    }
+    else
+    {
+        fill.sprite.SetOpacity(0);
+        spark.sprite.SetOpacity(0);
+    }
+
+    # shutdown/restart: the status line breathes instead of a bar
+    so = fade;
+    if (asking) so = 0;
+    if (!show.bar) so = fade * (0.55 + 0.45 * breath);
+    status.sprite.SetOpacity(so);
 }
 Plymouth.SetRefreshFunction(refresh_callback);
 
-# ---- passphrase prompt (encrypted disks) ----
-prompt.sprite = Sprite();
-dot.image = Image("dot.png");
+# ---------------------------------------------------------------- passphrase
+card.field = scaled(Image("field.png"));
+card.lock = scaled(Image("lock.png"));
+card.bullet = scaled(Image("bullet.png"));
+card.x = cx - card.field.GetWidth() / 2;
+card.y = sy + sh * 0.58;
+card.fieldsprite = Sprite(card.field);
+card.fieldsprite.SetPosition(card.x, card.y, 30);
+card.fieldsprite.SetOpacity(0);
+card.locksprite = Sprite(card.lock);
+card.locksprite.SetPosition(card.x + 16 * s, card.y + (card.field.GetHeight() - card.lock.GetHeight()) / 2, 31);
+card.locksprite.SetOpacity(0);
+card.title = Sprite();
+card.title.SetZ(31);
+card.hint = Sprite();
+card.hint.SetZ(31);
+card.text = Sprite();
+card.text.SetZ(31);
 
-fun display_password_callback (prompt_text, bullets)
+fun show_card (title, hinttext, entrytext, bullets)
 {
     global.asking = 1;
-    label = prompt_text;
-    if (label == "") label = "Enter your passphrase to unlock this disk";
-    global.prompt.image = Image.Text(label, 0.96, 0.95, 0.94, 1, "Sans 11");
-    prompt.sprite.SetImage(global.prompt.image);
-    prompt.sprite.SetPosition(centre.x - global.prompt.image.GetWidth() / 2, bar.y - 6, 3);
-    prompt.sprite.SetOpacity(1);
+    if (title == "") title = "Enter the passphrase to unlock this disk";
+    ti = Image.Text(title, 0.961, 0.953, 0.937, 1, "Inter 12");
+    card.title.SetImage(ti);
+    card.title.SetPosition(cx - ti.GetWidth() / 2, card.y - ti.GetHeight() - 14 * s, 31);
+    card.title.SetOpacity(1);
+    card.fieldsprite.SetOpacity(1);
+    card.locksprite.SetOpacity(1);
 
-    gap = 14;
-    total = bullets * gap;
-    for (i = 0; i < bullets || dots[i]; i++)
+    midy = card.y + card.field.GetHeight() / 2;
+    left = card.x + 44 * s;
+    if (entrytext != "")
     {
-        if (!global.dots[i]) global.dots[i] = Sprite(dot.image);
-        global.dots[i].SetPosition(centre.x - total / 2 + i * gap, bar.y + 26, 3);
-        if (i < bullets) global.dots[i].SetOpacity(1);
+        te = Image.Text(entrytext, 0.961, 0.953, 0.937, 1, "Inter 12");
+        card.text.SetImage(te);
+        card.text.SetPosition(left, midy - te.GetHeight() / 2, 31);
+        card.text.SetOpacity(1);
+    }
+    else card.text.SetOpacity(0);
+
+    if (bullets == 0 && entrytext == "")
+    {
+        hi = Image.Text(hinttext, 0.455, 0.443, 0.427, 1, "Inter 11");
+        card.hint.SetImage(hi);
+        card.hint.SetPosition(left, midy - hi.GetHeight() / 2, 31);
+        card.hint.SetOpacity(1);
+    }
+    else card.hint.SetOpacity(0);
+
+    gap = 15 * s;
+    maxdots = Math.Int((card.field.GetWidth() - 64 * s) / gap);
+    for (i = 0; i < bullets || global.dots[i]; i++)
+    {
+        if (!global.dots[i]) global.dots[i] = Sprite(card.bullet);
+        global.dots[i].SetPosition(left + i * gap, midy - card.bullet.GetHeight() / 2, 32);
+        if (i < bullets && i < maxdots) global.dots[i].SetOpacity(1);
         else global.dots[i].SetOpacity(0);
     }
 }
+
+fun display_password_callback (prompt, bullets)
+{
+    show_card(prompt, "Passphrase", "", bullets);
+}
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_question_callback (prompt, entry)
+{
+    show_card(prompt, "", entry, 0);
+}
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
 
 fun display_normal_callback ()
 {
     global.asking = 0;
-    prompt.sprite.SetOpacity(0);
-    for (i = 0; dots[i]; i++) dots[i].SetOpacity(0);
+    card.title.SetOpacity(0);
+    card.hint.SetOpacity(0);
+    card.text.SetOpacity(0);
+    card.fieldsprite.SetOpacity(0);
+    card.locksprite.SetOpacity(0);
+    for (i = 0; global.dots[i]; i++) global.dots[i].SetOpacity(0);
 }
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 
-# ---- quiet status line at the bottom (e.g. "Checking disks…") ----
-message.sprite = Sprite();
+# ---------------------------------------------------------------- messages
 fun message_callback (text)
 {
-    global.message.image = Image.Text(text, 0.65, 0.64, 0.61, 1, "Sans 9");
-    message.sprite.SetImage(global.message.image);
-    message.sprite.SetPosition(centre.x - global.message.image.GetWidth() / 2, screen.y + screen.h - 48, 3);
+    if (text != "") set_status(text);
 }
 Plymouth.SetMessageFunction(message_callback);
+
+fun quit_callback ()
+{
+    global.progress = 1;
+    global.shown = 1;
+}
+Plymouth.SetQuitFunction(quit_callback);

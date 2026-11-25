@@ -21,14 +21,18 @@ This adds a one-time ~10 min compile to the build.
 
 ## What the installer does
 
-Launched from **Install Enclave OS** (app menu or the live desktop icon →
-`pkexec calamares`). The module sequence
+Launched from **Install Enclave OS** (pinned in Start) →
+[`enclave-install`](overlay/airootfs/usr/local/bin/enclave-install), which runs
+Calamares as root through the live user's passwordless sudo and passes the
+Wayland display along (`pkexec` strips the session environment, so Calamares
+would have no display to open on). The module sequence
 ([`overlay/airootfs/etc/calamares/settings.conf`](overlay/airootfs/etc/calamares/settings.conf)):
 
 1. **partition** — erase-disk by default (manual still available); 512M EFI + ext4.
 2. **unpackfs** — copies the live squashfs (`/run/archiso/bootmnt/enclave/x86_64/airootfs.sfs`) to the target.
 3. **users** — creates the real account (sudo via `wheel`; no autologin).
-4. **initcpio / grub / bootloader** — regenerates initramfs and installs GRUB (UEFI + BIOS).
+4. **initcpio / grub / bootloader** — regenerates initramfs and installs GRUB (UEFI) with the
+   Enclave GRUB theme; the menu stays hidden unless Esc is held.
 5. **cleanup** (shellprocess, in chroot) — strips the live-only bits so the
    installed system boots to the Enclave greeter:
    - removes the live autologin drop-in and passwordless-sudo file,
@@ -40,9 +44,25 @@ The Enclave SDDM **login theme** is kept (it lives in `05-enclave-theme.conf`,
 separate from the live-only `10-enclave-autologin.conf`), so the installed
 system shows the Enclave greeter.
 
+## Look: Enclave Ember
+
+The installer wears Enclave's own interface
+([`branding/enclave/`](overlay/airootfs/etc/calamares/branding/enclave/)):
+
+- `calamares-sidebar.qml` — the step rail (mark + "Enclave OS / Installer",
+  ember checks for finished steps, an ember pill for the current one).
+- `stylesheet.qss` — dark Ember for every page: rounded fields, ember focus,
+  pill buttons (Next is ember), Ember progress bar, summary cards.
+- `show.qml` — the full-bleed slideshow during the copy.
+- `welcome.svg` — the welcome-page art.
+
+Navigation stays the Calamares *widget* footer (styled by the QSS): a QML
+footer can't take keyboard focus, which would lose Alt+N / Alt+B / Alt+I.
+
 ## Known caveats
 
-- **Don't name your account `enclave`** during install — cleanup deletes the
-  live `enclave` user and would remove a same-named new account's home.
+- The account names `enclave`, `live`, `builder`, `root`, `nobody` are refused
+  (`users.conf`): cleanup deletes the live `enclave` user, so a same-named
+  account would lose its home.
 - The installer flow can only be fully verified by running an install in a VM;
   expect to iterate on module specifics after the first boot test.

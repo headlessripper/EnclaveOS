@@ -92,11 +92,29 @@ exists "arch/plymouth/enclave/enclave.script"               "Plymouth Enclave sc
 has "arch/plymouth/enclave/enclave.plymouth" '^ModuleName=script$' "Plymouth theme is a script theme"
 has "arch/plymouth/enclave/enclave.script" 'SetDisplayPasswordFunction' "splash asks for disk passphrases"
 has "$AIR/etc/plymouth/plymouthd.conf" '^Theme=enclave$'    "Plymouth uses the Enclave theme"
-has "scripts/build-iso.sh" 'quiet splash loglevel=3'        "live boot is quiet"
+has "arch/boot/grub/grub.cfg" 'quiet splash loglevel=3'    "live boot is quiet"
 has "$AIR/etc/calamares/modules/grubcfg.conf" 'GRUB_TIMEOUT_STYLE: "hidden"' "installed boot hides the GRUB menu"
 has "$AIR/etc/calamares/modules/grubcfg.conf" '"splash"'    "installed boot shows the splash"
-has "scripts/build-iso.sh" 's/\^timeout \.\*/timeout 3/'    "UEFI menu waits 3 s"
-has "arch/branding/enclave-boot.svg" 'FF7A1A'               "BIOS menu background in Ember"
+# --- boot menu: UEFI only, one Enclave entry, Enclave's GRUB theme ---
+has "scripts/build-iso.sh" "bootmodes=\('uefi\.grub'\)"   "ISO boots UEFI only (GRUB)"
+has "scripts/build-iso.sh" 'rm -rf "\$PROFILE/syslinux"'    "build drops the BIOS (syslinux) menu"
+has "arch/overlay/packages.remove" '^syslinux$'             "syslinux not shipped"
+has "arch/overlay/packages.remove" '^memtest86\+'           "memtest not shipped"
+if [ "$(grep -c '^menuentry' arch/boot/grub/grub.cfg)" = 1 ]; then
+  pass "live boot menu has exactly one entry"
+else
+  bad "live boot menu has exactly one entry ($(grep -c '^menuentry' arch/boot/grub/grub.cfg))"
+fi
+has "arch/boot/grub/grub.cfg" '^menuentry "Start Enclave OS"' "the entry is Start Enclave OS"
+lacks "arch/boot/grub/grub.cfg" '[Ss]peech|accessibility|memtest|[Aa]rch Linux' "no speech/memtest/Arch entries"
+lacks "arch/boot/grub/loopback.cfg" '[Ss]peech|accessibility|memtest|[Aa]rch Linux' "loopback menu: no extra entries"
+has "arch/boot/grub/grub.cfg" 'theme=.*enclave_theme|set theme='  "live menu uses the Enclave GRUB theme"
+has "arch/boot/grub/theme.txt" '__timeout__'                "menu countdown is a text label"
+lacks "arch/boot/grub/theme.txt" 'progress_bar'             "no GRUB progress bar"
+has "arch/boot/art/background.svg" '101114'                 "boot background in Obsidian/Ember"
+has "tools/make-boot-art.sh" 'INSTALLED'                    "art script also renders the installed system's theme"
+has "$AIR/etc/calamares/modules/grubcfg.conf" 'GRUB_THEME: "/usr/share/grub/themes/enclave/theme.txt"' "installed GRUB uses the Enclave theme"
+if bash -n tools/make-boot-art.sh; then pass "make-boot-art.sh parses"; else bad "make-boot-art.sh parse"; fi
 
 # --- executables really are executable in the image (mkarchiso drops file
 #     modes; only profiledef file_permissions survive — alpha.10 shipped 0644) ---

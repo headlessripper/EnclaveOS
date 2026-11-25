@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Enclave OS — boot background (GRUB menu + Plymouth splash), Enclave Ember.
+       Obsidian, a low ember horizon, a faint halo where the mark sits
+       (centre 960,356) and the mark's open arcs echoed around it. The mark,
+       wordmark, menu and progress are drawn on top by GRUB / Plymouth, so
+       the boot menu dissolves into the splash without anything moving. -->
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0B0C0F"/>
+      <stop offset="0.55" stop-color="#101114"/>
+      <stop offset="1" stop-color="#16110D"/>
+    </linearGradient>
+    <radialGradient id="horizon" gradientUnits="userSpaceOnUse" cx="960" cy="1330" r="1120">
+      <stop offset="0" stop-color="#FF7A1A" stop-opacity="0.30"/>
+      <stop offset="0.36" stop-color="#E95B16" stop-opacity="0.11"/>
+      <stop offset="0.7" stop-color="#E95B16" stop-opacity="0.025"/>
+      <stop offset="1" stop-color="#E95B16" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo" gradientUnits="userSpaceOnUse" cx="960" cy="356" r="320">
+      <stop offset="0" stop-color="#FF7A1A" stop-opacity="0.085"/>
+      <stop offset="0.6" stop-color="#FF7A1A" stop-opacity="0.025"/>
+      <stop offset="1" stop-color="#FF7A1A" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vignette" gradientUnits="userSpaceOnUse" cx="960" cy="480" r="1250">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.45"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#base)"/>
+  <rect width="1920" height="1080" fill="url(#horizon)"/>
+  <rect width="1920" height="1080" fill="url(#halo)"/>
+  <!-- the mark's open arcs, echoed: 250, 380 and 520 px, open to the right -->
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round">
+    <path d="M1103.4 151.2 A250 250 0 1 0 1103.4 560.8" stroke-width="2" stroke-opacity="0.05"/>
+    <path d="M1178.0 44.7 A380 380 0 1 0 1178.0 667.3" stroke-width="1.5" stroke-opacity="0.032"/>
+    <path d="M1258.3 -70.0 A520 520 0 1 0 1258.3 782.0" stroke-width="1.2" stroke-opacity="0.02"/>
+  </g>
+  <rect width="1920" height="1080" fill="url(#vignette)"/>
+</svg>

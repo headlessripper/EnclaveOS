@@ -20,7 +20,9 @@ you already rely on (Windows, Android, Linux) running side by side.
   Windows have no title bar: each gets the slim Enclave frame and is
   controlled from Enclave's signature floating **bubble**. Enclave Icons
   (Enclave's own squircle app, folder and device icons on a Papirus base),
-  Inter font, an Ember boot splash. See `desktop/` and
+  Inter font. Boot is UEFI-only: one themed "Start Enclave OS" menu entry
+  (no speech/Memtest/BIOS entries) that hands over to the Enclave splash on
+  the same background (`arch/boot/`, `arch/plymouth/enclave/`). See `desktop/` and
   `docs/superpowers/specs/2026-11-24-enclave-shell-design.md`.
 - **Default apps:** Zen Browser, Thunderbird, Files, Text Editor, Photos
   (Ristretto), Media Player (Celluloid), Terminal, Settings (with Activity,

@@ -136,9 +136,13 @@ if [ -d "$BRANDING" ]; then
   install -d "$AIR/usr/share/enclave"
   cp -a "$BRANDING/." "$AIR/usr/share/enclave/"
 fi
-# Calamares branding expects its logo beside branding.desc.
-if [ -d "$AIR/etc/calamares/branding/enclave" ] && [ -f "$BRANDING/enclave-logo.svg" ]; then
-  cp -f "$BRANDING/enclave-logo.svg" "$AIR/etc/calamares/branding/enclave/enclave-logo.svg"
+# Calamares branding expects its images beside branding.desc; stamp the
+# installer's version with the image date.
+CALB="$AIR/etc/calamares/branding/enclave"
+if [ -d "$CALB" ]; then
+  cp -f "$BRANDING/enclave-logo.svg" "$BRANDING/enclave-logo-dark.svg" "$CALB/"
+  stamp="$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y.%m.%d)"
+  sed -i -E "s/^(  (version|shortVersion):[[:space:]]+).*/\1$stamp/" "$CALB/branding.desc"
 fi
 # --- 6b. desktop look: GTK/window theme, icons and cursor (Fluent, the
 #         Windows-11 design language), recoloured to Enclave orange and
@@ -263,32 +267,40 @@ if [ -d "$DESKTOP_DIR/terminal" ]; then
   log "  Enclave Terminal installed"
 fi
 
-# --- 6c. Plymouth boot splash: Enclave's own script theme (arch/plymouth/enclave):
-#     obsidian, the mark fading in, an ember segment gliding on a slim track,
-#     and a calm passphrase prompt. Its images are rendered here from the
-#     brand SVGs so they always match the logo. ---
-if [ -d "$REPO/arch/plymouth/enclave" ] && command -v rsvg-convert >/dev/null 2>&1; then
-  log "installing the Enclave Plymouth boot splash"
-  PTH="$AIR/usr/share/plymouth/themes/enclave"
-  rm -rf "$PTH"; install -d "$PTH"
-  cp "$REPO/arch/plymouth/enclave/enclave.plymouth" "$REPO/arch/plymouth/enclave/enclave.script" "$PTH/"
-  rsvg-convert -w 96 -h 96 "$BRANDING/enclave-logo-dark.svg" -o "$PTH/logo.png" || die "plymouth logo"
-  printf '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="#272A31"/></svg>'     | rsvg-convert -o "$PTH/track.png" /dev/stdin || die "plymouth track"
-  printf '<svg xmlns="http://www.w3.org/2000/svg" width="4" height="4"><rect width="4" height="4" fill="#FF7A1A"/></svg>'     | rsvg-convert -o "$PTH/fill.png" /dev/stdin || die "plymouth fill"
-  printf '<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><circle cx="4" cy="4" r="4" fill="#F5F3EF"/></svg>'     | rsvg-convert -o "$PTH/dot.png" /dev/stdin || die "plymouth dot"
-  # Live ISO initramfs: add the plymouth hook (right after udev) so the splash
-  # shows on the live boot too.
-  for mk in "$AIR"/etc/mkinitcpio.conf.d/*.conf "$PROFILE"/airootfs/etc/mkinitcpio.conf.d/*.conf; do
-    [ -f "$mk" ] || continue
-    grep -q 'plymouth' "$mk" 2>/dev/null && continue
-    sed -i 's/\(HOOKS=([^)]*udev\)/ plymouth/' "$mk" 2>/dev/null || true
-  done
-  # A quiet boot on every live entry: no kernel/udev chatter, no blinking
-  # cursor, just the splash.
-  { grep -rIl --null 'archisobasedir'     "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null     | xargs -0 -r sed -i -E 's/(archisobasedir=[^ ]+)/ quiet splash loglevel=3 rd.udev.log_level=3 vt.global_cursor_default=0/'; } || true
-else
-  log "  WARN: Plymouth theme or rsvg-convert missing; boot shows text logs"
-fi
+# --- 6c. Boot look: Enclave's own UEFI boot menu and Plymouth splash ---
+#     Enclave boots UEFI only (no BIOS/syslinux, no systemd-boot text menu):
+#     GRUB shows one "Start Enclave OS" entry in Enclave's theme, then the
+#     Plymouth splash takes over on the same background, mark and wordmark.
+#     tools/make-boot-art.sh renders both from arch/boot/art + the brand SVGs.
+log "boot look: themed UEFI boot menu + Enclave splash"
+command -v grub-mkfont >/dev/null 2>&1 || die "grub not found (pacman -S grub) — needed for the boot menu"
+command -v rsvg-convert >/dev/null 2>&1 || die "rsvg-convert not found (pacman -S librsvg) — needed for the boot art"
+# One bootloader, UEFI: replace releng's bootmodes array.
+awk '
+  /^bootmodes=\(/ { print "bootmodes=('"'"'uefi.grub'"'"')"; skip = ($0 !~ /\)/); next }
+  skip { if ($0 ~ /\)/) skip = 0; next }
+  { print }
+' "$PROFILE/profiledef.sh" > "$PROFILE/profiledef.sh.tmp" && mv "$PROFILE/profiledef.sh.tmp" "$PROFILE/profiledef.sh"
+grep -q "^bootmodes=('uefi.grub')$" "$PROFILE/profiledef.sh" || die "could not set the UEFI boot mode"
+rm -rf "$PROFILE/syslinux" "$PROFILE/efiboot" "$PROFILE/grub"
+install -d "$PROFILE/grub"
+cp "$REPO/arch/boot/grub/grub.cfg" "$REPO/arch/boot/grub/loopback.cfg" "$PROFILE/grub/"
+PTH="$AIR/usr/share/plymouth/themes/enclave"
+rm -rf "$PTH"; install -d "$PTH"
+bash "$REPO/tools/make-boot-art.sh" "$PROFILE/grub/themes/enclave" "$PTH" \
+  "Live · $(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y.%m.%d)" \
+  "$AIR/usr/share/grub/themes/enclave" || die "boot art failed"
+# (the last directory is the installed system's GRUB theme: wider menu for its
+#  three entries, no "Live" label; Calamares' grubcfg.conf points GRUB at it)
+cp "$REPO/arch/plymouth/enclave/enclave.plymouth" "$REPO/arch/plymouth/enclave/enclave.script" "$PTH/"
+# Live ISO initramfs: add the plymouth hook (right after udev) so the splash
+# shows on the live boot too.
+for mk in "$AIR"/etc/mkinitcpio.conf.d/*.conf; do
+  [ -f "$mk" ] || continue
+  grep -q 'plymouth' "$mk" 2>/dev/null && continue
+  sed -i 's/\(HOOKS=([^)]*\budev\b\)/\1 plymouth/' "$mk" 2>/dev/null || true
+done
+grep -qs 'plymouth' "$AIR/etc/mkinitcpio.conf.d/archiso.conf" || die "plymouth hook missing from the live initramfs"
 
 # --- 7. service wiring (symlinks created here so the repo stays Windows-clean) ---
 log "wiring services (graphical default, SDDM, NetworkManager, live setup)"
@@ -306,37 +318,6 @@ rm -f "$AIR/etc/systemd/system/multi-user.target.wants/systemd-networkd.service"
       "$AIR/etc/systemd/system/multi-user.target.wants/systemd-networkd-wait-online.service" \
       "$AIR/etc/systemd/system/multi-user.target.wants/iwd.service" \
       "$AIR/etc/systemd/system/sockets.target.wants/systemd-networkd.socket" 2>/dev/null || true
-
-# --- 8. human-readable boot menu titles ---
-# NOTE: these grep|xargs pipelines use `|| true` because under `set -o pipefail`
-# a grep that matches nothing returns non-zero and would abort the build.
-log "branding boot menus"
-{ grep -rIl --null 'Arch Linux' \
-  "$PROFILE/syslinux" "$PROFILE/grub" "$PROFILE/efiboot" 2>/dev/null \
-  | xargs -0 -r sed -i 's/Arch Linux install medium/Enclave OS/g; s/Arch Linux/Enclave OS/g'; } || true
-
-# --- 8a. replace the Arch-logo boot splash with Enclave's ---
-# BIOS boots syslinux (which shows splash.png). UEFI x64 boots systemd-boot,
-# which has no background image, so there is nothing to brand there beyond the
-# entry titles above. (GRUB is only used for IA32 UEFI / loopback, and mkarchiso
-# does not copy extra files from grub/, so a GRUB background can't be shipped.)
-if command -v rsvg-convert >/dev/null 2>&1 && [ -f "$BRANDING/enclave-boot.svg" ] && [ -d "$PROFILE/syslinux" ]; then
-  log "branding boot splash (Enclave)"
-  rsvg-convert -w 640 -h 480 "$BRANDING/enclave-boot.svg" -o "$PROFILE/syslinux/splash.png" \
-    || log "  WARN: could not render the syslinux splash"
-fi
-# BIOS menu in Enclave Ember: quiet borders, an ember highlight on the
-# selected entry, and the menu set below the mark and wordmark.
-for head in "$PROFILE"/syslinux/archiso_head.cfg; do
-  [ -f "$head" ] || continue
-  sed -i -E     -e 's/^MENU VSHIFT .*/MENU VSHIFT 11/'     -e 's/^MENU COLOR border .*/MENU COLOR border       30;44   #20ffffff #00000000 std/'     -e 's/^MENU COLOR title .*/MENU COLOR title        1;36;44 #00000000 #00000000 std/'     -e 's/^MENU COLOR sel .*/MENU COLOR sel          7;37;40 #fff5f3ef #d0e95b16 all/'     -e 's/^MENU COLOR unsel .*/MENU COLOR unsel        37;44   #c0f5f3ef #00000000 std/'     -e 's/^MENU COLOR help .*/MENU COLOR help         37;40   #a0a7a39b #00000000 std/'     -e 's/^MENU COLOR timeout_msg .*/MENU COLOR timeout_msg  37;40   #80a7a39b #00000000 std/'     -e 's/^MENU COLOR timeout .*/MENU COLOR timeout      1;37;40 #ffff7a1a #00000000 std/'     -e 's/^MENU COLOR tabmsg .*/MENU COLOR tabmsg       31;40   #60a7a39b #00000000 std/'     "$head"
-done
-# Boot sooner: 3 s on both menus, and no beep.
-{ grep -rIl --null '^TIMEOUT' "$PROFILE/syslinux" 2>/dev/null | xargs -0 -r sed -i -E 's/^TIMEOUT .*/TIMEOUT 30/'; } || true
-LOADER_CONF="$PROFILE/efiboot/loader/loader.conf"
-if [ -f "$LOADER_CONF" ]; then
-  sed -i '/^beep /d; s/^timeout .*/timeout 3/' "$LOADER_CONF"
-fi
 
 # --- 8b. AUR packages (Calamares, Zen Browser) → a local file:// repo ---
 # Neither has an official Arch package. Calamares: no trustworthy prebuilt

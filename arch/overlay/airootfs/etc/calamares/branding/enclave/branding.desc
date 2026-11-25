@@ -1,36 +1,45 @@
+# Enclave OS — installer branding (Calamares 3.4), Enclave Ember.
+#
+# Enclave's own installer look: a graphite step rail with the mark
+# (calamares-sidebar.qml), an obsidian page area styled by stylesheet.qss, an
+# ember "Next" pill in the footer (Calamares' own buttons, so Alt+N / Alt+B
+# keep working from the keyboard) and an Ember slideshow while it installs
+# (show.qml). build-iso.sh stamps `version`.
 ---
 componentName: enclave
 
-welcomeStyleCalamares: true
+welcomeStyleCalamares: false
 welcomeExpandingLogo: true
 windowExpanding: normal
-windowSize: 820px,560px
+windowSize: 1060px,700px
 windowPlacement: center
-sidebar: widget
+sidebar: qml
 navigation: widget
 
 strings:
   productName:         Enclave OS
-  shortProductName:    Enclave
-  version:             0.1 alpha
-  shortVersion:        0.1
-  versionedName:       Enclave OS 0.1 alpha
-  shortVersionedName:  Enclave 0.1
+  shortProductName:    Enclave OS
+  version:             rolling
+  shortVersion:        rolling
+  versionedName:       Enclave OS
+  shortVersionedName:  Enclave OS
   bootloaderEntryName: Enclave OS
   productUrl:          https://github.com/headlessripper/EnclaveOS
   supportUrl:          https://github.com/headlessripper/EnclaveOS/issues
   releaseNotesUrl:     https://github.com/headlessripper/EnclaveOS/releases
 
 images:
-  productLogo:    "enclave-logo.svg"
-  productIcon:    "enclave-logo.svg"
-  productWelcome: "enclave-logo.svg"
+  productLogo:    "enclave-logo-dark.svg"
+  productIcon:    "enclave-logo-dark.svg"
+  productWelcome: "welcome.svg"
 
 slideshow: "show.qml"
 slideshowAPI: 2
 
+# Read by the QML sidebar/navigation (Branding.styleString) and by Calamares'
+# own fallbacks. Ember: graphite rail, obsidian page, ember for "current".
 style:
-  sidebarBackground:    "#0E1621"
-  sidebarText:          "#F3F5F8"
-  sidebarTextSelect:    "#FF7A3D"
-  sidebarTextHighlight: "#FF7A3D"
+  SidebarBackground:        "#16181C"
+  SidebarText:              "#A7A39B"
+  SidebarBackgroundCurrent: "#2A1D14"
+  SidebarTextCurrent:       "#FFFFFF"

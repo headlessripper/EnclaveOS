@@ -37,3 +37,10 @@ gpm
 darkhttpd
 refind
 livecd-sounds
+
+# Boot: the image boots UEFI only, straight into Enclave's own themed GRUB
+# menu with a single entry, so the BIOS loader, RAM tester and UEFI shell go.
+syslinux
+memtest86+
+memtest86+-efi
+edk2-shell
