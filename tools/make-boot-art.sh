@@ -153,19 +153,90 @@ from_string "$P/lock.png" <<'SVG'
 SVG
 
 # --------------------------------------------- installed-system GRUB variant
+# Seen only when another OS is installed or Esc is held at power-on: just
+# "Enclave OS" and the bubble (drawn like the desktop's), which opens a
+# rounded card with everything else (bubble-<n>.txt): other systems,
+# Advanced options, UEFI Firmware Settings, Restart, Shut down…
+# The menu itself comes from /etc/grub.d/10_enclave + 45_enclave_options.
 if [ -n "$INSTALLED" ]; then
   rm -rf "$INSTALLED"; install -d "$(dirname "$INSTALLED")"
   cp -a "$G" "$INSTALLED"
+  T="$INSTALLED/theme.txt"
   sed -i -e 's/^  left = 50%-152$/  left = 50%-230/' \
          -e 's/^  width = 304$/  width = 460/' \
-         -e 's/^  height = 58$/  height = 184/' \
+         -e 's/^  height = 58$/  height = 214/' \
          -e 's/^  item_spacing = 0$/  item_spacing = 18/' \
          -e 's/^  item_color = "#F5F3EF"$/  item_color = "#A7A39B"/' \
          -e 's/^  item_font = "Enclave Strong Regular 20"$/  item_font = "Enclave Regular 16"/' \
-         -e 's/^  top = 58%+84$/  top = 58%+214/' "$INSTALLED/theme.txt"
-  sed -i "s/^  text = \"${VERSION}\"$/  text = \"\"/" "$INSTALLED/theme.txt"
-  for want in 'width = 460' 'height = 184' 'item_spacing = 18' 'top = 58%+214' 'item_font = "Enclave Regular 16"'; do
-    grep -qF "$want" "$INSTALLED/theme.txt" || die "installed theme: '$want' not applied"
+         -e 's/^  icon_height = 26$/  icon_height = 40/' \
+         -e 's/^  top = 58%+84$/  top = 58%+152/' "$T"
+  sed -i "s/^  text = \"${VERSION}\"$/  text = \"\"/" "$T"
+  for want in 'width = 460' 'height = 214' 'item_spacing = 18' 'top = 58%+152' 'icon_height = 40' 'item_font = "Enclave Regular 16"'; do
+    grep -qF "$want" "$T" || die "installed theme: '$want' not applied"
+  done
+
+  # The installed menu's entries carry 40 px-tall icons (the bubble needs
+  # the room); every icon is drawn on a 51x40 canvas, right-aligned.
+  icon40() { # name <<< inner svg (drawn in a 26x26 box)
+    from_string "$INSTALLED/icons/$1.png" <<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="51" height="40"><g transform="translate(25 7)">$(cat)</g></svg>
+SVG
+  }
+  MARK="$(sed -n '/<path\|<circle/p' "$BRAND/enclave-logo-dark.svg")"
+  icon40 enclave <<SVG
+<g transform="scale(0.26)">$(printf '%s' "$MARK" | sed 's/#ff6b1a/#ffffff/I')</g>
+SVG
+  cp "$INSTALLED/icons/enclave.png" "$INSTALLED/icons/advanced.png"
+  icon40 os <<'SVG'
+<g fill="none" stroke="#F5F3EF" stroke-width="1.6" stroke-linecap="round"><rect x="2.5" y="3" width="21" height="14" rx="3"/><path d="M9 21.5h8M13 17v4.5"/></g>
+SVG
+  icon40 efi <<'SVG'
+<g fill="none" stroke="#F5F3EF" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="5" width="16" height="16" rx="3.5"/><rect x="9.5" y="9.5" width="7" height="7" rx="1.5" fill="#FFAC55" stroke="none"/>
+<path d="M9 2.5v2.5M13 2.5v2.5M17 2.5v2.5M9 21v2.5M13 21v2.5M17 21v2.5M2.5 9h2.5M2.5 13h2.5M2.5 17h2.5M21 9h2.5M21 13h2.5M21 17h2.5"/></g>
+SVG
+  icon40 restart <<'SVG'
+<g fill="none" stroke="#F5F3EF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13a8 8 0 1 1-2.6-5.9"/><path d="M19.5 3.5v4.2h-4.2"/></g>
+SVG
+  icon40 shutdown <<'SVG'
+<g fill="none" stroke="#F5F3EF" stroke-width="1.8" stroke-linecap="round"><path d="M13 3.5v8.5"/><path d="M8 6.8a8 8 0 1 0 10 0"/></g>
+SVG
+  # The bubble, as on the desktop: a 38 px glass circle, hairline, soft
+  # shadow, the Enclave mark in its own colours.
+  bubble_svg() { # ring-colour ring-width rotation
+    cat <<SVG
+<circle cx="0" cy="0" r="22" fill="none" stroke="#000000" stroke-opacity="0.10" stroke-width="2"/>
+<circle cx="0" cy="0" r="19.5" fill="#272A31" fill-opacity="0.92" stroke="$1" stroke-width="$2"/>
+<g transform="rotate($3) translate(-12 -12) scale(0.24)">$MARK</g>
+SVG
+  }
+  from_string "$INSTALLED/icons/bubble.png" <<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="51" height="40"><g transform="translate(31 20) scale(0.86)">$(bubble_svg '#4A4D55' 1 0)</g></svg>
+SVG
+  from_string "$INSTALLED/bubble-open.png" <<SVG
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><g transform="translate(24 24)">$(bubble_svg '#FF7A1A' 2 0)</g></svg>
+SVG
+  # the card: graphite glass, fully rounded, a hairline and a soft ember rim
+  # along the top (a 9-slice box around the menu; 42 px borders keep the
+  # ember pill inside it)
+  slice9 bubble "$INSTALLED" 120 120 42 42 42 42 <<'SVG'
+<svg xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="r" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FF7A1A" stop-opacity="0.55"/><stop offset="0.35" stop-color="#FF7A1A" stop-opacity="0"/></linearGradient></defs>
+  <rect x="0.5" y="0.5" width="119" height="119" rx="28" fill="#1A1C21" fill-opacity="0.96" stroke="#33363E"/>
+  <rect x="0.75" y="0.75" width="118.5" height="118.5" rx="27.75" fill="none" stroke="url(#r)" stroke-width="1.5"/>
+</svg>
+SVG
+  # one bubble theme per entry count; taller cards move up to stay on screen
+  # (positions for 1080p: the card normally starts at 58%)
+  for n in 3 4 5 6 7 8; do
+    # GRUB shows (h + spacing - 2*padding - pill pads - box pads) / (row + spacing)
+    # rows: (h + 14 - 28 - 16 - 84) / 54 >= n
+    h=$(( 54 * n + 116 ))
+    off=$(( 990 - h - 626 )); [ "$off" -gt 0 ] && off=0
+    if [ "$off" -eq 0 ]; then top="58%"; else top="58%$off"; fi
+    btop="58%$(( off - 62 ))"
+    sed -e "s/%N%/$n/g" -e "s/%HEIGHT%/$h/" -e "s/%CARD_TOP%/$top/" -e "s/%BUBBLE_TOP%/$btop/" \
+        "$REPO/arch/boot/grub/bubble.txt" > "$INSTALLED/bubble-$n.txt"
   done
 fi
 

@@ -128,7 +128,7 @@ APPS['enclave-install'] = ('Install Enclave OS', ['calamares'], lambda: app(
     '<rect x="30" y="80" width="68" height="18" rx="6" fill="#202124"/>'
     '<circle cx="88" cy="89" r="3" fill="#2FBF71"/>'))
 
-APPS['system-file-manager'] = ('Files', ['thunar', 'org.xfce.thunar'], lambda: app(
+APPS['system-file-manager'] = ('Files', ['thunar', 'org.xfce.thunar', 'enclave-files'], lambda: app(
     'Files: a solar folder', 'light',
     grad('back', [(0, '#F57A26'), (1, BURNT)], 0, 34, 0, 100)
     + grad('front', [(0, '#FFC67F'), (1, '#FF8A2C')], 0, 54, 0, 100),

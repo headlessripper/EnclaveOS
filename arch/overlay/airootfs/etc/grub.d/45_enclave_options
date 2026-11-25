@@ -1,0 +1,98 @@
+#!/bin/sh
+# Enclave OS — the options bubble, and Windows-style booting.
+#
+#  * Boot like Windows: when Enclave is the only system on the machine GRUB
+#    shows nothing and starts Enclave at once (/etc/default/grub: timeout 0,
+#    hidden; hold Esc or Shift at power-on for the menu). When os-prober finds
+#    another system (Windows, another Linux…), the menu shows for 5 seconds.
+#  * The menu itself is just "Enclave OS" (10_enclave) and the bubble, drawn
+#    like the desktop's bubble. Opening it shows a rounded card with
+#    everything else: other systems (Windows Boot Manager…), "Advanced
+#    options for Enclave OS", every other menu generator in /etc/grub.d
+#    (anything a package adds later lands here too — enclave-grub-tidy keeps
+#    them off the top level), "UEFI Firmware Settings", Restart and Shut down.
+#    Esc folds it back.
+set -e
+
+theme_dir=/usr/share/grub/themes/enclave
+D="${GRUB_DISTRIBUTOR:-Enclave OS}"
+tidy() {
+  sed -e "s/'$D Linux, with Linux \([^']*\) (fallback initramfs)'/'$D (\1 kernel, fallback initramfs)'/" \
+      -e "s/'$D Linux, with Linux \([^']*\)'/'$D (\1 kernel)'/" \
+      -e "s/'$D Linux'/'$D'/"
+}
+# run a generator whatever its mode (they are switched off) with its own
+# interpreter
+gen() {
+  [ -f "$1" ] || return 0
+  interp=$(sed -n '1s/^#![[:space:]]*//p' "$1")
+  ${interp:-/bin/sh} "$1" 2>/dev/null || true
+}
+# how many entries a block of menu text puts at its top level
+count() {
+  awk '{ if (depth == 0 && $0 ~ /^[[:space:]]*(menuentry|submenu)[[:space:]]/) n++
+         o = gsub(/\{/, "{"); c = gsub(/\}/, "}"); depth += o - c }
+       END { print n + 0 }'
+}
+
+others=""   # other systems (os-prober)
+if [ "${GRUB_DISABLE_OS_PROBER:-true}" = false ]; then
+  # "Windows Boot Manager (on /dev/nvme0n1p1)" → "Windows Boot Manager"
+  others=$(gen /etc/grub.d/30_os-prober | sed -E "s/^(menuentry ['\"][^'\"]*) \(on \/dev\/[^)]*\)/\1/")
+fi
+adv=$(gen /etc/grub.d/10_linux | tidy | awk '
+  /^submenu / { inside = 1; next }
+  inside && /^}/ { inside = 0; next }
+  inside { print }
+')
+extra=""    # every other generator (custom entries, memtest, fwupd…)
+for f in /etc/grub.d/*; do
+  case "${f##*/}" in
+    00_*|01_*|05_*|25_bli|10_enclave|10_linux|30_os-prober|30_uefi-firmware|45_enclave_options|README) continue ;;
+  esac
+  out=$(gen "$f")
+  [ -n "$out" ] && extra="$extra
+$out"
+done
+
+# 1. dual boot: other systems on the machine → show the menu
+if [ "$(printf '%s\n' "$others" | count)" -gt 0 ]; then
+  echo "Enclave: other systems found — the boot menu will show" >&2
+  printf '# another system is installed: let the user choose\nset timeout_style=menu\nset timeout=5\n'
+fi
+
+# 2. the bubble; its card is sized for its entries (bubble-<n>.txt)
+n=$(( $(printf '%s\n' "$others" | count) + $(printf '%s\n' "$extra" | count) + 3 ))
+[ -n "$adv" ] && n=$((n + 1))
+[ "$n" -lt 3 ] && n=3
+[ "$n" -gt 8 ] && n=8          # bubble-3 … bubble-8 themes exist (make-boot-art.sh)
+
+cat <<CFG
+submenu "More options" --class bubble --id enclave-options {
+	unset timeout
+	if [ -f "$theme_dir/bubble-$n.txt" ]; then set theme="$theme_dir/bubble-$n.txt"; export theme; fi
+CFG
+[ -n "$others" ] && printf '%s\n' "$others" | sed 's/^/\t/'
+if [ -n "$adv" ]; then
+  printf '\tsubmenu "Advanced options for Enclave OS" --class enclave --id enclave-advanced {\n'
+  printf '%s\n' "$adv" | sed 's/^/\t/'
+  printf '\t}\n'
+fi
+[ -n "$extra" ] && printf '%s\n' "$extra" | sed 's/^/\t/'
+cat <<'CFG'
+	if [ "$grub_platform" = "efi" ]; then
+		fwsetup --is-supported
+		if [ "$?" = 0 ]; then
+			menuentry "UEFI Firmware Settings" --class efi --id uefi-firmware {
+				fwsetup
+			}
+		fi
+	fi
+	menuentry "Restart" --class restart --id enclave-restart {
+		reboot
+	}
+	menuentry "Shut down" --class shutdown --id enclave-shutdown {
+		halt
+	}
+}
+CFG

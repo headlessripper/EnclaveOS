@@ -1,6 +1,8 @@
 // Enclave Shell — the signature floating bubble.
 //
-// One small round bubble floats over everything. Drag it anywhere and it
+// One small round bubble floats over everything — every window, full-screen
+// ones included (it sits on the overlay layer and only fades back while a
+// full-screen app plays). Drag it anywhere and it
 // settles on the nearest side edge (and remembers the spot). Click it and its
 // controls fan out on an arc that faces the middle of the screen, so they never
 // fall off an edge or a corner: minimise, maximise/restore and close for the
@@ -21,7 +23,7 @@ import Enclave
 
 Window {
     id: root
-    visible: !Windows.activeFullscreen
+    visible: true            // always: the bubble is on top of every window
     color: "transparent"
     title: "Enclave Bubble"
 
@@ -48,7 +50,7 @@ Window {
     }
 
     LayerShell.Window.scope: "enclave-bubble"
-    LayerShell.Window.layer: LayerShell.Window.LayerTop
+    LayerShell.Window.layer: LayerShell.Window.LayerOverlay   // above full-screen windows too
     LayerShell.Window.anchors: LayerShell.Window.AnchorTop | LayerShell.Window.AnchorBottom
                                | LayerShell.Window.AnchorLeft | LayerShell.Window.AnchorRight
     LayerShell.Window.exclusionZone: -1
@@ -224,7 +226,8 @@ Window {
             color: Theme.c.glass
             border.width: root.open ? 2 : 1
             border.color: root.open ? Theme.c.accent : Theme.c.border
-            opacity: root.open || root.dragging || press.containsMouse ? 1 : 0.78
+            opacity: root.open || root.dragging || press.containsMouse ? 1
+                   : Windows.activeFullscreen ? 0.45 : 0.78
             Behavior on opacity { NumberAnimation { duration: Theme.motion.standard } }
             Behavior on border.color { ColorAnimation { duration: Theme.motion.fast } }
 

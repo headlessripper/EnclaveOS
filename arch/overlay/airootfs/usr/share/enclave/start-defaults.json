@@ -2,7 +2,7 @@
   "pinned": [
     "zen.desktop",
     "org.mozilla.Thunderbird.desktop",
-    "thunar.desktop",
+    "enclave-files.desktop",
     "enclave-assistant.desktop",
     "org.xfce.mousepad.desktop",
     "org.xfce.ristretto.desktop",
@@ -14,7 +14,7 @@
     "enclave-install.desktop"
   ],
   "taskbar": [
-    "thunar.desktop",
+    "enclave-files.desktop",
     "zen.desktop",
     "org.mozilla.Thunderbird.desktop",
     "enclave-assistant.desktop",

@@ -1,6 +1,6 @@
 # Enclave OS — packages appended to releng/packages.x86_64 by build-iso.sh.
 # Desktop: Enclave Shell, Enclave's own Wayland desktop (Qt 6 / QML), with
-# labwc managing windows underneath — see the "Enclave Shell" section below
+# Hyprland managing windows underneath (rounded corners, blur) — see the "Enclave Shell" section below
 # and docs/superpowers/specs/2026-11-24-enclave-shell-design.md. XFCE and the
 # old X11 pieces (panel, picom, GTK Start menu, X11 bubble) were removed.
 
@@ -29,10 +29,8 @@ gnome-themes-extra
 inter-font
 
 # --- Core apps for a usable first session (the Windows-equivalent set) ---
-thunar
-thunar-volman
-# Extract Here / Create Archive in the Files context menu
-thunar-archive-plugin
+# Files is Enclave's own (enclave-files, part of Enclave Shell). gvfs gives
+# it and other apps mounting; tumbler makes thumbnails for GTK apps.
 gvfs
 tumbler
 xarchiver
@@ -92,6 +90,8 @@ vulkan-tools
 calamares
 grub
 efibootmgr
+# finds Windows / other systems so the boot menu shows only when there is a choice
+os-prober
 squashfs-tools
 parted
 dosfstools
@@ -111,7 +111,6 @@ python-keyring
 #     session — see docs/superpowers/specs/2026-11-24-enclave-shell-design.md) ---
 hyprland
 xdg-desktop-portal-hyprland
-labwc
 xorg-xwayland
 layer-shell-qt
 qt6-base
@@ -132,7 +131,7 @@ wl-clipboard
 libnotify
 mako
 polkit-gnome
-# Settings > Displays reads and sets modes with wlr-randr under labwc
+# wlr-randr: display modes for wlroots tools (Settings uses hyprctl)
 wlr-randr
 # Settings > Power: power modes (balanced / saver / performance)
 power-profiles-daemon

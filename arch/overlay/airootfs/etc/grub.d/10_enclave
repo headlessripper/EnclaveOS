@@ -1,0 +1,26 @@
+#!/bin/sh
+# Enclave OS — the main boot entry, from GRUB's own Linux generator.
+#
+# Enclave's boot menu (seen only when another OS is installed, or when Esc is
+# held) has a single "Enclave OS" entry up top; "Advanced options for Enclave
+# OS" and "UEFI Firmware Settings" live in the options bubble instead
+# (45_enclave_options). This runs GRUB's stock 10_linux and keeps everything
+# except its "Advanced options" submenu. 10_linux itself is switched off
+# (chmod -x) by the installer and by the enclave-grub pacman hook.
+set -e
+src=/etc/grub.d/10_linux
+[ -f "$src" ] || exit 0
+
+# GRUB names entries "<distributor> Linux" and "…, with Linux <kernel>";
+# Enclave's are just "Enclave OS" and "Enclave OS (<kernel> kernel)".
+D="${GRUB_DISTRIBUTOR:-Enclave OS}"
+tidy() {
+  sed -e "s/'$D Linux, with Linux \([^']*\) (fallback initramfs)'/'$D (\1 kernel, fallback initramfs)'/" \
+      -e "s/'$D Linux, with Linux \([^']*\)'/'$D (\1 kernel)'/" \
+      -e "s/'$D Linux'/'$D'/"
+}
+sh "$src" | tidy | awk '
+  /^submenu / { skip = 1; next }
+  skip && /^}/ { skip = 0; next }
+  !skip { print }
+'

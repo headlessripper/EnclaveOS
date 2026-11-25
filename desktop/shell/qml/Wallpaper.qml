@@ -72,9 +72,9 @@ Window {
     // desktop menu (Home, Trash), removed from their own right-click menu ----
     readonly property var shortcuts: Apps.desktopPins.map(id => {
         if (id === "home")
-            return { id: id, label: "Home", icon: "user-home", run: () => System.run("thunar", [System.homePath]) }
+            return { id: id, label: "Home", icon: "user-home", run: () => System.run("enclave-files", [System.homePath]) }
         if (id === "trash")
-            return { id: id, label: "Trash", icon: "user-trash", run: () => System.run("thunar", ["trash:///"]) }
+            return { id: id, label: "Trash", icon: "user-trash", run: () => System.run("enclave-files", ["trash:///"]) }
         const a = Apps.app(id)
         return a.appId ? { id: id, label: a.name, icon: a.icon, run: () => Apps.launch(id) } : null
     }).filter(s => s !== null)

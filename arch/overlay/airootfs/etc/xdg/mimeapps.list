@@ -13,7 +13,7 @@ x-scheme-handler/mailto=org.mozilla.Thunderbird.desktop
 message/rfc822=org.mozilla.Thunderbird.desktop
 text/calendar=org.mozilla.Thunderbird.desktop
 # Files, text, photos, media
-inode/directory=thunar.desktop
+inode/directory=enclave-files.desktop
 text/plain=org.xfce.mousepad.desktop
 image/png=org.xfce.ristretto.desktop
 image/jpeg=org.xfce.ristretto.desktop

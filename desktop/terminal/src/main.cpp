@@ -6,7 +6,7 @@
 //   enclave-terminal -x PROGRAM ARGS...       run PROGRAM with ARGS (the rest)
 //   enclave-terminal --title TEXT             a fixed tab title
 //   enclave-terminal --hold                   keep the tab after it finishes
-// The -e / -x / --working-directory forms match what Thunar, the Start menu
+// The -e / -x / --working-directory forms match what Enclave Files, the Start menu
 // and other desktops' launchers already pass to a terminal.
 #include <QApplication>
 #include <QDir>

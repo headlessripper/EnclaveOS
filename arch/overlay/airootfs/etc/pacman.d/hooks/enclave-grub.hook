@@ -1,0 +1,19 @@
+# Enclave OS — whenever GRUB or a boot-menu script is installed or updated
+# (os-prober, memtest, fwupd…), keep the menu to "Enclave OS" + the options
+# bubble: the new entries go inside the bubble (enclave-grub-tidy).
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Path
+Target = etc/grub.d/*
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = grub
+
+[Action]
+Description = Keeping the Enclave boot menu tidy…
+When = PostTransaction
+Exec = /bin/sh /usr/local/bin/enclave-grub-tidy

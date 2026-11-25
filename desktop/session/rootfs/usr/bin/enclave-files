@@ -1,0 +1,8 @@
+#!/bin/sh
+# Enclave Files — Enclave's own file manager: your places and drives, the
+# path as pills, icons with picture thumbnails or a list, Trash with
+# Restore, cut / copy / paste shared with other apps.
+#   enclave-files [FOLDER | file:///… | trash:///]
+# It is enclave-shell in its Files mode, so it shares the Ember theme. Qt
+# follows Ember itself, not the GTK platform theme the session sets for apps.
+exec env -u QT_QPA_PLATFORMTHEME enclave-shell --files "$@"

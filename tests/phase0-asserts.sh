@@ -26,7 +26,7 @@ has "$AIR/etc/hostname"       '^enclave$'                    "hostname = enclave
 
 # --- packages / repos ---
 has "$O/packages.x86_64.extra" '^sddm$'                      "pkg: sddm"
-has "$O/packages.x86_64.extra" '^labwc$'                    "pkg: labwc (under Enclave Shell)"
+has "$O/packages.x86_64.extra" '^hyprland$'                 "pkg: hyprland (under Enclave Shell)"
 has "$O/packages.x86_64.extra" '^networkmanager$'            "pkg: networkmanager"
 has "$O/pacman.conf"           '^\[multilib\]'               "pacman: multilib enabled"
 # KDE/Plasma must be gone (Wayland-only, black-screens on VMware).

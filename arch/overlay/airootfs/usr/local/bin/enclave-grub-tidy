@@ -1,0 +1,18 @@
+#!/bin/sh
+# Enclave OS — keep the boot menu to "Enclave OS" plus the options bubble.
+#
+# GRUB builds its menu from every executable script in /etc/grub.d. Enclave's
+# own 10_enclave (the "Enclave OS" entry) and 45_enclave_options (the bubble)
+# stay on; every other menu generator — GRUB's Linux list, os-prober
+# (Windows, other systems), firmware settings, and anything a package adds
+# later (memtest, fwupd, custom entries…) — is switched off here, and
+# 45_enclave_options runs it inside the bubble instead.
+# Run by the installer and by the enclave-grub pacman hook.
+for f in /etc/grub.d/*; do
+  [ -f "$f" ] || continue
+  case "${f##*/}" in
+    00_*|01_*|05_*|25_bli|10_enclave|45_enclave_options|README) chmod +x "$f" 2>/dev/null ;;
+    *) chmod -x "$f" 2>/dev/null ;;
+  esac
+done
+exit 0

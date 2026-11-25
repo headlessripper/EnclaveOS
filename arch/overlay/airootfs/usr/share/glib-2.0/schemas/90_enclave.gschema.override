@@ -1,14 +1,15 @@
 # Enclave OS — GTK apps on Wayland read their look from GSettings (there is
 # no XFCE settings daemon any more). Compiled by glib2's pacman hook.
+# Dark is the default; Settings > Appearance switches these with the shell.
 [org.gnome.desktop.interface]
-gtk-theme='Enclave'
-icon-theme='Enclave'
+gtk-theme='Enclave-Dark'
+icon-theme='Enclave-dark'
 cursor-theme='Enclave-cursors'
 cursor-size=24
 font-name='Inter 10'
 document-font-name='Inter 10'
 monospace-font-name='DejaVu Sans Mono 10'
-color-scheme='prefer-light'
+color-scheme='prefer-dark'
 
 [org.gnome.desktop.wm.preferences]
 button-layout='icon:minimize,maximize,close'

@@ -46,6 +46,7 @@ has "$SH/qml/Bubble.qml" 'activeMinimize'             "bubble controls the activ
 has "$SH/qml/Bubble.qml" 'Snap left'                  "bubble snaps windows (they have no title bar)"
 has "$SH/qml/Bubble.qml" 'setInputRegion'             "bubble is click-through around itself"
 has "$SH/qml/Bubble.qml" 'bubble/side'                "bubble remembers where it rests"
+has "$SH/qml/Bubble.qml" 'LayerShell.Window.LayerOverlay' "bubble is on top of every window (overlay layer)"
 has "$SH/qml/Taskbar.qml" 'anchors\.centerIn: parent' "dock items truly centred"
 has "$SH/qml/Taskbar.qml" 'allAppsRequested'          "dock ends with All apps"
 # no top bar: status lives in the Now widget, search in its own widget
@@ -101,10 +102,10 @@ has "$TERM_DIR/src/terminalwindow.cpp" 'startSystemMove' "terminal: the tab stri
 has "$TERM_DIR/src/terminalwindow.cpp" 'appearance/mode' "terminal follows Enclave light / dark"
 has "scripts/build-iso.sh" 'compiling Enclave Terminal' "build compiles Enclave Terminal"
 has "$SH/src/appregistry.cpp" 'enclave-terminal -x'    "terminal apps open in Enclave Terminal"
-has "arch/overlay/airootfs/etc/skel/.config/Thunar/uca.xml" 'enclave-terminal' "Files: Open Terminal Here"
+has "$SH/src/files.cpp" '"enclave-terminal"' "Files: Open in Terminal"
 has "arch/overlay/airootfs/etc/xdg/xfce4/helpers.rc" 'TerminalEmulator=enclave-terminal' "exo's terminal is Enclave Terminal"
 has "arch/overlay/airootfs/usr/share/enclave/start-defaults.json" 'enclave-terminal\.desktop' "Terminal pinned"
-if grep -rqE 'xfce4-terminal' "$SES/usr/share/enclave" arch/overlay/airootfs/usr/share/enclave/start-defaults.json      arch/overlay/airootfs/etc/skel/.config/Thunar "$SH/src" "$SH/qml"; then
+if grep -rqE 'xfce4-terminal' "$SES/usr/share/enclave" arch/overlay/airootfs/usr/share/enclave/start-defaults.json      "$SH/src" "$SH/qml"; then
   bad "no xfce4-terminal left in the session"
 else
   pass "no xfce4-terminal left in the session"
@@ -126,14 +127,14 @@ else
 fi
 has "arch/overlay/airootfs/usr/share/enclave/start-defaults.json" '"taskbar"' "default taskbar pins"
 
-# --- session: labwc underneath, selectable from SDDM ---
+# --- session: Hyprland underneath (no fallback), selectable from SDDM ---
 has "$SES/usr/share/wayland-sessions/enclave.desktop" '^Exec=/usr/bin/enclave-session$' "SDDM: Enclave (Wayland) session"
-has "$SES/usr/bin/enclave-session" 'labwc'            "session runs labwc"
-has "$SES/usr/bin/enclave-session" 'Hyprland'         "session prefers Hyprland when a GPU is there"
+has "$SES/usr/bin/enclave-session" '^exec Hyprland'    "session runs Hyprland"
+if grep -q 'labwc' <(grep -v '^#' "$SES/usr/bin/enclave-session"); then bad "no labwc fallback in the session"; else pass "no labwc fallback in the session"; fi
+has "scripts/build-iso.sh" 'rm -rf "\$AIR/usr/share/enclave/labwc"' "labwc config left out of the ISO"
 has "$SES/usr/share/enclave/hypr/hyprland.lua" 'enclave\.minimize|function enclave' "Hyprland config: the Enclave bridge"
 has "$SES/usr/share/enclave/hypr/hyprland.lua" 'enclave-shell-run' "Hyprland autostarts the shell"
 has "arch/overlay/packages.x86_64.extra" '^hyprland$'  "pkg: hyprland"
-has "$SES/usr/bin/enclave-session" 'WLR_RENDERER=pixman' "software-render fallback (VMs without GPU)"
 has "$SES/usr/share/enclave/labwc/autostart" 'enclave-shell-run' "shell autostarts (with crash restart)"
 has "$SES/usr/bin/enclave-shell-run" 'enclave-shell'  "crash-restart wrapper"
 has "$SES/usr/share/enclave/labwc/rc.xml" 'Super_L'   "Windows key opens Start"
@@ -148,10 +149,60 @@ has "$SES/usr/share/xdg-desktop-portal/enclave-portals.conf" 'wlr' "portals for 
 # --- build + packages ---
 has "scripts/build-iso.sh" 'compiling Enclave Shell'  "build compiles Enclave Shell"
 has "scripts/build-iso.sh" '/usr/bin/\$f" 755|add_file_perm "/usr/bin/' "shell executables get 0755"
-for p in labwc xorg-xwayland layer-shell-qt qt6-declarative qt6-wayland xdg-desktop-portal-wlr; do
+if grep -q '^labwc$' arch/overlay/packages.x86_64.extra; then bad "labwc not on the ISO"; else pass "labwc not on the ISO"; fi
+for p in hyprland xorg-xwayland layer-shell-qt qt6-declarative qt6-wayland xdg-desktop-portal-wlr; do
   has "arch/overlay/packages.x86_64.extra" "^$p\$" "pkg: $p"
 done
 has "scripts/build-iso-docker.sh" 'layer-shell-qt'    "docker build has shell deps"
 has ".github/workflows/build-iso.yml" 'layer-shell-qt' "CI build has shell deps"
+
+# --- Enclave Files (replaces Thunar) ---
+has "$SH/src/main.cpp" 'runFiles'                      "enclave-shell --files mode"
+has "$SH/CMakeLists.txt" 'qml/Files\.qml'              "Files UI is built in"
+has "$SES/usr/bin/enclave-files" 'enclave-shell --files' "enclave-files launcher"
+has "arch/overlay/airootfs/etc/xdg/mimeapps.list" '^inode/directory=enclave-files\.desktop' "folders open in Files"
+has "$SH/src/files.cpp" 'moveToTrash'                  "Files: Move to Trash"
+has "$SH/qml/Files.qml" 'asynchronous: String\(source\)\.startsWith' "icons load on the GUI thread (no crash)"
+if grep -rqiE 'thunar' "$SH/qml" "$SES/usr/share/enclave/hypr" arch/overlay/airootfs/usr/share/enclave/start-defaults.json arch/overlay/airootfs/etc/xdg/mimeapps.list; then
+  bad "no Thunar left in the desktop"
+else
+  pass "no Thunar left in the desktop"
+fi
+if grep -qE '^thunar' arch/overlay/packages.x86_64.extra; then bad "Thunar not on the ISO"; else pass "Thunar not on the ISO"; fi
+has "$SH/src/theme.cpp" 'QFileSystemWatcher'          "Settings / Files follow light-dark live"
+
+# --- the global rule: rounded, modern buttons ---
+has "$TOK" '"small": 10'                               "small radius is 10 px"
+has "$SH/qml/settings/Controls.qml" 'radius: height / 2' "Settings buttons are pills"
+has "tools/enclave-gtk-patch.sh" "'round', 10px"       "GTK controls rounded to 10 px"
+has "arch/themes/gtk/enclave-layer.css" 'border-radius' "GTK layer rounds the rest"
+has "desktop/terminal/src/terminalwindow.cpp" 'QPushButton \{[^}]*border-radius: 15px' "Terminal buttons are pills"
+
+# --- installer Location page: Enclave's own map ---
+CAL="arch/overlay/airootfs/etc/calamares"
+has "$CAL/settings.conf" '^  - localeq$'               "installer uses the QML Location page"
+has "$CAL/modules/localeq.conf" '^qmlSearch: both'     "Location page loads from the branding folder"
+has "$CAL/branding/enclave/localeq.qml" 'worldmap-dots\.png' "dot-matrix world map"
+has "$CAL/branding/enclave/localeq.qml" 'setCurrentLocation' "map click sets the time zone"
+exists "$CAL/branding/enclave/worldmap-dots.png"        "map image present"
+has "$CAL/branding/enclave/zones.js" 'New_York'        "zone table present"
+
+# --- Windows / Android apps look native ---
+has "arch/overlay/airootfs/usr/local/bin/enclave-run-windows" 'Control Panel.Colors' "Wine: Ember colour scheme"
+has "arch/overlay/airootfs/usr/local/bin/enclave-run-windows" 'Fonts.Replacements' "Wine: Inter fonts"
+has "arch/overlay/airootfs/usr/local/bin/enclave-run-windows" 'LogPixels' "Wine: DPI follows the screen"
+has "arch/overlay/airootfs/usr/local/bin/enclave-run-android" 'multi_windows true' "Android apps in their own windows"
+has "arch/overlay/airootfs/usr/local/bin/enclave-run-android" 'uimode night' "Android follows dark / light"
+
+# --- installed boot: Windows-like, extra options in the bubble ---
+G="arch/overlay/airootfs/etc/grub.d"
+has "$CAL/modules/grubcfg.conf" 'GRUB_TIMEOUT_STYLE: "hidden"' "boots straight in when Enclave is alone"
+has "$CAL/modules/grubcfg.conf" 'GRUB_DISABLE_OS_PROBER: "false"' "other systems are found"
+has "$G/45_enclave_options" 'submenu "More options"'   "the bubble holds the extra options"
+has "$G/45_enclave_options" 'fwsetup'                  "UEFI Firmware Settings in the bubble"
+has "$G/45_enclave_options" 'Advanced options for Enclave OS' "advanced options in the bubble"
+has "$G/45_enclave_options" '30_os-prober'             "other systems go in the bubble"
+has "arch/overlay/airootfs/usr/local/bin/enclave-grub-tidy" '10_enclave' "only Enclave's generators stay executable"
+has "scripts/build-iso.sh" '/etc/grub.d/'              "grub.d scripts ship executable"
 
 exit $fail

@@ -87,7 +87,7 @@ Controls.Page {
             subtitle: page.trashSize === "" || page.trashSize === "0 B" ? "Empty" : page.trashSize + " in the Trash"
             Row {
                 spacing: 8
-                Controls.Button { text: "Open"; onClicked: System.run("thunar", ["trash:///"]) }
+                Controls.Button { text: "Open"; onClicked: System.run("enclave-files", ["trash:///"]) }
                 Controls.Button {
                     text: "Empty Trash"
                     danger: true
@@ -100,7 +100,7 @@ Controls.Page {
             icon: "system-file-manager-symbolic"
             title: "Browse your files"
             link: true
-            onClicked: System.run("thunar", [System.homePath])
+            onClicked: System.run("enclave-files", [System.homePath])
         }
     }
 }

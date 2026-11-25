@@ -120,6 +120,9 @@ add_file_perm() { # path-in-image mode
 for f in "$AIR"/usr/local/bin/*; do
   [ -f "$f" ] && add_file_perm "/usr/local/bin/$(basename "$f")" 755
 done
+for f in "$AIR"/etc/grub.d/*; do
+  [ -f "$f" ] && add_file_perm "/etc/grub.d/$(basename "$f")" 755
+done
 for f in "$AIR"/etc/skel/Desktop/*.desktop; do
   [ -f "$f" ] && add_file_perm "/etc/skel/Desktop/$(basename "$f")" 755
 done
@@ -176,15 +179,32 @@ run_logged() { # logfile cmd... — keep installer chatter out of the log unless
 log "building Enclave GTK + window theme (Fluent @ ${FLUENT_GTK_REV:0:7})"
 fetch_rev https://github.com/vinceliuice/Fluent-gtk-theme.git "$FLUENT_GTK_REV" "$THEMETMP/gtk" \
   || die "could not fetch Fluent-gtk-theme"
+# Ember colours and the rounded-everything rule go into Fluent's source
+# before it is built (tools/enclave-gtk-patch.sh), in light and dark:
+#   Enclave       — light (Porcelain, Burnt Orange accent)
+#   Enclave-Dark  — dark  (Obsidian/Graphite, Ember accent) — the default
+# then the Enclave layer (arch/themes/gtk/enclave-layer.css: rounded buttons
+# everywhere, Files restyle) is appended to every GTK 3 / 4 stylesheet.
+bash "$REPO/tools/enclave-gtk-patch.sh" "$THEMETMP/gtk" || die "Enclave GTK patch failed"
 install -d "$AIR/usr/share/themes"
-( cd "$THEMETMP/gtk" && run_logged "$THEMETMP/gtk.log" ./install.sh -t orange -c light --tweaks round -d "$AIR/usr/share/themes" ) \
+( cd "$THEMETMP/gtk" && run_logged "$THEMETMP/gtk.log" ./install.sh -t orange -c light dark --tweaks round -d "$AIR/usr/share/themes" ) \
   || die "Fluent-gtk-theme install failed"
-[ -d "$AIR/usr/share/themes/Fluent-round-orange-Light" ] || die "Fluent theme folder missing after install"
-rm -rf "$AIR/usr/share/themes/Enclave" "$AIR"/usr/share/themes/Fluent-round-orange-Light-*
+for v in Light Dark; do
+  [ -d "$AIR/usr/share/themes/Fluent-round-orange-$v" ] || die "Fluent $v theme folder missing after install"
+done
+rm -rf "$AIR/usr/share/themes/Enclave" "$AIR/usr/share/themes/Enclave-Dark" "$AIR"/usr/share/themes/Fluent-round-orange-*-compact
 mv "$AIR/usr/share/themes/Fluent-round-orange-Light" "$AIR/usr/share/themes/Enclave"
-sed -i 's/^Name=.*/Name=Enclave/; s/^GtkTheme=.*/GtkTheme=Enclave/; s/^MetacityTheme=.*/MetacityTheme=Enclave/;
-        s/^IconTheme=.*/IconTheme=Enclave/; s/^CursorTheme=.*/CursorTheme=Enclave-cursors/' \
-  "$AIR/usr/share/themes/Enclave/index.theme"
+mv "$AIR/usr/share/themes/Fluent-round-orange-Dark" "$AIR/usr/share/themes/Enclave-Dark"
+for t in Enclave Enclave-Dark; do
+  sed -i "s/^Name=.*/Name=$t/; s/^GtkTheme=.*/GtkTheme=$t/; s/^MetacityTheme=.*/MetacityTheme=$t/;
+          s/^IconTheme=.*/IconTheme=Enclave/; s/^CursorTheme=.*/CursorTheme=Enclave-cursors/" \
+    "$AIR/usr/share/themes/$t/index.theme"
+  for css in "$AIR/usr/share/themes/$t"/gtk-3.0/gtk*.css "$AIR/usr/share/themes/$t"/gtk-4.0/gtk*.css; do
+    [ -f "$css" ] || continue
+    printf '\n' >> "$css"; cat "$REPO/arch/themes/gtk/enclave-layer.css" >> "$css"
+  done
+  grep -qs 'Enclave layer' "$AIR/usr/share/themes/$t/gtk-3.0/gtk.css" || die "Enclave layer missing from $t"
+done
 # Window frames: show the app icon at the top-left like Windows (Fluent hides it).
 log "  Enclave theme installed"
 
@@ -218,7 +238,7 @@ rm -rf "$THEMETMP"
 log "  Enclave icons + cursor installed"
 
 # --- 6b3. Enclave Shell (Enclave's own Wayland desktop, Qt 6 / QML) and its
-#          labwc session ("Enclave" on the login screen).
+#          Hyprland session ("Enclave" on the login screen).
 #          Compiled against the same Arch Qt the image installs. ---
 DESKTOP_DIR="$REPO/desktop"
 if [ -d "$DESKTOP_DIR/shell" ]; then
@@ -234,6 +254,8 @@ if [ -d "$DESKTOP_DIR/shell" ]; then
   run_logged "$SHELLBUILD.log" env DESTDIR="$AIR" cmake --install "$SHELLBUILD" || die "Enclave Shell failed to install"
   [ -x "$AIR/usr/bin/enclave-shell" ] || die "Enclave Shell did not install"
   cp -a "$DESKTOP_DIR/session/rootfs/." "$AIR/"
+  # Hyprland only on the ISO: labwc's config is for the screenshot rig.
+  rm -rf "$AIR/usr/share/enclave/labwc" "$AIR/usr/share/themes/Enclave-Ember/labwc"
   # Stamp the image version, and keep Enclave's identity where package
   # updates can't replace it (Settings > About reads this copy first).
   if [ -f "$AIR/etc/os-release" ]; then
@@ -244,14 +266,14 @@ if [ -d "$DESKTOP_DIR/shell" ]; then
   fi
   install -Dm644 "$DESKTOP_DIR/design-system/tokens/ember.json" \
     "$AIR/usr/share/enclave/design-system/ember.json"
-  for f in enclave-shell enclave-session enclave-shell-run enclave-screenshot enclave-settings; do
+  for f in enclave-shell enclave-session enclave-shell-run enclave-screenshot enclave-settings enclave-files; do
     add_file_perm "/usr/bin/$f" 755
   done
   log "  Enclave Shell + Wayland session installed"
 fi
 
 # --- 6b4. Enclave Terminal (QTermWidget in an Ember window; the default
-#          terminal for the dock, Super+Return, Thunar and terminal apps). ---
+#          terminal for the dock, Super+Return, Files and terminal apps). ---
 if [ -d "$DESKTOP_DIR/terminal" ]; then
   [ -f /usr/lib/cmake/qtermwidget6/qtermwidget6-config.cmake ] \
     || die "qtermwidget not found (pacman -S qtermwidget) — needed for Enclave Terminal"

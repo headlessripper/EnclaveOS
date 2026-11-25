@@ -36,6 +36,7 @@ qt_add_executable(enclave-shell
   src/windowmanager.h
   src/toplevels.h src/toplevels.cpp
   src/system.h src/system.cpp
+  src/files.h src/files.cpp
   "${GEN}/wlr-foreign-toplevel-client.h" "${GEN}/wlr-foreign-toplevel.c")
 target_include_directories(enclave-shell PRIVATE "${GEN}" src)
 # Fallback token location when running from a source checkout.
@@ -58,6 +59,7 @@ qt_add_qml_module(enclave-shell
     qml/ControlCenter.qml
     qml/CalendarPanel.qml
     qml/Settings.qml
+    qml/Files.qml
     qml/settings/Controls.qml
     qml/settings/NetworkPage.qml
     qml/settings/SoundPage.qml

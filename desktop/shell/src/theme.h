@@ -51,6 +51,8 @@ signals:
 private:
     void load();
     void save() const;
+    // GTK / Qt apps follow light and dark too (GSettings + settings.ini)
+    void syncToolkits();
 
     QString m_source;
     QString m_mode = "light";
@@ -58,4 +60,5 @@ private:
     QString m_font = "Inter";
     int m_taskbarHeight = 76;
     bool m_reducedMotion = false;
+    int m_syncedDark = -1;
 };

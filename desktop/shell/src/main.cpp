@@ -8,6 +8,9 @@
 //                                 Enclave Settings, as an ordinary app window
 //                                 (what /usr/bin/enclave-settings runs). One
 //                                 instance: a second call just turns the page.
+//   enclave-shell --files [FOLDER]
+//                                 Enclave Files, the file manager (what
+//                                 /usr/bin/enclave-files runs). A window per call.
 #include <QCommandLineParser>
 #include <QDir>
 #include <QLocalServer>
@@ -19,6 +22,7 @@
 #include <QQuickWindow>
 
 #include "appregistry.h"
+#include "files.h"
 #include "iconprovider.h"
 #include "system.h"
 #include "theme.h"
@@ -132,6 +136,47 @@ static int runSettings(int argc, char *argv[])
     return app.exec();
 }
 
+// Enclave Files: Enclave's own file manager, in an ordinary window whose app
+// id is enclave-files; the same theme, icons and controls as the shell.
+static int runFiles(int argc, char *argv[])
+{
+    QString start;
+    for (int i = 1; i < argc; ++i) {
+        const QString a = QString::fromLocal8Bit(argv[i]);
+        if (!a.startsWith("--"))
+            start = a;
+    }
+    prepareEnvironment();
+    QGuiApplication app(argc, argv);
+    app.setApplicationName("enclave-files");
+    app.setApplicationDisplayName("Files");
+    app.setOrganizationName("Enclave");
+    app.setDesktopFileName("enclave-files");
+
+    Theme theme;
+    QFont font(theme.fontFamily());
+    font.setPointSizeF(10);
+    app.setFont(font);
+    AppRegistry apps;
+    System system;
+    Files files;
+    if (!start.isEmpty())
+        files.go(start);
+
+    QQmlApplicationEngine engine;
+    engine.addImageProvider("icon", new IconProvider);
+    qmlRegisterSingletonInstance("Enclave", 1, 0, "Theme", &theme);
+    qmlRegisterSingletonInstance("Enclave", 1, 0, "Apps", &apps);
+    qmlRegisterSingletonInstance("Enclave", 1, 0, "System", &system);
+    qmlRegisterSingletonInstance("Enclave", 1, 0, "FS", &files);
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app,
+                     [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);
+    engine.loadFromModule("Enclave.Shell", "Files");
+    if (engine.rootObjects().isEmpty())
+        return 1;
+    return app.exec();
+}
+
 int main(int argc, char *argv[])
 {
     for (int i = 1; i < argc; ++i) {
@@ -140,6 +185,8 @@ int main(int argc, char *argv[])
             return runClient(argc, argv);
         if (a == "--settings")
             return runSettings(argc, argv);
+        if (a == "--files")
+            return runFiles(argc, argv);
     }
 
     prepareEnvironment();
@@ -155,6 +202,7 @@ int main(int argc, char *argv[])
     cli.addOption({"toggle-start", "Open or close Start in the running shell."});
     cli.addOption({"command", "Send a command (start, show-desktop, toggle-appearance, quit).", "name"});
     cli.addOption({"settings", "Open Enclave Settings (with --page NAME)."});
+    cli.addOption({"files", "Open Enclave Files (optionally at FOLDER)."});
     cli.process(app);
 
     Theme theme;

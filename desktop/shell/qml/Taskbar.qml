@@ -371,12 +371,12 @@ Window {
                 icon: root.trashFull ? "user-trash-full" : "user-trash"
                 name: root.trashFull ? "Trash" : "Trash · empty"
                 checked: trashMenu.visible
-                onClicked: { root.interacted(); System.run("thunar", ["trash:///"]) }
+                onClicked: { root.interacted(); System.run("enclave-files", ["trash:///"]) }
                 onRightClicked: trashMenu.popup(trash, 0, -trashMenu.implicitHeight - 8)
 
                 EmberMenu {
                     id: trashMenu
-                    MenuItem { text: "Open Trash"; onTriggered: System.run("thunar", ["trash:///"]) }
+                    MenuItem { text: "Open Trash"; onTriggered: System.run("enclave-files", ["trash:///"]) }
                     MenuItem {
                         text: "Empty Trash"
                         enabled: root.trashFull

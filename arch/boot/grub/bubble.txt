@@ -1,0 +1,80 @@
+# Enclave OS — the options bubble (installed system's boot menu).
+#
+# The bubble on the boot menu opens this: the same screen, the bubble open
+# (ember ring) and a rounded glass card beneath it holding everything that
+# isn't "Enclave OS" — other systems (Windows Boot Manager…), Advanced
+# options, anything a package adds, UEFI Firmware Settings, Restart, Shut
+# down. Esc folds it back. Template: tools/make-boot-art.sh fills in
+# %N% / %HEIGHT% / %CARD_TOP% / %BUBBLE_TOP%; /etc/grub.d/45_enclave_options
+# picks the variant for the number of entries.
+
+title-text: ""
+desktop-image: "background.png"
+desktop-image-scale-method: "crop"
+desktop-color: "#101114"
+
+terminal-font: "Enclave Mono Regular 16"
+terminal-box: "term_*.png"
+terminal-left: "50%-500"
+terminal-top: "16%"
+terminal-width: "1000"
+terminal-height: "62%"
+terminal-border: "0"
+
+message-font: "Enclave Regular 16"
+message-color: "#A7A39B"
+message-bg-color: "#101114"
+
++ image {
+  left = 50%-64
+  top = 27%
+  file = "logo.png"
+}
+
++ image {
+  left = 50%-180
+  top = 27%+150
+  file = "wordmark.png"
+}
+
+# the bubble itself, open (ember ring), like the desktop's when its controls
+# fan out — and its card hanging beneath it
++ image {
+  left = 50%-24
+  top = %BUBBLE_TOP%
+  file = "bubble-open.png"
+}
+
+# the card: the menu's own rounded box, sized for %N% entries
+# (tools/make-boot-art.sh writes bubble-3.txt … bubble-8.txt;
+#  45_enclave_options picks the one that fits)
++ boot_menu {
+  left = 50%-320
+  top = %CARD_TOP%
+  width = 640
+  height = %HEIGHT%
+  menu_pixmap_style = "bubble_*.png"
+  item_font = "Enclave Regular 16"
+  item_color = "#D9D5CE"
+  selected_item_font = "Enclave Strong Regular 20"
+  selected_item_color = "#FFFFFF"
+  item_height = 40
+  item_padding = 14
+  item_spacing = 14
+  icon_width = 51
+  icon_height = 40
+  item_icon_space = 14
+  selected_item_pixmap_style = "select_*.png"
+  scrollbar = false
+}
+
++ label {
+  left = 0
+  top = 100%-64
+  width = 100%
+  height = 20
+  align = "center"
+  color = "#67645F"
+  font = "Enclave Regular 14"
+  text = "Enter  open      Esc  back      E  edit boot options"
+}

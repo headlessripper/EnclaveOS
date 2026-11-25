@@ -46,7 +46,7 @@
     "shadow":        "#00000033",
     "scrim":         "#00000033"
   },
-  "radius": { "small": 6, "medium": 12, "large": 20, "floating": 24, "pill": 999 },
+  "radius": { "small": 10, "medium": 14, "large": 20, "floating": 24, "pill": 999 },
   "spacing": { "unit": 8 },
   "type": { "family": "Inter", "body": 10, "small": 9, "title": 14, "display": 22 },
   "motion": { "fast": 150, "standard": 200, "slow": 250 },

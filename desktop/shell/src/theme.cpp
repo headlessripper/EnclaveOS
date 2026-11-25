@@ -4,7 +4,11 @@
 #include <QFile>
 #include <QGuiApplication>
 #include <QIcon>
+#include <QDir>
+#include <QFileInfo>
+#include <QFileSystemWatcher>
 #include <QJsonDocument>
+#include <QProcess>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QStyleHints>
@@ -51,7 +55,62 @@ Theme::Theme(QObject *parent) : QObject(parent)
     // Last resort for symbolic UI icons no theme in the chain has.
     QIcon::setFallbackThemeName("Adwaita");
     QIcon::setThemeName(iconTheme());
-    connect(this, &Theme::changed, this, [this] { QIcon::setThemeName(iconTheme()); });
+    connect(this, &Theme::changed, this, [this] { QIcon::setThemeName(iconTheme()); syncToolkits(); });
+    syncToolkits();
+
+    // Settings and Files are separate processes: they follow light / dark
+    // (and reduced motion) as soon as shell.conf changes, whoever changed it.
+    if (QCoreApplication::applicationName() != QLatin1String("enclave-shell")) {
+        auto *watch = new QFileSystemWatcher(this);
+        const QString conf = settingsPath();
+        QDir().mkpath(QFileInfo(conf).absolutePath());
+        watch->addPath(QFileInfo(conf).absolutePath());   // QSettings replaces the file
+        if (QFile::exists(conf))
+            watch->addPath(conf);
+        auto follow = [this, watch, conf] {
+            if (QFile::exists(conf) && !watch->files().contains(conf))
+                watch->addPath(conf);
+            QSettings s(conf, QSettings::IniFormat);
+            const QString mode = s.value("appearance/mode", "dark").toString();
+            const bool reduced = s.value("appearance/reducedMotion", false).toBool();
+            if (mode != m_mode || reduced != m_reducedMotion)
+                reload();
+        };
+        connect(watch, &QFileSystemWatcher::directoryChanged, this, follow);
+        connect(watch, &QFileSystemWatcher::fileChanged, this, follow);
+    }
+}
+
+// Light / dark for every other app: GTK 3 apps (Files…) switch between the
+// Enclave and Enclave-Dark themes, GTK 4 / libadwaita and portals read
+// color-scheme, and Qt apps follow GTK (QT_QPA_PLATFORMTHEME=gtk3).
+void Theme::syncToolkits()
+{
+    // only the desktop shell itself (Settings and Files tell it to reload)
+    if (QCoreApplication::applicationName() != QLatin1String("enclave-shell"))
+        return;
+    const int d = dark() ? 1 : 0;
+    if (d == m_syncedDark)
+        return;
+    m_syncedDark = d;
+    const QString gtk = d ? "Enclave-Dark" : "Enclave";
+    const QString icons = d ? "Enclave-dark" : "Enclave";
+    const QString scheme = d ? "prefer-dark" : "prefer-light";
+    const QString iface = "org.gnome.desktop.interface";
+    QProcess::startDetached("gsettings", {"set", iface, "gtk-theme", gtk});
+    QProcess::startDetached("gsettings", {"set", iface, "icon-theme", icons});
+    QProcess::startDetached("gsettings", {"set", iface, "color-scheme", scheme});
+    const QString config = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+    for (const char *dir : {"gtk-3.0", "gtk-4.0"}) {
+        const QString path = config + "/" + dir + "/settings.ini";
+        QDir().mkpath(config + "/" + dir);
+        QSettings ini(path, QSettings::IniFormat);
+        ini.beginGroup("Settings");
+        ini.setValue("gtk-theme-name", gtk);
+        ini.setValue("gtk-icon-theme-name", icons);
+        ini.setValue("gtk-application-prefer-dark-theme", d ? "true" : "false");
+        ini.endGroup();
+    }
 }
 
 void Theme::load()
@@ -91,7 +150,7 @@ void Theme::load()
     m_dark = {{"background", QColor("#101114")}, {"surface", QColor("#1A1C21")},
               {"elevated", QColor("#272A31")}, {"text", QColor("#F5F3EF")},
               {"textSecondary", QColor("#A7A39B")}, {"accent", QColor("#FF7A1A")}};
-    m_radius = {{"small", 6}, {"medium", 12}, {"large", 20}, {"floating", 24}};
+    m_radius = {{"small", 10}, {"medium", 14}, {"large", 20}, {"floating", 24}};
     m_motion = {{"fast", 150}, {"standard", 200}, {"slow", 250}};
 }
 

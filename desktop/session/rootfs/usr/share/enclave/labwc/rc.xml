@@ -57,7 +57,7 @@
     </keybind>
     <keybind key="W-s"><action name="Execute" command="enclave-shell --command start-open" /></keybind>
     <keybind key="W-d"><action name="Execute" command="enclave-shell --command show-desktop" /></keybind>
-    <keybind key="W-e"><action name="Execute" command="thunar" /></keybind>
+    <keybind key="W-e"><action name="Execute" command="enclave-files" /></keybind>
     <keybind key="W-Return"><action name="Execute" command="enclave-terminal" /></keybind>
     <keybind key="C-A-t"><action name="Execute" command="enclave-terminal" /></keybind>
     <keybind key="C-S-Escape"><action name="Execute" command="enclave-settings --page activity" /></keybind>

@@ -1,0 +1,30 @@
+/* Enclave OS — the Enclave layer, appended to the Enclave GTK themes
+ * (light and dark) by scripts/build-iso.sh after Fluent is built with the
+ * Ember patch (tools/enclave-gtk-patch.sh).
+ *
+ * The global rule: every button is rounded and modern. Fluent (patched)
+ * already rounds controls to 10 px; this layer makes the remaining square
+ * corners round and turns flat toolbar buttons into soft pills on hover.
+ * (Files is Enclave's own Qt app, styled by Enclave Shell, not GTK.)
+ * Colours come from the theme's named colours, so light and dark both work.
+ */
+
+/* ------------------------------------------------------------ everywhere */
+button, button.flat, button.image-button, button.text-button,
+menubutton > button, combobox > box > button, spinbutton button,
+toolbar button, headerbar button, .titlebar button:not(.titlebutton),
+modelbutton, popover button, dialog .dialog-action-area button {
+  border-radius: 10px;
+}
+button.circular, button.titlebutton, .titlebutton { border-radius: 9999px; }
+button.suggested-action, button.destructive-action { border-radius: 9999px; padding-left: 16px; padding-right: 16px; }
+entry, spinbutton, combobox, searchbar entry { border-radius: 10px; }
+popover, popover.background, popover > contents, menu, .menu, .context-menu { border-radius: 12px; }
+tooltip, tooltip.background { border-radius: 8px; }
+scale slider, switch slider, switch { border-radius: 9999px; }
+progressbar trough, progressbar progress, scale trough, scale highlight { border-radius: 9999px; }
+checkbutton check, check { border-radius: 6px; }
+notebook > header tab { border-radius: 10px; }
+.linked > button:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+.linked > button:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+

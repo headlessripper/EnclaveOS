@@ -47,7 +47,7 @@ Window {
         { title: "Set up your email", app: "org.mozilla.Thunderbird.desktop" },
         { title: "Ask the Enclave Assistant", app: "enclave-assistant.desktop" },
         { title: "Make Enclave yours", app: "enclave-settings.desktop" },
-        { title: "Open your files", app: "thunar.desktop" },
+        { title: "Open your files", app: "enclave-files.desktop" },
     ]
 
     function open(startPage) {

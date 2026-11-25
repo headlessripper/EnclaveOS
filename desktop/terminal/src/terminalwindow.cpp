@@ -294,7 +294,7 @@ void TerminalWindow::showContextMenu(QTermWidget *term, const QPoint &pos)
         LaunchOptions o; o.workingDirectory = term->workingDirectory(); addTab(o);
     });
     menu.addAction("Open Folder in Files", this, [term] {
-        QProcess::startDetached("thunar", {term->workingDirectory()});
+        QProcess::startDetached("enclave-files", {term->workingDirectory()});
     });
     menu.exec(term->mapToGlobal(pos));
 }
@@ -363,7 +363,7 @@ void TerminalWindow::applyTheme()
         QTabBar::tab {
             background: transparent; color: %6;
             padding: 6px 10px 6px 14px; margin: 8px 2px 8px 0;
-            border-radius: 9px; min-width: 110px; max-width: 230px;
+            border-radius: 12px; min-width: 110px; max-width: 230px;
             font-size: 9.5pt;
         }
         QTabBar::tab:hover { background: %4; color: %5; }
@@ -371,16 +371,16 @@ void TerminalWindow::applyTheme()
             background: %3; color: %5; font-weight: 600;
             border: 1px solid %7; border-bottom: 2px solid %9;
         }
-        QTabBar::close-button { image: url(:/icons/close.svg); subcontrol-position: right; margin: 2px; border-radius: 4px; }
+        QTabBar::close-button { image: url(:/icons/close.svg); subcontrol-position: right; margin: 2px; border-radius: 8px; }
         QTabBar::close-button:hover { background: %4; }
         QTabBar QToolButton { background: %2; color: %5; border: none; }
         #plus {
-            background: transparent; color: %6; border: none; border-radius: 8px;
+            background: transparent; color: %6; border: none; border-radius: 15px;
             font-size: 15pt; font-weight: 300; padding-bottom: 2px;
         }
         #plus:hover { background: %4; color: %9; }
         QMenu { background: %8; color: %5; border: 1px solid %7; border-radius: 12px; padding: 6px; }
-        QMenu::item { padding: 7px 26px 7px 14px; border-radius: 7px; }
+        QMenu::item { padding: 7px 26px 7px 14px; border-radius: 9px; }
         QMenu::item:selected { background: %4; }
         QMenu::item:disabled { color: %6; }
         QMenu::separator { height: 1px; background: %7; margin: 5px 8px; }
@@ -388,9 +388,9 @@ void TerminalWindow::applyTheme()
         QScrollBar::handle:vertical { background: %4; border-radius: 3px; min-height: 30px; }
         QScrollBar::handle:vertical:hover { background: %6; }
         QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page { background: none; height: 0; }
-        QLineEdit { background: %8; color: %5; border: 1px solid %7; border-radius: 8px; padding: 4px 8px; selection-background-color: %9; }
+        QLineEdit { background: %8; color: %5; border: 1px solid %7; border-radius: 12px; padding: 5px 12px; selection-background-color: %9; }
         QMessageBox { background: %2; } QMessageBox QLabel { color: %5; }
-        QPushButton { background: %8; color: %5; border: 1px solid %7; border-radius: 8px; padding: 6px 16px; }
+        QPushButton { background: %8; color: %5; border: 1px solid %7; border-radius: 15px; padding: 6px 18px; }
         QPushButton:hover { background: %4; }
     )").arg(p.ground, p.strip, p.tab, p.tabHover, p.text, p.muted, p.border, p.menu, kEmber));
     for (QTermWidget *t : m_terms)

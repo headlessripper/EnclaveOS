@@ -26,12 +26,16 @@ setup_android() {
   sudo systemctl enable --now waydroid-container.service
   echo "[enclave] initializing Waydroid images (downloads ~1GB)…"
   sudo waydroid init || true
-  echo "[enclave] Android ready. Open .apk files or use: waydroid app install <apk>"
+  echo "[enclave] making Android apps look like Enclave apps (own windows, dark mode)…"
+  enclave-run-android --apply-look || true
+  echo "[enclave] Android ready. Open an .apk file in Files to install it."
 }
 
 setup_gaming() {
   echo "[enclave] installing Steam + Proton (Windows games)…"
   sudo pacman -S --needed --noconfirm steam
+  echo "[enclave] preparing the Windows app prefix (Ember look, Inter, DPI)…"
+  enclave-run-windows --apply-look || true
   echo "[enclave] In Steam: Settings > Compatibility > enable Proton for all titles."
 }
 

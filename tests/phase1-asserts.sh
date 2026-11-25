@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Enclave OS — Phase 1 (the desktop's defaults and look) static assertions.
-# XFCE is gone: the desktop is Enclave Shell on labwc (see phase5). This
+# XFCE is gone: the desktop is Enclave Shell on Hyprland (see phase5). This
 # checks what surrounds it: session defaults, look (GTK, icons, cursor, font,
 # wallpapers), default apps, boot screens and the SDDM greeter.
 # Run from the repo root:  bash tests/phase1-asserts.sh
@@ -33,9 +33,9 @@ has "$AIR/usr/share/enclave/start-defaults.json" '"taskbar"' "default dock pins"
 lacks "$AIR/usr/share/enclave/start-defaults.json" '"desktop"' "clean desktop: no default desktop icons"
 
 # --- the look: GTK theme, Enclave Icons, cursor, font ---
-has "$AIR/etc/skel/.config/gtk-3.0/settings.ini" '^gtk-icon-theme-name=Enclave$' "GTK 3 icons = Enclave Icons"
-has "$AIR/etc/skel/.config/gtk-4.0/settings.ini" '^gtk-icon-theme-name=Enclave$' "GTK 4 icons = Enclave Icons"
-has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "icon-theme='Enclave'" "Wayland GTK icons = Enclave Icons"
+has "$AIR/etc/skel/.config/gtk-3.0/settings.ini" '^gtk-icon-theme-name=Enclave(-dark)?$' "GTK 3 icons = Enclave Icons"
+has "$AIR/etc/skel/.config/gtk-4.0/settings.ini" '^gtk-icon-theme-name=Enclave(-dark)?$' "GTK 4 icons = Enclave Icons"
+has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "icon-theme='Enclave(-dark)?'" "Wayland GTK icons = Enclave Icons"
 has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "cursor-theme='Enclave-cursors'" "cursor = Enclave"
 has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "font-name='Inter" "UI font = Inter"
 has "$PKG" '^inter-font$'                                   "pkg: inter-font"
@@ -72,7 +72,8 @@ has "scripts/build-iso.sh" 'FLUENT_GTK_REV="[0-9a-f]{40}"'  "GTK theme source is
 has "$AIR/usr/share/enclave/menus/enclave-applications.menu" 'enclave-settings\.desktop' "one Settings entry"
 has "$AIR/usr/local/share/applications/org.xfce.ristretto.desktop" '^Name=Photos$' "image viewer branded 'Photos'"
 has "$AIR/usr/local/share/applications/io.github.celluloid_player.Celluloid.desktop" '^Name=Media Player$' "video player branded 'Media Player'"
-has "$AIR/usr/local/share/applications/thunar.desktop" '^Name=Files' "file manager branded 'Files'"
+has "desktop/session/rootfs/usr/share/applications/enclave-files.desktop" '^Name=Files$' "file manager is Enclave Files"
+has "$AIR/etc/xdg/mimeapps.list" '^inode/directory=enclave-files.desktop' "folders open in Enclave Files"
 
 # --- wallpapers: Ember Horizon, light and dark ---
 for w in enclave-default enclave-default-light enclave-login; do

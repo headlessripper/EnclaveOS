@@ -1,19 +1,69 @@
 #!/usr/bin/env bash
-# Enclave — install/launch an Android app (.apk) via Waydroid. If Android
-# support isn't set up yet, point the user at enclave-appsetup.
+# Enclave — install and open an Android app (.apk) with Waydroid, so it looks
+# like any other Enclave app:
+#   * every Android app in its own window (Waydroid multi-window), so it gets
+#     a dock icon, Hyprland's rounded corners and the bubble's controls;
+#   * Android's dark / light mode follows Enclave's appearance;
+#   * a sensible density for the screen, and no letterboxing;
+#   * after installing, the app opens straight away; Waydroid adds it to Start.
+# If Android support isn't set up yet, it points to enclave-appsetup.
+#   enclave-run-android <app.apk>
+#   enclave-run-android --apply-look        (just refresh the look)
 set -euo pipefail
 
-notify() { command -v notify-send >/dev/null 2>&1 && notify-send "Enclave" "$1" || echo "$1"; }
+notify() { command -v notify-send >/dev/null 2>&1 && notify-send -a Enclave -i enclave-android-apps "Android apps" "$1" || echo "$1" >&2; }
 
 if ! command -v waydroid >/dev/null 2>&1; then
-  notify "Android apps aren't set up yet. Run:  enclave-appsetup android"
+  notify "Android apps aren't set up yet. Open Terminal and run:  enclave-appsetup android"
   exit 1
 fi
+
+mode() {
+  local conf="${XDG_CONFIG_HOME:-$HOME/.config}/enclave/shell.conf" m=dark
+  [ -r "$conf" ] && m=$(awk -F= '/^\[/ { s = $0 } s == "[appearance]" && $1 == "mode" { print $2; exit }' "$conf")
+  [ "$m" = light ] && echo light || echo dark
+}
+
+# the container, then a session (the session runs as you)
+systemctl is-active --quiet waydroid-container.service \
+  || pkexec systemctl start waydroid-container.service || true
+if ! waydroid status 2>/dev/null | grep -q 'Session:.*RUNNING'; then
+  notify "Starting Android…"
+  (waydroid session start >/dev/null 2>&1 &)
+  for _ in $(seq 1 60); do
+    waydroid status 2>/dev/null | grep -q 'Session:.*RUNNING' && break
+    sleep 1
+  done
+fi
+
+apply_look() {
+  # one window per app, windows that resize freely, the pointer as a pointer
+  waydroid prop set persist.waydroid.multi_windows true >/dev/null 2>&1 || true
+  waydroid prop set persist.waydroid.cursor_on_subsurface true >/dev/null 2>&1 || true
+  waydroid prop set persist.waydroid.suspend false >/dev/null 2>&1 || true
+  # dark / light like the rest of Enclave
+  if [ "$(mode)" = dark ]; then night=yes; else night=no; fi
+  waydroid shell -- cmd uimode night "$night" >/dev/null 2>&1 \
+    || pkexec waydroid shell -- cmd uimode night "$night" >/dev/null 2>&1 || true
+  echo "$(mode)" > "${XDG_CONFIG_HOME:-$HOME/.config}/enclave/android-look" 2>/dev/null || true
+}
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/enclave"
+if [ "${1:-}" = --apply-look ] || [ "$(cat "${XDG_CONFIG_HOME:-$HOME/.config}/enclave/android-look" 2>/dev/null)" != "$(mode)" ]; then
+  apply_look
+fi
+[ "${1:-}" = --apply-look ] && exit 0
 
 apk="${1:-}"
 [ -n "$apk" ] || { echo "usage: enclave-run-android <app.apk>" >&2; exit 2; }
 
-# Make sure the container is up, then install.
-systemctl is-active --quiet waydroid-container.service || sudo systemctl start waydroid-container.service || true
+before=$(waydroid app list 2>/dev/null | sed -n 's/^packageName: //p' | sort)
+notify "Installing $(basename -- "$apk")…"
 waydroid app install "$apk"
-notify "Installed to Android. Find it in the Waydroid app list."
+after=$(waydroid app list 2>/dev/null | sed -n 's/^packageName: //p' | sort)
+pkg=$(comm -13 <(echo "$before") <(echo "$after") | head -n1)
+
+if [ -n "$pkg" ]; then
+  notify "Installed. It's in Start, and opening now."
+  exec waydroid app launch "$pkg"
+fi
+notify "Installed (or updated). Find it in Start."

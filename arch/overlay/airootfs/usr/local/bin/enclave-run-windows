@@ -1,22 +1,185 @@
 #!/usr/bin/env bash
-# Enclave — run a Windows program (.exe/.msi) through Wine, in a tidy Enclave
-# prefix. Used by the file-type handler and runnable directly.
+# Enclave — run a Windows program (.exe/.msi) through Wine, in Enclave's own
+# prefix, looking like it belongs on Enclave OS:
+#   * native Wayland windows (Wine's Wayland driver: sharp at any scale, and
+#     Hyprland rounds and animates them like every other window); X11 via
+#     Xwayland if you set ENCLAVE_WINE_DRIVER=x11;
+#   * Enclave Ember colours for classic Windows controls, light or dark
+#     following Enclave's appearance, and "dark mode" for apps that ask;
+#   * Inter in place of Segoe UI / Tahoma / MS Sans Serif, with smooth
+#     (subpixel) font rendering;
+#   * the screen's scale as the Windows DPI (125 %, 150 %… just work);
+#   * no Mono / Gecko download prompts.
+# The look is (re)applied when the prefix is new or Enclave's light / dark
+# changes. Used by the file-type handler and runnable directly:
+#   enclave-run-windows <program.exe|installer.msi> [args...]
+#   enclave-run-windows --apply-look      (just refresh the look)
 set -euo pipefail
 
+notify() { command -v notify-send >/dev/null 2>&1 && notify-send -a Enclave -i enclave-windows-apps "Windows apps" "$1" || echo "$1" >&2; }
+
 if ! command -v wine >/dev/null 2>&1; then
-  echo "Wine is not installed." >&2
+  notify "Wine is not installed (sudo pacman -S wine)."
   exit 1
 fi
 
 export WINEPREFIX="${WINEPREFIX:-${XDG_DATA_HOME:-$HOME/.local/share}/enclave/wine}"
 export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:-mscoree=d;mshtml=d}"  # skip mono/gecko nags
+export WINEDEBUG="${WINEDEBUG:--all}"
 mkdir -p "$WINEPREFIX"
+
+# ---------------------------------------------------------------- the look
+mode() {   # dark | light — Enclave's appearance (shell.conf), "system" = dark
+  local conf="${XDG_CONFIG_HOME:-$HOME/.config}/enclave/shell.conf" m=dark
+  [ -r "$conf" ] && m=$(awk -F= '/^\[/ { s = $0 } s == "[appearance]" && $1 == "mode" { print $2; exit }' "$conf")
+  [ "$m" = light ] && echo light || echo dark
+}
+
+dpi() {    # 96 × the focused screen's scale (Hyprland), else 96
+  local s=1
+  if command -v hyprctl >/dev/null 2>&1; then
+    s=$(hyprctl -j monitors 2>/dev/null | sed -n 's/.*"scale": *\([0-9.]*\).*/\1/p' | head -n1)
+  fi
+  awk -v s="${s:-1}" 'BEGIN { d = int(96 * s + 0.5); if (d < 96) d = 96; printf "%d", d }'
+}
+
+apply_look() {
+  local m d driver reg
+  m=$(mode); d=$(dpi)
+  driver="${ENCLAVE_WINE_DRIVER:-wayland,x11}"
+  [ "$driver" = x11 ] && driver="x11"
+  reg="$(mktemp --suffix=.reg)"
+  {
+    echo 'Windows Registry Editor Version 5.00'
+    echo
+    echo '[HKEY_CURRENT_USER\Software\Wine\Drivers]'
+    echo "\"Graphics\"=\"$driver\""
+    echo
+    echo '[HKEY_CURRENT_USER\Control Panel\Desktop]'
+    echo '"FontSmoothing"="2"'
+    echo '"FontSmoothingType"=dword:00000002'
+    echo '"FontSmoothingGamma"=dword:00000578'
+    echo '"FontSmoothingOrientation"=dword:00000001'
+    printf '"LogPixels"=dword:%08x\n' "$d"
+    echo
+    echo '[HKEY_LOCAL_MACHINE\System\CurrentControlSet\Hardware Profiles\Current\Software\Fonts]'
+    printf '"LogPixels"=dword:%08x\n' "$d"
+    echo
+    echo '[HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements]'
+    for f in "Segoe UI" "Segoe UI Variable" "Tahoma" "MS Shell Dlg" "MS Shell Dlg 2" "MS Sans Serif" "Microsoft Sans Serif" "Arial" "Verdana" "Trebuchet MS"; do
+      echo "\"$f\"=\"Inter\""
+    done
+    echo '"Consolas"="JetBrains Mono"'
+    echo '"Courier New"="JetBrains Mono"'
+    echo
+    echo '[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]'
+    if [ "$m" = dark ]; then
+      echo '"AppsUseLightTheme"=dword:00000000'
+      echo '"SystemUsesLightTheme"=dword:00000000'
+    else
+      echo '"AppsUseLightTheme"=dword:00000001'
+      echo '"SystemUsesLightTheme"=dword:00000001'
+    fi
+    echo
+    echo '[HKEY_CURRENT_USER\Control Panel\Colors]'
+    if [ "$m" = dark ]; then
+      # Obsidian / Graphite / Elevated, Ember selection
+      cat <<'EOF'
+"ActiveBorder"="44 47 54"
+"ActiveTitle"="26 28 33"
+"AppWorkSpace"="16 17 20"
+"Background"="16 17 20"
+"ButtonAlternateFace"="39 42 49"
+"ButtonDkShadow"="10 11 13"
+"ButtonFace"="39 42 49"
+"ButtonHilight"="58 61 69"
+"ButtonLight"="48 51 59"
+"ButtonShadow"="22 24 28"
+"ButtonText"="245 243 239"
+"GradientActiveTitle"="26 28 33"
+"GradientInactiveTitle"="16 17 20"
+"GrayText"="107 104 98"
+"Hilight"="255 122 26"
+"HilightText"="255 255 255"
+"HotTrackingColor"="255 172 85"
+"InactiveBorder"="44 47 54"
+"InactiveTitle"="16 17 20"
+"InactiveTitleText"="167 163 155"
+"InfoText"="245 243 239"
+"InfoWindow"="39 42 49"
+"Menu"="39 42 49"
+"MenuBar"="26 28 33"
+"MenuHilight"="255 122 26"
+"MenuText"="245 243 239"
+"Scrollbar"="26 28 33"
+"TitleText"="245 243 239"
+"Window"="26 28 33"
+"WindowFrame"="44 47 54"
+"WindowText"="245 243 239"
+EOF
+    else
+      # Porcelain / white / Warm Grey, Burnt Orange selection (contrast on white)
+      cat <<'EOF'
+"ActiveBorder"="234 232 226"
+"ActiveTitle"="247 246 243"
+"AppWorkSpace"="234 232 226"
+"Background"="247 246 243"
+"ButtonAlternateFace"="234 232 226"
+"ButtonDkShadow"="160 157 150"
+"ButtonFace"="247 246 243"
+"ButtonHilight"="255 255 255"
+"ButtonLight"="250 249 246"
+"ButtonShadow"="214 211 204"
+"ButtonText"="32 33 36"
+"GradientActiveTitle"="247 246 243"
+"GradientInactiveTitle"="242 241 238"
+"GrayText"="150 146 138"
+"Hilight"="233 91 22"
+"HilightText"="255 255 255"
+"HotTrackingColor"="233 91 22"
+"InactiveBorder"="234 232 226"
+"InactiveTitle"="242 241 238"
+"InactiveTitleText"="107 104 96"
+"InfoText"="32 33 36"
+"InfoWindow"="255 255 255"
+"Menu"="255 255 255"
+"MenuBar"="247 246 243"
+"MenuHilight"="233 91 22"
+"MenuText"="32 33 36"
+"Scrollbar"="234 232 226"
+"TitleText"="32 33 36"
+"Window"="255 255 255"
+"WindowFrame"="214 211 204"
+"WindowText"="32 33 36"
+EOF
+    fi
+  } > "$reg"
+  wine regedit /S "$reg" >/dev/null 2>&1 || true
+  wineserver -w 2>/dev/null || true
+  rm -f "$reg"
+  echo "$m $d $driver" > "$WINEPREFIX/.enclave-look"
+}
+
+want="$(mode) $(dpi) ${ENCLAVE_WINE_DRIVER:-wayland,x11}"
+if [ ! -f "$WINEPREFIX/system.reg" ]; then
+  notify "Setting up Windows apps for the first time…"
+  wineboot -i >/dev/null 2>&1 || true
+  apply_look
+elif [ "$(cat "$WINEPREFIX/.enclave-look" 2>/dev/null)" != "$want" ] || [ "${1:-}" = --apply-look ]; then
+  apply_look
+fi
+[ "${1:-}" = --apply-look ] && exit 0
 
 target="${1:-}"
 [ -n "$target" ] || { echo "usage: enclave-run-windows <program.exe|installer.msi> [args...]" >&2; exit 2; }
 shift || true
 
+# Run from the program's folder: many Windows apps look for files beside themselves.
+dir=$(dirname -- "$(readlink -f -- "$target")")
+cd -- "$dir" 2>/dev/null || true
+
 case "${target,,}" in
   *.msi) exec wine msiexec /i "$target" "$@" ;;
+  *.bat|*.cmd) exec wine cmd /c "$target" "$@" ;;
   *)     exec wine "$target" "$@" ;;
 esac

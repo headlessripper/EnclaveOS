@@ -4,7 +4,7 @@
 -- window floats (a desktop, not a tiling WM), with continuous rounded
 -- corners, soft shadows, a hairline frame and frosted-glass blur behind the
 -- shell. There are no title bars — windows are driven from the bubble.
--- On machines without 3D graphics, enclave-session uses labwc instead.
+-- Hyprland is the only compositor on Enclave OS (no fallback); VMs need 3D.
 --
 -- Users can override anything in ~/.config/enclave/hyprland.lua (loaded last).
 
@@ -217,7 +217,7 @@ hl.bind("SUPER + C", hl.dsp.exec_cmd(shell .. "calendar"))
 hl.bind("SUPER + W", hl.dsp.exec_cmd(shell .. "widgets"))
 hl.bind("SUPER + B", hl.dsp.exec_cmd(shell .. "bubble"))
 hl.bind("SUPER + D", hl.dsp.exec_cmd(shell .. "show-desktop"))
-hl.bind("SUPER + E", hl.dsp.exec_cmd("thunar"))
+hl.bind("SUPER + E", hl.dsp.exec_cmd("enclave-files"))
 hl.bind("SUPER + RETURN", hl.dsp.exec_cmd("enclave-terminal"))
 hl.bind("CTRL + ALT + T", hl.dsp.exec_cmd("enclave-terminal"))
 hl.bind("CTRL + SHIFT + ESCAPE", hl.dsp.exec_cmd("enclave-settings --page activity"))

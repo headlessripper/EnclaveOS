@@ -1,18 +1,35 @@
 name: Build Enclave ISO
 
+# Builds the Enclave OS ISO (Hyprland session, Enclave Shell) in an Arch
+# container. A pushed tag v* also publishes a GitHub Release with the ISO;
+# a manual run only uploads it as a workflow artifact.
+
 on:
   workflow_dispatch:
   push:
     tags: ['v*']
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
 
       - name: Static checks (all phases)
-        run: for p in 0 1 2 3 4; do bash "tests/phase$p-asserts.sh"; done
+        run: for p in 0 1 2 3 4 5; do bash "tests/phase$p-asserts.sh" || exit 1; done
+
+      # The runner starts with ~14 GB free; the ISO build (Calamares compile,
+      # airootfs, squashfs) needs more. Drop toolchains the build never uses.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL \
+                      /usr/local/share/boost /usr/share/swift /usr/local/.ghcup || true
+          sudo docker image prune --all --force || true
+          df -h /
 
       - name: Build ISO (in archlinux container)
         run: |
@@ -22,10 +39,57 @@ jobs:
               sed -i "/^\[options\]/a XferCommand = /usr/bin/curl -fL -C - --retry 30 --retry-delay 3 --retry-all-errors --connect-timeout 30 -o %o %u" /etc/pacman.conf &&
               pacman -Syu --noconfirm --needed archiso git base-devel sudo sassc librsvg plymouth gtk-update-icon-cache cmake wlr-protocols wayland-protocols qt6-base qt6-declarative qt6-wayland qt6-svg layer-shell-qt qtermwidget grub inter-font ttf-jetbrains-mono &&
               bash scripts/build-iso.sh'
+          sudo chown -R "$(id -u):$(id -g)" dist
+          ls -la dist/
 
-      - name: Upload ISO
+      # GitHub release assets are limited to 2 GiB each: a larger ISO is
+      # published in parts (join with: cat enclave-*.iso.part-* > enclave.iso).
+      - name: Checksums (and split if over 2 GiB)
+        run: |
+          cd dist
+          iso=$(ls *.iso | head -n1)
+          sha256sum "$iso" > "$iso.sha256"
+          if [ "$(stat -c %s "$iso")" -ge 2000000000 ]; then
+            split -b 1900M -d -a 2 "$iso" "$iso.part-"
+            echo "SPLIT=1" >> "$GITHUB_ENV"
+          fi
+          echo "ISO=$iso" >> "$GITHUB_ENV"
+          ls -la
+
+      - name: Upload ISO (workflow artifact)
         uses: actions/upload-artifact@v4
         with:
           name: enclave-iso
           path: dist/*.iso
+          compression-level: 0
           if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          cd dist
+          if [ "${SPLIT:-0}" = 1 ]; then
+            assets=$(ls "$ISO".part-* "$ISO.sha256")
+            how="The ISO is over GitHub's 2 GiB per-file limit, so it comes in parts. Download every part, then join them:
+
+          \`\`\`
+          cat $ISO.part-* > $ISO
+          sha256sum -c $ISO.sha256
+          \`\`\`"
+          else
+            assets="$ISO $ISO.sha256"
+            how="Check the download with \`sha256sum -c $ISO.sha256\`."
+          fi
+          cat > notes.md <<EOF
+          Enclave OS $TAG — Enclave Shell on Hyprland (rounded windows, blur, animations).
+
+          * Boot it from a USB stick (UEFI) or in a VM. **Virtual machines need 3D acceleration enabled** (VMware: *Accelerate 3D graphics*; VirtualBox: VMSVGA + 3D; QEMU: virtio-gpu-gl).
+          * Install with **Install Enclave OS** on the desktop.
+
+          $how
+          EOF
+          sed -i 's/^          //' notes.md
+          gh release create "$TAG" $assets --title "Enclave OS $TAG" --notes-file notes.md --prerelease

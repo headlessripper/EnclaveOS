@@ -1,0 +1,22 @@
+[Desktop Entry]
+Type=Application
+Name=Files
+GenericName=File Manager
+Comment=Browse your files, drives and Trash
+Exec=enclave-files %U
+Icon=system-file-manager
+Terminal=false
+StartupNotify=true
+StartupWMClass=enclave-files
+Categories=System;Utility;Core;FileTools;FileManager;
+MimeType=inode/directory;
+Keywords=files;explorer;file manager;folders;browse;finder;
+Actions=Home;Trash;
+
+[Desktop Action Home]
+Name=Home
+Exec=enclave-files
+
+[Desktop Action Trash]
+Name=Trash
+Exec=enclave-files trash:///

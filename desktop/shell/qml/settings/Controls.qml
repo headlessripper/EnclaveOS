@@ -281,8 +281,8 @@ QtObject {
         property bool danger: false
         signal clicked()
         height: 32
-        width: btnRow.width + 28
-        radius: Theme.radius.small + 3
+        width: btnRow.width + 32
+        radius: height / 2          // the global rule: buttons are pills
         opacity: enabled ? 1 : 0.45
         color: primary ? (btnMouse.pressed ? Theme.brand.burnt : Theme.c.accent)
              : btnMouse.pressed ? Theme.c.pressed : btnMouse.containsMouse ? Theme.c.hover : Theme.c.surface
