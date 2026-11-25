@@ -1,7 +1,7 @@
 [Icon Theme]
 Name=Enclave Icons
-Comment=Enclave OS icons (light). Enclave's own set from tools/make-icons.py; everything else from Papirus.
-Inherits=Papirus,Adwaita,hicolor
+Comment=Enclave OS icons (light). Enclave's own set from tools/make-icons.py; third-party apps keep their own icons (hicolor first); Papirus fills the gaps.
+Inherits=hicolor,Papirus,Adwaita
 Example=folder
 Directories=scalable/apps,scalable/places,scalable/devices,scalable/mimetypes
 

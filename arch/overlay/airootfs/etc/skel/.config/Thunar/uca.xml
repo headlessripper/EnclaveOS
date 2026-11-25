@@ -6,7 +6,7 @@
     <icon>utilities-terminal</icon>
     <name>Open Terminal Here</name>
     <unique-id>enclave-terminal</unique-id>
-    <command>xfce4-terminal --working-directory %f</command>
+    <command>enclave-terminal --working-directory %f</command>
     <description>Open a terminal in this folder</description>
     <patterns>*</patterns>
     <startup-notify/>

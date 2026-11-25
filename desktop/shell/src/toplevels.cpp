@@ -1,4 +1,5 @@
 #include "toplevels.h"
+#include "system.h"
 
 #include <cstring>
 #include <wayland-client.h>
@@ -276,8 +277,13 @@ void ToplevelModel::minimize(int index)
 {
     if (!valid(index))
         return;
+    // Hyprland keeps minimised windows on a hidden workspace (hyprland.lua);
+    // the request below reaches it as a "window.minimize" event, and for the
+    // window in front we also ask directly.
     zwlr_foreign_toplevel_handle_v1_set_minimized(m_items.at(index)->handle);
     flush();
+    if (System::compositor() == "hyprland" && index == activeIndex())
+        System::runHypr("enclave.minimize()");
 }
 
 void ToplevelModel::toggleMaximize(int index)
@@ -312,6 +318,10 @@ void ToplevelModel::toggleMinimize(int index)
 
 void ToplevelModel::minimizeAll()
 {
+    if (System::compositor() == "hyprland") {
+        System::runHypr("enclave.show_desktop()");
+        return;
+    }
     bool any = false;
     for (Toplevel *t : std::as_const(m_items))
         if (!t->minimized) {

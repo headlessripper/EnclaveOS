@@ -1,8 +1,15 @@
 #!/bin/sh
-# Enclave OS — start the Enclave Shell session (Wayland, labwc underneath).
+# Enclave OS — start the Enclave Shell session (Wayland).
 # Selected from the login screen as "Enclave" (the only session).
+#
+# The compositor underneath:
+#   * Hyprland wherever there is a GPU (rounded windows, blur, animations);
+#   * labwc when there is no GPU render node (VMs without 3D graphics, broken
+#     drivers): it renders in software, so Enclave always reaches a desktop;
+#   * labwc too if Hyprland fails to start (falls over within 10 seconds).
+# Force one with ~/.config/enclave/compositor ("hyprland" or "labwc") or
+# ENCLAVE_COMPOSITOR.
 
-export XDG_CURRENT_DESKTOP=Enclave:wlroots
 export XDG_SESSION_DESKTOP=enclave
 export XDG_SESSION_TYPE=wayland
 export QT_QPA_PLATFORM="wayland;xcb"
@@ -17,23 +24,63 @@ export QT_QPA_PLATFORMTHEME=gtk3
 export XCURSOR_THEME=Enclave-cursors
 export XCURSOR_SIZE=24
 
-# No GPU render node (some VMs, broken drivers): render in software
-# instead of failing to start.
-if ! ls /dev/dri/renderD* >/dev/null 2>&1; then
-  export WLR_RENDERER=pixman
-  export ENCLAVE_SOFTWARE_RENDERING=1
+# The keyboard layout chosen in the installer (compositors read XKB_DEFAULT_*).
+if [ -z "${XKB_DEFAULT_LAYOUT:-}" ] && command -v localectl >/dev/null; then
+  layout=$(localectl status 2>/dev/null | sed -n 's/^ *X11 Layout: *//p')
+  variant=$(localectl status 2>/dev/null | sed -n 's/^ *X11 Variant: *//p')
+  [ -n "$layout" ] && export XKB_DEFAULT_LAYOUT="$layout"
+  [ -n "$variant" ] && export XKB_DEFAULT_VARIANT="$variant"
 fi
+
 # Virtual GPUs often draw a broken hardware cursor.
 if command -v systemd-detect-virt >/dev/null && systemd-detect-virt -q --vm; then
   export WLR_NO_HARDWARE_CURSORS=1
 fi
 
 # exec keeps this pid, so the shell can end the session without knowing
-# which compositor runs it.
+# which compositor runs it (SIGTERM; forwarded to Hyprland below).
 export ENCLAVE_COMPOSITOR_PID=$$
 
-# The user's own labwc config wins; otherwise Enclave's defaults.
-if [ -f "$HOME/.config/labwc/rc.xml" ]; then
-  exec labwc "$@"
+choice=${ENCLAVE_COMPOSITOR:-}
+[ -z "$choice" ] && [ -r "$HOME/.config/enclave/compositor" ] && choice=$(head -n1 "$HOME/.config/enclave/compositor")
+if [ -z "$choice" ]; then
+  if ls /dev/dri/renderD* >/dev/null 2>&1 && command -v Hyprland >/dev/null; then
+    choice=hyprland
+  else
+    choice=labwc
+  fi
 fi
-exec labwc -C /usr/share/enclave/labwc "$@"
+
+run_labwc() {
+  export XDG_CURRENT_DESKTOP=Enclave:wlroots
+  export ENCLAVE_COMPOSITOR=labwc
+  # No GPU render node: render in software instead of failing to start.
+  if ! ls /dev/dri/renderD* >/dev/null 2>&1; then
+    export WLR_RENDERER=pixman
+    export ENCLAVE_SOFTWARE_RENDERING=1
+  fi
+  # The user's own labwc config wins; otherwise Enclave's defaults.
+  if [ -f "$HOME/.config/labwc/rc.xml" ]; then
+    exec labwc "$@"
+  fi
+  exec labwc -C /usr/share/enclave/labwc "$@"
+}
+
+if [ "$choice" = hyprland ]; then
+  export XDG_CURRENT_DESKTOP=Enclave:Hyprland
+  export ENCLAVE_COMPOSITOR=hyprland
+  started=$(date +%s)
+  Hyprland -c /usr/share/enclave/hypr/hyprland.lua "$@" &
+  child=$!
+  trap 'kill -TERM "$child" 2>/dev/null' TERM INT HUP
+  wait "$child"
+  rc=$?
+  # A deliberate exit (sign out) ends the session; an instant crash falls
+  # back to labwc so the user still gets a desktop.
+  if [ "$rc" -ne 0 ] && [ $(( $(date +%s) - started )) -lt 10 ]; then
+    logger -t enclave-session "Hyprland exited ($rc) at start; falling back to labwc" 2>/dev/null
+    run_labwc "$@"
+  fi
+  exit "$rc"
+fi
+run_labwc "$@"

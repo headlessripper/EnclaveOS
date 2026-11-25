@@ -40,8 +40,11 @@ has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "cursor-theme=
 has "$AIR/usr/share/glib-2.0/schemas/90_enclave.gschema.override" "font-name='Inter" "UI font = Inter"
 has "$PKG" '^inter-font$'                                   "pkg: inter-font"
 ICONS="arch/icons/Enclave"
-has "$ICONS/index.theme" '^Inherits=Papirus,'               "Enclave Icons layer on Papirus"
-has "arch/icons/Enclave-dark/index.theme" '^Inherits=Papirus-Dark,' "dark variant inherits Papirus-Dark"
+has "$ICONS/index.theme" '^Inherits=hicolor,Papirus,'       "third-party apps keep their own icons; Papirus fills gaps"
+has "arch/icons/Enclave-dark/index.theme" '^Inherits=hicolor,Papirus-Dark,' "dark variant: same, on Papirus-Dark"
+for n in zen zen-browser thunderbird org.mozilla.Thunderbird wine foot; do
+  gone "$ICONS/scalable/apps/$n.svg"                        "third-party app keeps its own icon: $n"
+done
 has "$PKG" '^papirus-icon-theme$'                           "pkg: Papirus (base for Enclave Icons)"
 has "scripts/build-iso.sh" 'ln -s \.\./Enclave/scalable'    "Enclave-dark shares Enclave's icons"
 lacks "scripts/build-iso.sh" 'WhiteSur'                     "no WhiteSur fetch/installer in the build"
@@ -56,7 +59,7 @@ else
   pass "Enclave icons avoid filters/masks/clip paths"
 fi
 # Every launcher Enclave ships has an Enclave icon.
-for f in "$AIR"/usr/share/applications/*.desktop "$AIR"/usr/local/share/applications/*.desktop          desktop/session/rootfs/usr/share/applications/*.desktop; do
+for f in "$AIR"/usr/share/applications/*.desktop "$AIR"/usr/local/share/applications/*.desktop          desktop/session/rootfs/usr/share/applications/*.desktop desktop/terminal/*.desktop; do
   n=$(sed -n 's/^Icon=//p' "$f" | head -1)
   [ -n "$n" ] || continue
   exists "$ICONS/scalable/apps/$n.svg"                      "$(basename "$f") has an Enclave icon ($n)"

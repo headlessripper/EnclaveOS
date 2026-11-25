@@ -1,11 +1,25 @@
 [Desktop Entry]
 Type=Application
 Name=Settings
-GenericName=Control Center
-Comment=Appearance, sound, network and displays
-Exec=enclave-shell --command control-center
-Icon=preferences-system
+GenericName=System Settings
+Comment=Network, sound, displays, appearance, the dock, power and more
+Exec=enclave-settings
+Icon=enclave-settings
 Terminal=false
-StartupNotify=false
-Categories=System;
-Keywords=settings;preferences;control;appearance;dark;light;sound;volume;network;wifi;display;
+StartupNotify=true
+StartupWMClass=enclave-settings
+Categories=System;Settings;
+Keywords=settings;preferences;control;appearance;dark;light;sound;volume;network;wifi;display;dock;battery;time;keyboard;
+Actions=Activity;Network;Displays;
+
+[Desktop Action Activity]
+Name=Activity (task manager)
+Exec=enclave-settings --page activity
+
+[Desktop Action Network]
+Name=Network
+Exec=enclave-settings --page network
+
+[Desktop Action Displays]
+Name=Displays
+Exec=enclave-settings --page displays

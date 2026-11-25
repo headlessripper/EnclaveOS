@@ -9,8 +9,11 @@ One style for everything people see most (dock, Start, desktop, Files):
               dark (obsidian), graphite and ember.
   * places  — warm "solar" folders with a debossed emblem; a porcelain bin.
   * devices — drive, USB stick, computer.
-Everything else (thousands of app, file-type and symbolic icons) comes from
-Papirus, which the Enclave theme inherits (index.theme).
+Only Enclave's own apps and its core apps (Files, Terminal, Text Editor, ...)
+get Enclave icons. Third-party apps (Zen, Thunderbird, anything a user
+installs) keep their original icons: the theme inherits hicolor — where apps
+install their own icons — before Papirus, which only fills the gaps
+(file types, symbolic UI icons, apps that ship no icon).
 
 Only gradients, paths, opacity and transforms are used: Qt's SVG renderer
 (the shell) ignores filters, masks and clip paths, so shadows are drawn as
@@ -125,7 +128,7 @@ APPS['enclave-install'] = ('Install Enclave OS', ['calamares'], lambda: app(
     '<rect x="30" y="80" width="68" height="18" rx="6" fill="#202124"/>'
     '<circle cx="88" cy="89" r="3" fill="#2FBF71"/>'))
 
-APPS['system-file-manager'] = ('Files', ['thunar', 'org.xfce.thunar', 'file-manager'], lambda: app(
+APPS['system-file-manager'] = ('Files', ['thunar', 'org.xfce.thunar'], lambda: app(
     'Files: a solar folder', 'light',
     grad('back', [(0, '#F57A26'), (1, BURNT)], 0, 34, 0, 100)
     + grad('front', [(0, '#FFC67F'), (1, '#FF8A2C')], 0, 54, 0, 100),
@@ -135,12 +138,12 @@ APPS['system-file-manager'] = ('Files', ['thunar', 'org.xfce.thunar', 'file-mana
     '<rect x="27" y="57" width="74" height="42" rx="6.5" fill="url(#front)"/>'
     '<path d="M33 58.6 H95" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="1.2" stroke-linecap="round"/>'))
 
-APPS['utilities-terminal'] = ('Terminal', ['org.xfce.terminal', 'xfce4-terminal', 'foot', 'terminal'], lambda: app(
+APPS['utilities-terminal'] = ('Terminal', ['enclave-terminal', 'org.xfce.terminal', 'xfce4-terminal'], lambda: app(
     'Terminal: a prompt and an ember cursor', 'dark', '',
     '<path d="M36 47 L53 64 L36 81" stroke="#F5F3EF" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
     '<path d="M61 82 H91" stroke="#FF7A1A" stroke-width="8" stroke-linecap="round"/>'))
 
-APPS['accessories-text-editor'] = ('Text Editor', ['org.xfce.mousepad', 'mousepad', 'text-editor'], lambda: app(
+APPS['accessories-text-editor'] = ('Text Editor', ['org.xfce.mousepad', 'mousepad'], lambda: app(
     'Text Editor: a page and an ember pencil', 'light', '',
     '<rect x="33" y="23" width="50" height="80" rx="6" fill="#000000" opacity="0.08"/>'
     '<rect x="33" y="21" width="50" height="80" rx="6" fill="#FFFFFF" stroke="#DCD8D0" stroke-width="1.2"/>'
@@ -155,7 +158,7 @@ APPS['accessories-text-editor'] = ('Text Editor', ['org.xfce.mousepad', 'mousepa
     '<path d="M44 -6 L57 0 L44 6 Z" fill="#F5D9BC"/>'
     '<path d="M52.5 -2.1 L57 0 L52.5 2.1 Z" fill="#2A2C33"/></g>'))
 
-APPS['image-viewer'] = ('Photos', ['org.xfce.ristretto', 'ristretto', 'multimedia-photo-viewer'], lambda: app(
+APPS['image-viewer'] = ('Photos', ['org.xfce.ristretto', 'ristretto'], lambda: app(
     'Photos: an ember dusk over the hills', 'light',
     grad('sky', [(0, '#FFE2C2'), (0.45, SOLAR), (1, '#EC5A12')], 0, 26, 0, 96)
     + grad('hill', [(0, '#3E414A'), (1, '#1C1E24')], 0, 60, 0, 102),
@@ -166,14 +169,14 @@ APPS['image-viewer'] = ('Photos', ['org.xfce.ristretto', 'ristretto', 'multimedi
     '<path d="M22 88 L42 72 L56 82 L78 60 L106 86 V91 a11 11 0 0 1 -11 11 H33 a11 11 0 0 1 -11 -11 Z" fill="url(#hill)"/>'
     '<rect x="22.5" y="26.5" width="83" height="75" rx="10.5" fill="none" stroke="#000000" stroke-opacity="0.08"/>'))
 
-APPS['multimedia-video-player'] = ('Media Player', ['io.github.celluloid_player.Celluloid', 'celluloid', 'video-player'], lambda: app(
+APPS['multimedia-video-player'] = ('Media Player', ['io.github.celluloid_player.Celluloid', 'celluloid'], lambda: app(
     'Media Player: an ember play button', 'dark',
     grad('play', [(0, SOLAR), (1, BURNT)], 0, 40, 0, 88),
     '<circle cx="64" cy="64" r="36" fill="#FF7A1A" opacity="0.10"/>'
     '<circle cx="64" cy="64" r="36" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>'
     '<path d="M55 45 L86 64 L55 83 Z" fill="url(#play)" stroke="url(#play)" stroke-width="10" stroke-linejoin="round"/>'))
 
-APPS['applets-screenshooter'] = ('Screenshot', ['enclave-screenshot', 'accessories-screenshot', 'org.gnome.Screenshot', 'gnome-screenshot'], lambda: app(
+APPS['applets-screenshooter'] = ('Screenshot', ['enclave-screenshot', 'accessories-screenshot'], lambda: app(
     'Screenshot: a selection and a lens', 'graphite',
     grad('lens', [(0, SOLAR), (1, BURNT)], 0, 47, 0, 81),
     '<path d="M28 46 V38 a6 6 0 0 1 6 -6 H42 M86 32 H94 a6 6 0 0 1 6 6 V46 M100 82 V90 a6 6 0 0 1 -6 6 H86 M42 96 H34 a6 6 0 0 1 -6 -6 V82" '
@@ -182,9 +185,7 @@ APPS['applets-screenshooter'] = ('Screenshot', ['enclave-screenshot', 'accessori
     '<circle cx="64" cy="64" r="8" fill="#16171B"/>'
     '<circle cx="61" cy="61" r="2.6" fill="#FFFFFF" opacity="0.85"/>'))
 
-APPS['preferences-system'] = ('Settings', ['enclave-settings', 'preferences-desktop', 'org.xfce.settings.manager',
-                                           'xfce4-settings-manager', 'systemsettings', 'org.gnome.Settings',
-                                           'gnome-control-center'], lambda: app(
+APPS['preferences-system'] = ('Settings', ['enclave-settings', 'preferences-desktop'], lambda: app(
     'Settings: a porcelain gear with an ember hub', 'graphite',
     grad('gear', [(0, '#FFFFFF'), (1, '#D3CFC6')], 0, 24, 0, 104),
     f'<path d="{gear(64, 64, 38, 29.5, 8)}" fill="#000000" opacity="0.25" transform="translate(0 2)"/>'
@@ -192,15 +193,14 @@ APPS['preferences-system'] = ('Settings', ['enclave-settings', 'preferences-desk
     '<circle cx="64" cy="64" r="16" fill="#FF7A1A"/>'
     '<circle cx="64" cy="64" r="9" fill="#24262C"/>'))
 
-APPS['utilities-system-monitor'] = ('Task Manager', ['org.xfce.taskmanager', 'xfce4-taskmanager',
-                                                     'org.gnome.SystemMonitor', 'gnome-system-monitor'], lambda: app(
+APPS['utilities-system-monitor'] = ('Task Manager', ['org.xfce.taskmanager', 'xfce4-taskmanager', 'enclave-task-manager'], lambda: app(
     'Task Manager: an ember pulse', 'dark',
     grad('pulse', [(0, SOLAR), (1, EMBER)], 24, 0, 104, 0),
     '<path d="M24 46 H104 M24 64 H104 M24 82 H104" stroke="#FFFFFF" stroke-opacity="0.07" stroke-width="2"/>'
     '<path d="M24 70 H38 L47 52 L58 88 L70 40 L80 70 H104" stroke="#FF7A1A" stroke-opacity="0.22" stroke-width="14" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
     '<path d="M24 70 H38 L47 52 L58 88 L70 40 L80 70 H104" stroke="url(#pulse)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'))
 
-APPS['utilities-archiver'] = ('Archive Manager', ['xarchiver', 'org.xfce.xarchiver', 'accessories-archiver'], lambda: app(
+APPS['utilities-archiver'] = ('Archive Manager', ['xarchiver', 'org.xfce.xarchiver'], lambda: app(
     'Archive Manager: a zipped parcel', 'light',
     grad('box', [(0, '#F7E0C3'), (1, '#E5BB8B')], 0, 50, 0, 102)
     + grad('lid', [(0, '#FCEBD6'), (1, '#EFCB9F')], 0, 36, 0, 54)
@@ -213,13 +213,13 @@ APPS['utilities-archiver'] = ('Archive Manager', ['xarchiver', 'org.xfce.xarchiv
     '<rect x="56.5" y="58" width="15" height="22" rx="5.5" fill="url(#pull)"/>'
     '<rect x="61" y="63" width="6" height="9" rx="3" fill="#2A2C33"/>'))
 
-APPS['multimedia-volume-control'] = ('Sound', ['org.pulseaudio.pavucontrol', 'pavucontrol', 'preferences-desktop-sound'], lambda: app(
+APPS['multimedia-volume-control'] = ('Sound', ['preferences-desktop-sound'], lambda: app(
     'Sound: ember level bars', 'dark',
     grad('bar', [(0, SOLAR), (1, BURNT)], 0, 34, 0, 94),
     ''.join(f'<rect x="{x - 4.5}" y="{64 - h / 2}" width="9" height="{h}" rx="4.5" fill="url(#bar)"/>'
             for x, h in zip((36, 50, 64, 78, 92), (22, 44, 60, 40, 24)))))
 
-APPS['preferences-system-network'] = ('Network', ['nm-connection-editor'], lambda: app(
+APPS['preferences-system-network'] = ('Network', [], lambda: app(
     'Network: ember signal arcs', 'light', '',
     ''.join(f'<path d="M{64 - r * 0.7071:.1f} {84 - r * 0.7071:.1f} A{r} {r} 0 0 1 {64 + r * 0.7071:.1f} {84 - r * 0.7071:.1f}" '
             f'stroke="{c}" stroke-width="10" fill="none" stroke-linecap="round"/>'
@@ -245,9 +245,9 @@ def displays():
                f'<g transform="translate(64 66) scale(0.66) translate(-64 -65)">{b}</g>')
 
 
-APPS['preferences-desktop-display'] = ('Displays', ['network.cycles.wdisplays', 'wdisplays', 'display'], displays)
+APPS['preferences-desktop-display'] = ('Displays', [], displays)
 
-APPS['enclave-windows-apps'] = ('Windows apps', ['wine'], lambda: app(
+APPS['enclave-windows-apps'] = ('Windows apps', [], lambda: app(
     'Windows apps: an app window', 'light',
     grad('app', [(0, SOLAR), (1, BURNT)], 0, 54, 0, 68),
     '<rect x="26" y="34" width="76" height="62" rx="9" fill="#000000" opacity="0.10"/>'

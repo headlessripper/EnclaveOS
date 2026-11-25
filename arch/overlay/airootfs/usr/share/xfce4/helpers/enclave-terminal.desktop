@@ -1,0 +1,11 @@
+[Desktop Entry]
+NoDisplay=true
+Version=1.0
+Encoding=UTF-8
+Type=X-XFCE-Helper
+X-XFCE-Category=TerminalEmulator
+X-XFCE-CommandsWithParameter=enclave-terminal -x "%s"
+Icon=enclave-terminal
+Name=Enclave Terminal
+X-XFCE-Commands=enclave-terminal
+X-XFCE-Binaries=enclave-terminal

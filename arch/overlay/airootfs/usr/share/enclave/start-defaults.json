@@ -7,9 +7,9 @@
     "org.xfce.mousepad.desktop",
     "org.xfce.ristretto.desktop",
     "io.github.celluloid_player.Celluloid.desktop",
-    "xfce4-terminal.desktop",
+    "enclave-terminal.desktop",
     "enclave-screenshot.desktop",
-    "xfce4-taskmanager.desktop",
+    "enclave-activity.desktop",
     "enclave-settings.desktop",
     "enclave-install.desktop"
   ],
@@ -18,6 +18,6 @@
     "zen.desktop",
     "org.mozilla.Thunderbird.desktop",
     "enclave-assistant.desktop",
-    "xfce4-terminal.desktop"
+    "enclave-terminal.desktop"
   ]
 }

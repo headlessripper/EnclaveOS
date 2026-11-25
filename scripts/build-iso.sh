@@ -230,12 +230,37 @@ if [ -d "$DESKTOP_DIR/shell" ]; then
   run_logged "$SHELLBUILD.log" env DESTDIR="$AIR" cmake --install "$SHELLBUILD" || die "Enclave Shell failed to install"
   [ -x "$AIR/usr/bin/enclave-shell" ] || die "Enclave Shell did not install"
   cp -a "$DESKTOP_DIR/session/rootfs/." "$AIR/"
+  # Stamp the image version, and keep Enclave's identity where package
+  # updates can't replace it (Settings > About reads this copy first).
+  if [ -f "$AIR/etc/os-release" ]; then
+    stamp="$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y.%m.%d)"
+    sed -i '/^IMAGE_VERSION=/d' "$AIR/etc/os-release"
+    echo "IMAGE_VERSION=$stamp" >> "$AIR/etc/os-release"
+    install -Dm644 "$AIR/etc/os-release" "$AIR/usr/share/enclave/os-release"
+  fi
   install -Dm644 "$DESKTOP_DIR/design-system/tokens/ember.json" \
     "$AIR/usr/share/enclave/design-system/ember.json"
-  for f in enclave-shell enclave-session enclave-shell-run enclave-screenshot; do
+  for f in enclave-shell enclave-session enclave-shell-run enclave-screenshot enclave-settings; do
     add_file_perm "/usr/bin/$f" 755
   done
   log "  Enclave Shell + Wayland session installed"
+fi
+
+# --- 6b4. Enclave Terminal (QTermWidget in an Ember window; the default
+#          terminal for the dock, Super+Return, Thunar and terminal apps). ---
+if [ -d "$DESKTOP_DIR/terminal" ]; then
+  [ -f /usr/lib/cmake/qtermwidget6/qtermwidget6-config.cmake ] \
+    || die "qtermwidget not found (pacman -S qtermwidget) — needed for Enclave Terminal"
+  log "compiling Enclave Terminal"
+  TERMBUILD="${ENCLAVE_WORK:-$REPO/build}/enclave-terminal"
+  rm -rf "$TERMBUILD" "$TERMBUILD.log"
+  run_logged "$TERMBUILD.log" cmake -S "$DESKTOP_DIR/terminal" -B "$TERMBUILD" \
+    -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr || die "Enclave Terminal: cmake configure failed"
+  run_logged "$TERMBUILD.log" cmake --build "$TERMBUILD" -j"$(nproc)" || die "Enclave Terminal failed to compile"
+  run_logged "$TERMBUILD.log" env DESTDIR="$AIR" cmake --install "$TERMBUILD" || die "Enclave Terminal failed to install"
+  [ -x "$AIR/usr/bin/enclave-terminal" ] || die "Enclave Terminal did not install"
+  add_file_perm "/usr/bin/enclave-terminal" 755
+  log "  Enclave Terminal installed"
 fi
 
 # --- 6c. Plymouth boot splash: Enclave's own script theme (arch/plymouth/enclave):

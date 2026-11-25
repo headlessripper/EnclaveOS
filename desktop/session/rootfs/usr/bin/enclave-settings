@@ -1,0 +1,8 @@
+#!/bin/sh
+# Enclave Settings — every system page in one window (network, sound,
+# displays, appearance, desktop & dock, notifications, power, activity,
+# storage, date & time, keyboard, about).
+#   enclave-settings [--page NAME]
+# It is enclave-shell in its Settings mode, so it shares the Ember theme. Qt
+# follows Ember itself, not the GTK platform theme the session sets for apps.
+exec env -u QT_QPA_PLATFORMTHEME enclave-shell --settings "$@"

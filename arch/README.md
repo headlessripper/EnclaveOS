@@ -68,7 +68,10 @@ Enclave's own desktop lives in `../desktop/` and is compiled by
 | Piece | File |
 |---|---|
 | Colours, radii, motion (Enclave Ember) | `desktop/design-system/tokens/ember.json` |
-| Shell (top bar, dock, Start, Control Center, calendar, widgets, bubble, desktop) | `desktop/shell/` → `/usr/bin/enclave-shell` |
+| Shell (dock, Start, search, Control Center, calendar, Now + widgets, bubble, desktop) | `desktop/shell/` → `/usr/bin/enclave-shell` |
+| Enclave Settings (every system page; Activity = task manager) | `desktop/shell/qml/Settings.qml`, `qml/settings/` → `/usr/bin/enclave-settings` |
+| Enclave Terminal (QTermWidget, Ember tabs and colours) | `desktop/terminal/` → `/usr/bin/enclave-terminal` (step 6b4) |
+| Hyprland config (used when a GPU is present; labwc otherwise) | `desktop/session/rootfs/usr/share/enclave/hypr/hyprland.lua` |
 | Session launcher | `desktop/session/rootfs/usr/bin/enclave-session` |
 | Window manager config, keyboard shortcuts (labwc) | `desktop/session/rootfs/usr/share/enclave/labwc/rc.xml` |
 | Window frames (no title bars; hairline + shadow) | `desktop/session/rootfs/usr/share/themes/Enclave-Ember/labwc/themerc` |

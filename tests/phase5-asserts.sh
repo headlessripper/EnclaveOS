@@ -35,11 +35,11 @@ has "$SH/CMakeLists.txt" 'wlr-foreign-toplevel-management' "task list via standa
 has "$SH/src/windowmanager.h" 'class WindowManager'   "WindowManager interface (compositor-independent)"
 has "$SH/src/toplevels.h" 'public WindowManager'      "foreign-toplevel implements WindowManager"
 if grep -rqE 'labwc' "$SH/src"; then bad "shell code never depends on labwc"; else pass "shell code never depends on labwc"; fi
-for s in Wallpaper TopBar Taskbar Widgets StartMenu Bubble components/Flyout; do
+for s in Wallpaper SearchWidget Taskbar Widgets StartMenu Bubble components/Flyout; do
   exists "$SH/qml/$s.qml"                             "surface: $s"
   has "$SH/qml/$s.qml" 'org\.kde\.layershell'         "$s is a layer-shell surface"
 done
-for s in ControlCenter CalendarPanel; do
+for s in ControlCenter CalendarPanel Spotlight; do
   has "$SH/qml/$s.qml" '^Flyout \{'                    "$s is a flyout surface"
 done
 has "$SH/qml/Bubble.qml" 'activeMinimize'             "bubble controls the active window (Wayland)"
@@ -48,8 +48,70 @@ has "$SH/qml/Bubble.qml" 'setInputRegion'             "bubble is click-through a
 has "$SH/qml/Bubble.qml" 'bubble/side'                "bubble remembers where it rests"
 has "$SH/qml/Taskbar.qml" 'anchors\.centerIn: parent' "dock items truly centred"
 has "$SH/qml/Taskbar.qml" 'allAppsRequested'          "dock ends with All apps"
-has "$SH/qml/TopBar.qml" 'Search anything'            "top bar: search anything"
-has "$SH/qml/TopBar.qml" 'activeTitle'                "top bar names the window in front"
+# no top bar: status lives in the Now widget, search in its own widget
+if [ -e "$SH/qml/TopBar.qml" ] || grep -q 'TopBar' "$SH/qml/Main.qml" "$SH/CMakeLists.txt"; then
+  bad "the top bar is gone"
+else
+  pass "the top bar is gone"
+fi
+has "$SH/qml/SearchWidget.qml" 'Search anything'      "desktop search widget"
+has "$SH/qml/Spotlight.qml" 'recentFiles'             "search: recent files"
+has "$SH/qml/Spotlight.qml" 'Calculator|calculator'   "search: sums"
+has "$SH/qml/Widgets.qml" 'showStatus'                "Now widget: time, network, battery"
+has "$SH/qml/Widgets.qml" 'batteryMinutes'            "Now widget: battery time left"
+
+# --- the dock ---
+has "$SH/src/appregistry.cpp" 'm_taskbarPins\.contains' "a pinned app's windows group under its pin"
+has "$SH/qml/components/DockItem.qml" 'windowCount'    "dock: one dot per window"
+has "$SH/qml/components/WindowPeek.qml" 'closeRequested' "dock: hover window list with close"
+has "$SH/qml/Taskbar.qml" 'moveTaskbarPin'            "dock: drag pins to reorder"
+has "$SH/qml/Taskbar.qml" 'cycleGroup'                "dock: scroll steps through windows"
+has "$SH/qml/Taskbar.qml" 'user-trash-full'           "dock: Trash shows full / empty"
+has "$SH/qml/Taskbar.qml" 'dock/autohide'             "dock: auto-hide option"
+has "$SH/qml/Taskbar.qml" 'setInputRegion'            "dock: clicks pass through beside the island"
+
+# --- Enclave Settings ---
+exists "$SES/usr/bin/enclave-settings"                "enclave-settings launcher"
+has "$SES/usr/bin/enclave-settings" 'enclave-shell --settings' "Settings runs from the shell binary"
+has "$SH/src/main.cpp" 'runSettings'                  "shell has a Settings mode"
+has "$SH/src/main.cpp" 'enclave-settings-'            "Settings is single-instance"
+for p in Network Sound Displays Appearance Desktop Notifications Power Activity Storage DateTime Keyboard About; do
+  exists "$SH/qml/settings/${p}Page.qml"              "Settings page: $p"
+done
+has "$SH/qml/Main.qml" 'reload-settings'              "shell applies Settings changes at once"
+has "$SES/usr/share/applications/enclave-settings.desktop" '^Exec=enclave-settings$' "Settings entry opens the app"
+has "$SES/usr/share/applications/enclave-activity.desktop" 'page activity' "Activity (task manager) entry"
+has "$SES/usr/share/enclave/labwc/rc.xml" 'C-S-Escape.*page activity' "Ctrl+Shift+Esc opens Activity"
+if grep -rqE 'nm-connection-editor"|"wdisplays|"pavucontrol"|xfce4-taskmanager' "$SH/qml/ControlCenter.qml" "$SH/qml/Widgets.qml"; then
+  bad "Control Center and widgets open Settings, not old tools"
+else
+  pass "Control Center and widgets open Settings, not old tools"
+fi
+
+# --- Enclave Terminal ---
+TERM_DIR="desktop/terminal"
+exists "$TERM_DIR/CMakeLists.txt"                      "terminal CMake project"
+has "$TERM_DIR/CMakeLists.txt" 'qtermwidget6'          "terminal built on QTermWidget"
+exists "$TERM_DIR/schemes/Enclave-Dark.colorscheme"    "terminal: Enclave Dark colours"
+exists "$TERM_DIR/schemes/Enclave-Light.colorscheme"   "terminal: Enclave Light colours"
+has "$TERM_DIR/schemes/Enclave-Dark.colorscheme" '^Color=16,17,20$' "terminal dark ground is Obsidian"
+has "$TERM_DIR/src/main.cpp" 'working-directory'       "terminal: --working-directory"
+has "$TERM_DIR/src/main.cpp" '"-x"'                    "terminal: -x PROGRAM ARGS (terminal apps)"
+has "$TERM_DIR/src/terminalwindow.cpp" 'startSystemMove' "terminal: the tab strip is the title bar"
+has "$TERM_DIR/src/terminalwindow.cpp" 'appearance/mode' "terminal follows Enclave light / dark"
+has "scripts/build-iso.sh" 'compiling Enclave Terminal' "build compiles Enclave Terminal"
+has "$SH/src/appregistry.cpp" 'enclave-terminal -x'    "terminal apps open in Enclave Terminal"
+has "arch/overlay/airootfs/etc/skel/.config/Thunar/uca.xml" 'enclave-terminal' "Files: Open Terminal Here"
+has "arch/overlay/airootfs/etc/xdg/xfce4/helpers.rc" 'TerminalEmulator=enclave-terminal' "exo's terminal is Enclave Terminal"
+has "arch/overlay/airootfs/usr/share/enclave/start-defaults.json" 'enclave-terminal\.desktop' "Terminal pinned"
+if grep -rqE 'xfce4-terminal' "$SES/usr/share/enclave" arch/overlay/airootfs/usr/share/enclave/start-defaults.json      arch/overlay/airootfs/etc/skel/.config/Thunar "$SH/src" "$SH/qml"; then
+  bad "no xfce4-terminal left in the session"
+else
+  pass "no xfce4-terminal left in the session"
+fi
+for p in qtermwidget ttf-jetbrains-mono wlr-randr power-profiles-daemon; do
+  has "arch/overlay/packages.x86_64.extra" "^$p\$" "pkg: $p"
+done
 has "$SH/qml/StartMenu.qml" 'Recommended'             "Start: Recommended section"
 has "$SH/qml/StartMenu.qml" 'Apps\.categories'        "Start: category rail"
 has "$SH/qml/Wallpaper.qml" 'Apps\.desktopPins'       "desktop icons only when the user adds them"
@@ -67,6 +129,10 @@ has "arch/overlay/airootfs/usr/share/enclave/start-defaults.json" '"taskbar"' "d
 # --- session: labwc underneath, selectable from SDDM ---
 has "$SES/usr/share/wayland-sessions/enclave.desktop" '^Exec=/usr/bin/enclave-session$' "SDDM: Enclave (Wayland) session"
 has "$SES/usr/bin/enclave-session" 'labwc'            "session runs labwc"
+has "$SES/usr/bin/enclave-session" 'Hyprland'         "session prefers Hyprland when a GPU is there"
+has "$SES/usr/share/enclave/hypr/hyprland.lua" 'enclave\.minimize|function enclave' "Hyprland config: the Enclave bridge"
+has "$SES/usr/share/enclave/hypr/hyprland.lua" 'enclave-shell-run' "Hyprland autostarts the shell"
+has "arch/overlay/packages.x86_64.extra" '^hyprland$'  "pkg: hyprland"
 has "$SES/usr/bin/enclave-session" 'WLR_RENDERER=pixman' "software-render fallback (VMs without GPU)"
 has "$SES/usr/share/enclave/labwc/autostart" 'enclave-shell-run' "shell autostarts (with crash restart)"
 has "$SES/usr/bin/enclave-shell-run" 'enclave-shell'  "crash-restart wrapper"

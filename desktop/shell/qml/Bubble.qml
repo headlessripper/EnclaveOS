@@ -55,7 +55,7 @@ Window {
     // Never take keyboard focus: the window in front must stay the target.
     LayerShell.Window.keyboardInteractivity: LayerShell.Window.KeyboardInteractivityNone
 
-    readonly property int topGap: Theme.topBarHeight + edge
+    readonly property int topGap: edge
     function clampTop(t) { return Math.min(Math.max(t, topGap), height - size - bottomGap) }
 
     readonly property real restLeft: side === "left" ? edge : width - size - edge
@@ -74,9 +74,11 @@ Window {
     readonly property real ring: Math.max(cornered ? radius + 66 : radius + 24,
                                           (controls.length - 1) * 46 / arc)
 
-    // Windows carry no title bar in Enclave: these are their controls. Snap
-    // and Move press labwc's own window shortcuts (rc.xml) through wtype, so
-    // they act on the window in front.
+    // Windows carry no title bar in Enclave: these are their controls. On
+    // Hyprland, Snap and Centre call the `enclave` Lua bridge (hyprland.lua);
+    // on labwc, Snap and Move press its own shortcuts (rc.xml) through wtype.
+    // Both act on the window in front.
+    readonly property bool hypr: System.compositor === "hyprland"
     function key(mods, k) {
         const args = []
         for (const m of mods) args.push("-M", m)
@@ -90,9 +92,12 @@ Window {
         { label: Windows.activeMaximized ? "Restore" : "Maximise",
           icon: Windows.activeMaximized ? "window-restore-symbolic" : "window-maximize-symbolic", target: true,
           run: () => Windows.activeToggleMaximize() },
-        { label: "Snap left", icon: "go-first-symbolic", target: true, run: () => root.key(["logo"], "Left") },
-        { label: "Snap right", icon: "go-last-symbolic", target: true, run: () => root.key(["logo"], "Right") },
-        { label: "Move (click to drop)", icon: "view-fullscreen-symbolic", target: true, run: () => root.key(["alt"], "F7") },
+        { label: "Snap left", icon: "go-first-symbolic", target: true,
+          run: () => root.hypr ? System.hypr('enclave.snap("left")') : root.key(["logo"], "Left") },
+        { label: "Snap right", icon: "go-last-symbolic", target: true,
+          run: () => root.hypr ? System.hypr('enclave.snap("right")') : root.key(["logo"], "Right") },
+        { label: root.hypr ? "Centre" : "Move (click to drop)", icon: "view-fullscreen-symbolic", target: true,
+          run: () => root.hypr ? System.hypr("enclave.center()") : root.key(["alt"], "F7") },
         { label: "Screenshot", icon: "camera-photo-symbolic", run: () => root.screenshotRequested() },
         { label: "Quick settings", icon: "emblem-system-symbolic", run: () => root.controlCenterRequested() },
         { label: "Close", icon: "window-close-symbolic", target: true, danger: true,

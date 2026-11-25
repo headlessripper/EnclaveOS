@@ -46,7 +46,7 @@ Flyout {
                         on: !!root.status && (root.status.netType !== "none"
                                               || (root.status.hasWifi && root.status.wifiOn))
                         onToggled: if (root.status && root.status.hasWifi) root.status.toggleWifi()
-                        onOpened: root.runLater("nm-connection-editor")
+                        onOpened: root.runLater("enclave-settings --page network")
                     }
                     ToggleRow {
                         width: parent.width
@@ -93,7 +93,7 @@ Flyout {
                     Repeater {
                         model: [
                             { label: "Screenshot", icon: "camera-photo-symbolic", cmd: "enclave-screenshot" },
-                            { label: "Displays", icon: "video-display-symbolic", cmd: "wdisplays" },
+                            { label: "Displays", icon: "video-display-symbolic", cmd: "enclave-settings --page displays" },
                         ]
                         delegate: Module {
                             id: tile
@@ -166,7 +166,7 @@ Flyout {
                     symbolic: true
                     icon: "audio-speakers-symbolic"
                     tooltip: "Sound settings"
-                    onClicked: root.runLater("pavucontrol")
+                    onClicked: root.runLater("enclave-settings --page sound")
                 }
             }
         }

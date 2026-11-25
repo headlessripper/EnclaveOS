@@ -50,6 +50,5 @@
   "spacing": { "unit": 8 },
   "type": { "family": "Inter", "body": 10, "small": 9, "title": 14, "display": 22 },
   "motion": { "fast": 150, "standard": 200, "slow": 250 },
-  "taskbar": { "height": 76, "$comment": "the strip reserved for the dock; the dock floats 6px inside it" },
-  "topbar": { "height": 36 }
+  "taskbar": { "height": 76, "$comment": "the strip reserved for the dock; the dock floats 6px inside it" }
 }

@@ -15,7 +15,8 @@ Window {
     property int panelWidth: 340
     property int padding: 14
     property string align: "right"          // right | centre
-    property string edge: "top"             // top (drops from the top bar) | bottom
+    property string edge: "top"             // top (drops from the screen top) | bottom
+    property int topOffset: 8               // distance from the top edge (edge "top")
     default property alias content: body.data
     readonly property bool shown: visible && panel.state === "open"
     signal aboutToOpen()
@@ -45,7 +46,7 @@ Window {
         width: Math.min(root.panelWidth, root.width - 16)
         height: body.childrenRect.height + root.padding * 2
         x: root.align === "right" ? root.width - width - 8 : (root.width - width) / 2
-        y: root.edge === "top" ? 8 : root.height - height - 8
+        y: root.edge === "top" ? root.topOffset : root.height - height - 8
         transformOrigin: root.edge === "top" ? (root.align === "right" ? Item.TopRight : Item.Top)
                                              : (root.align === "right" ? Item.BottomRight : Item.Bottom)
         state: "closed"

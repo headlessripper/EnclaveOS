@@ -68,8 +68,9 @@
     </Or>
   </Exclude>
 
-  <!-- the one Settings app -->
+  <!-- the one Settings app, and its Activity page as a Start entry -->
   <Include>
     <Filename>enclave-settings.desktop</Filename>
+    <Filename>enclave-activity.desktop</Filename>
   </Include>
 </Menu>

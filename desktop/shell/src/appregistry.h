@@ -51,6 +51,7 @@ public:
     Q_INVOKABLE void pinTaskbar(const QString &id, bool pinned);
     Q_INVOKABLE void pinDesktop(const QString &id, bool pinned);
     Q_INVOKABLE void moveStartPinToFront(const QString &id);
+    Q_INVOKABLE void moveTaskbarPin(const QString &id, int index);   // dock drag-reorder
     Q_INVOKABLE void reload();
 
     // For tests and the CLI: exec line with field codes expanded.

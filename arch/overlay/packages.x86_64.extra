@@ -15,9 +15,8 @@ xorg-xauth
 xf86-input-libinput
 
 # --- Desktop services ---
-# Task Manager (Ctrl+Shift+Esc)
-xfce4-taskmanager
-# nm-connection-editor: network settings from the Control Center
+# nm-connection-editor: VPNs and advanced connections, linked from
+# Settings > Network (everyday Wi-Fi is Settings itself)
 network-manager-applet
 xdg-desktop-portal
 xdg-desktop-portal-gtk
@@ -36,7 +35,6 @@ thunar-volman
 thunar-archive-plugin
 gvfs
 tumbler
-xfce4-terminal
 xarchiver
 mousepad
 # Photos + media player
@@ -111,6 +109,8 @@ python-keyring
 
 # --- Enclave Shell (Enclave's own Wayland desktop; the "Enclave"
 #     session — see docs/superpowers/specs/2026-11-24-enclave-shell-design.md) ---
+hyprland
+xdg-desktop-portal-hyprland
 labwc
 xorg-xwayland
 layer-shell-qt
@@ -124,8 +124,17 @@ papirus-icon-theme
 grim
 slurp
 wtype
+brightnessctl
+# Enclave Terminal: QTermWidget (the Konsole engine) and its monospace face
+qtermwidget
+ttf-jetbrains-mono
 wl-clipboard
 libnotify
 mako
 polkit-gnome
-wdisplays
+# Settings > Displays reads and sets modes with wlr-randr under labwc
+wlr-randr
+# Settings > Power: power modes (balanced / saver / performance)
+power-profiles-daemon
+# Settings > About: the graphics card's name
+pciutils

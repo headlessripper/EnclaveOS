@@ -14,11 +14,19 @@ Window {
     color: Theme.c.background
     title: "Enclave Desktop"
 
-    // Ember Horizon, in the light or dark cut (tools/make-wallpapers.py)
-    property url source: "file:///usr/share/enclave/wallpapers/"
-                         + (Theme.dark ? "enclave-default.svg" : "enclave-default-light.svg")
+    // Ember Horizon, in the light or dark cut (tools/make-wallpapers.py), or
+    // a picture chosen in Settings → Appearance
+    property string custom: String(System.setting("desktop/wallpaper", ""))
+    property url source: custom !== "" ? "file://" + custom
+                         : "file:///usr/share/enclave/wallpapers/"
+                           + (Theme.dark ? "enclave-default.svg" : "enclave-default-light.svg")
     signal controlCenterRequested()
     signal widgetsToggled()
+    signal statusToggled()
+    signal searchWidgetToggled()
+    property bool widgetsShown: true
+    property bool statusShown: true
+    property bool searchShown: true
 
     LayerShell.Window.scope: "enclave-wallpaper"
     LayerShell.Window.layer: LayerShell.Window.LayerBackground
@@ -73,7 +81,7 @@ Window {
 
     Grid {
         x: 16
-        y: Theme.topBarHeight + 16
+        y: 20
         flow: Grid.TopToBottom
         rows: Math.max(1, Math.floor((root.height - y - Theme.taskbarHeight - 8) / 94))
         rowSpacing: 6
@@ -151,7 +159,10 @@ Window {
     EmberMenu {
         id: desktopMenu
         MenuItem { text: Theme.dark ? "Switch to light" : "Switch to dark"; onTriggered: Theme.toggleDark() }
-        MenuItem { text: "Show or hide widgets"; onTriggered: root.widgetsToggled() }
+        MenuItem { text: "Clock & status"; checkable: true; checked: root.statusShown; onTriggered: root.statusToggled() }
+        MenuItem { text: "Search"; checkable: true; checked: root.searchShown; onTriggered: root.searchWidgetToggled() }
+        MenuItem { text: "Widgets"; checkable: true; checked: root.widgetsShown; onTriggered: root.widgetsToggled() }
+        MenuSeparator {}
         MenuItem {
             text: "Show Home on desktop"
             checkable: true
@@ -165,8 +176,9 @@ Window {
             onTriggered: Apps.pinDesktop("trash", checked)
         }
         MenuSeparator {}
-        MenuItem { text: "Open Terminal"; onTriggered: Apps.launch("xfce4-terminal.desktop") }
-        MenuItem { text: "Display settings"; onTriggered: System.run("wdisplays") }
+        MenuItem { text: "Open Terminal"; onTriggered: System.run("enclave-terminal", ["--working-directory", System.homePath + "/Desktop"]) }
+        MenuItem { text: "Display settings"; onTriggered: System.run("enclave-settings", ["--page", "displays"]) }
+        MenuItem { text: "Personalise"; onTriggered: System.run("enclave-settings", ["--page", "appearance"]) }
         MenuItem { text: "Quick settings"; onTriggered: root.controlCenterRequested() }
     }
 }

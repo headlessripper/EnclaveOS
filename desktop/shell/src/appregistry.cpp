@@ -235,6 +235,7 @@ void AppRegistry::reload()
               [&](const AppEntry &x, const AppEntry &y) { return coll.compare(x.name, y.name) < 0; });
     endResetModel();
     emit countChanged();
+    loadPins();           // Settings may have changed them
     emit pinsChanged();   // pins may now resolve to installed apps
 }
 
@@ -353,7 +354,7 @@ bool AppRegistry::launch(const QString &id)
         return false;
     QString cmd = expandExec(*it);
     if (it->terminal)
-        cmd = "xfce4-terminal -x " + cmd;
+        cmd = "enclave-terminal -x " + cmd;
     // setsid: apps outlive the shell (a shell restart must not kill them).
     return QProcess::startDetached("setsid", {"-f", "/bin/sh", "-c", "exec " + cmd},
                                    QDir::homePath());
@@ -397,19 +398,29 @@ QString AppRegistry::matchAppId(const QString &waylandAppId) const
     if (waylandAppId.isEmpty())
         return {};
     const QString w = waylandAppId.toLower();
+    // Candidates, strongest match first. A window always joins the app the
+    // user pinned to the dock when that app is one of them, so a pinned app
+    // never gets a second icon for its own windows.
+    QStringList exact, loose;
     if (m_all.contains(waylandAppId + ".desktop"))
-        return waylandAppId + ".desktop";
+        exact << waylandAppId + ".desktop";
     for (const AppEntry &a : m_all) {
         const QString base = a.id.chopped(8).toLower();      // strip ".desktop"
         if (base == w || base.section('.', -1) == w || a.wmClass.toLower() == w)
-            return a.id;
+            exact << a.id;
     }
     for (const AppEntry &a : m_all) {                         // last resort: binary
         const QString bin = QFileInfo(a.exec.section(' ', 0, 0)).fileName().toLower();
         if (!bin.isEmpty() && (bin == w || bin.startsWith(w + "-") || w.startsWith(bin)))
-            return a.id;
+            loose << a.id;
     }
-    return {};
+    for (const QStringList &tier : {exact, loose})
+        for (const QString &id : tier)
+            if (m_taskbarPins.contains(id))
+                return id;
+    if (!exact.isEmpty())
+        return exact.first();
+    return loose.isEmpty() ? QString() : loose.first();
 }
 
 // ---- pins -----------------------------------------------------------------
@@ -475,6 +486,19 @@ void AppRegistry::pinDesktop(const QString &id, bool pinned)
     m_desktopPins.removeAll(id);
     if (pinned)
         m_desktopPins << id;
+    savePins();
+    emit pinsChanged();
+}
+
+void AppRegistry::moveTaskbarPin(const QString &id, int index)
+{
+    const int from = m_taskbarPins.indexOf(id);
+    if (from < 0)
+        return;
+    const int to = qBound(0, index, int(m_taskbarPins.size()) - 1);
+    if (from == to)
+        return;
+    m_taskbarPins.move(from, to);
     savePins();
     emit pinsChanged();
 }

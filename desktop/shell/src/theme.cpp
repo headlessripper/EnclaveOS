@@ -79,7 +79,6 @@ void Theme::load()
         m_motion = numbers(root["motion"].toObject());
         m_font = root["type"].toObject()["family"].toString("Inter");
         m_taskbarHeight = root["taskbar"].toObject()["height"].toInt(76);
-        m_topBarHeight = root["topbar"].toObject()["height"].toInt(36);
         return;
     }
     qWarning("enclave-shell: Ember tokens not found; using built-in fallback");
@@ -145,6 +144,14 @@ void Theme::setReducedMotion(bool on)
         return;
     m_reducedMotion = on;
     save();
+    emit changed();
+}
+
+void Theme::reload()
+{
+    QSettings s(settingsPath(), QSettings::IniFormat);
+    m_mode = s.value("appearance/mode", "dark").toString();
+    m_reducedMotion = s.value("appearance/reducedMotion", false).toBool();
     emit changed();
 }
 

@@ -92,18 +92,34 @@ void System::suspend() { run("systemctl", {"suspend"}); }
 void System::lock() { run("loginctl", {"lock-session"}); }
 void System::openUrl(const QString &url) { run("xdg-open", {url}); }
 
+QString System::compositor()
+{
+    const QString set = qEnvironmentVariable("ENCLAVE_COMPOSITOR");
+    if (!set.isEmpty())
+        return set;
+    return qEnvironmentVariableIsSet("HYPRLAND_INSTANCE_SIGNATURE") ? "hyprland" : "wlroots";
+}
+
+void System::runHypr(const QString &lua)
+{
+    QProcess::startDetached("hyprctl", {"eval", lua});
+}
+
 void System::logout()
 {
     // enclave-session exports the compositor's pid (whichever compositor it
     // is); SIGTERM ends the session cleanly.
     const QString pid = qEnvironmentVariable("ENCLAVE_COMPOSITOR_PID");
-    if (!pid.isEmpty())
+    if (compositor() == "hyprland")
+        runHypr("hl.dispatch(hl.dsp.exit())");
+    else if (!pid.isEmpty())
         run("kill", {"-TERM", pid});
     else
         run("loginctl", {"terminate-session", qEnvironmentVariable("XDG_SESSION_ID")});
 }
 
-void System::query(const QString &program, const QStringList &args, const QJSValue &callback)
+void System::query(const QString &program, const QStringList &args, const QJSValue &callback,
+                   int timeoutMs)
 {
     auto *p = new QProcess(this);
     auto done = [p, callback](const QString &out, int code) {
@@ -118,11 +134,19 @@ void System::query(const QString &program, const QStringList &args, const QJSVal
         if (e == QProcess::FailedToStart)
             done({}, -1);
     });
-    QTimer::singleShot(3000, p, [p] {
+    QTimer::singleShot(timeoutMs, p, [p] {
         if (p->state() != QProcess::NotRunning)
             p->kill();
     });
     p->start(program, args);
+}
+
+QString System::readFile(const QString &path) const
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly))
+        return {};
+    return QString::fromUtf8(f.read(256 * 1024)).trimmed();
 }
 
 void System::setInputRegion(QObject *window, const QRect &rect)
@@ -145,6 +169,13 @@ QVariant System::setting(const QString &key, const QVariant &fallback) const
 void System::setSetting(const QString &key, const QVariant &value)
 {
     QSettings(shellConf(), QSettings::IniFormat).setValue(key, value);
+}
+
+QStringList System::settingKeys(const QString &group) const
+{
+    QSettings s(shellConf(), QSettings::IniFormat);
+    s.beginGroup(group);
+    return s.childKeys();
 }
 
 QVariantList System::recentFiles(int limit) const

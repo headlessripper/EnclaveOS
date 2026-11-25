@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Application
+Name=Terminal
+GenericName=Terminal
+Comment=Use the command line
+Exec=enclave-terminal
+Icon=enclave-terminal
+Terminal=false
+StartupNotify=true
+StartupWMClass=enclave-terminal
+Categories=System;Utility;TerminalEmulator;
+Keywords=terminal;console;command;shell;prompt;bash;cli;
+Actions=NewWindow;
+
+[Desktop Action NewWindow]
+Name=New Window
+Exec=enclave-terminal

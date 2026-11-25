@@ -48,7 +48,8 @@ qt_add_qml_module(enclave-shell
   QML_FILES
     qml/Main.qml
     qml/Wallpaper.qml
-    qml/TopBar.qml
+    qml/SearchWidget.qml
+    qml/Spotlight.qml
     qml/Taskbar.qml
     qml/Widgets.qml
     qml/StartMenu.qml
@@ -56,6 +57,20 @@ qt_add_qml_module(enclave-shell
     qml/Status.qml
     qml/ControlCenter.qml
     qml/CalendarPanel.qml
+    qml/Settings.qml
+    qml/settings/Controls.qml
+    qml/settings/NetworkPage.qml
+    qml/settings/SoundPage.qml
+    qml/settings/DisplaysPage.qml
+    qml/settings/AppearancePage.qml
+    qml/settings/DesktopPage.qml
+    qml/settings/NotificationsPage.qml
+    qml/settings/PowerPage.qml
+    qml/settings/ActivityPage.qml
+    qml/settings/StoragePage.qml
+    qml/settings/DateTimePage.qml
+    qml/settings/KeyboardPage.qml
+    qml/settings/AboutPage.qml
     qml/components/Glass.qml
     qml/components/Flyout.qml
     qml/components/Module.qml
@@ -64,6 +79,7 @@ qt_add_qml_module(enclave-shell
     qml/components/EmberMenu.qml
     qml/components/HoverLabel.qml
     qml/components/DockItem.qml
+    qml/components/WindowPeek.qml
     qml/components/IconButton.qml
     qml/components/AppTile.qml
     qml/components/SearchField.qml)

@@ -1,4 +1,4 @@
-// Enclave Shell — live system status for the status island and Control
+// Enclave Shell — live system status for the status widget and Control
 // Center: network (NetworkManager), sound (PipeWire/wpctl), battery (sysfs)
 // and Do Not Disturb (mako). Every query is asynchronous (System.query), so a
 // slow or missing service never freezes the shell; it just shows as absent.
@@ -18,6 +18,8 @@ QtObject {
     property bool muted: false
     property int battery: -1            // -1: no battery
     property bool charging: false
+    property string batteryStatus: ""   // Charging | Discharging | Full | Not charging
+    property int batteryMinutes: -1     // to empty (or to full while charging); -1 unknown
     property bool dnd: false
     property bool fast: false           // poll quicker while Control Center is open
 
@@ -67,11 +69,21 @@ QtObject {
                 if (m) s.volume = parseFloat(m[1])
                 s.muted = out.indexOf("[MUTED]") >= 0
             })
-        System.query("sh", ["-c", "for b in /sys/class/power_supply/BAT*; do cat \"$b/capacity\" \"$b/status\"; break; done 2>/dev/null"],
+        // capacity, status, then energy (or charge) now/full and power (or current)
+        System.query("sh", ["-c", "for b in /sys/class/power_supply/BAT*; do cd \"$b\" || break; "
+                            + "cat capacity status; cat energy_now charge_now energy_full charge_full power_now current_now 2>/dev/null | tr '\n' ' '; break; done 2>/dev/null"],
                      (out) => {
             const l = out.split("\n")
             s.battery = l.length >= 1 && l[0] !== "" ? (parseInt(l[0]) || 0) : -1
-            s.charging = l.length >= 2 && (l[1] === "Charging" || l[1] === "Full")
+            s.batteryStatus = l.length >= 2 ? l[1] : ""
+            s.charging = s.batteryStatus === "Charging" || s.batteryStatus === "Full"
+            // now, full, rate (the three present files, in that order)
+            const n = (l[2] || "").trim().split(/\s+/).map(Number).filter(x => !isNaN(x))
+            s.batteryMinutes = -1
+            if (n.length >= 3 && n[2] > 0) {
+                const hours = s.batteryStatus === "Charging" ? (n[1] - n[0]) / n[2] : n[0] / n[2]
+                if (hours > 0 && hours < 48) s.batteryMinutes = Math.round(hours * 60)
+            }
         })
         System.query("makoctl", ["mode"], (out) => s.dnd = out.split("\n").indexOf("do-not-disturb") >= 0)
     }

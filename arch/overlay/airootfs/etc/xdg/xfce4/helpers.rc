@@ -1,0 +1,3 @@
+# Thunar's "Open Terminal Here" and anything else that asks for "the
+# terminal" through exo get Enclave Terminal.
+TerminalEmulator=enclave-terminal

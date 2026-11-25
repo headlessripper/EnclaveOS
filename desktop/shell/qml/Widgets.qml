@@ -1,6 +1,8 @@
 // Enclave Shell — desktop widgets, stacked on the right of the desktop (below
-// windows, above the wallpaper): System Overview (CPU, memory, disk and a CPU
-// history line), Network (state and live speeds) and the Assistant card.
+// windows, above the wallpaper): "Now" (the time and date with a seconds
+// dial, network with signal and live speeds, battery with a charge ring and
+// time left), System Overview (CPU, memory, disk and a CPU history line) and
+// the Assistant card. "Now" and the rest can be shown or hidden separately.
 // Live figures come from System.stats() every two seconds.
 import QtQuick
 import QtQuick.Window
@@ -10,7 +12,11 @@ import "components"
 
 Window {
     id: root
-    visible: System.setting("desktop/widgets", true) !== "false"
+    visible: showStatus || showCards
+    property bool showStatus: System.setting("desktop/status", true) !== "false"
+    property bool showCards: System.setting("desktop/widgets", true) !== "false"
+    signal calendarRequested()
+    signal controlCenterRequested()
     color: "transparent"
     title: "Enclave Widgets"
     width: 312
@@ -55,6 +61,10 @@ Window {
         root.lastTime = now
         root.cpuHistory = push(root.cpuHistory, root.cpu)
         root.rxHistory = push(root.rxHistory, root.rxRate)
+    }
+    function duration(minutes) {
+        const h = Math.floor(minutes / 60), m = minutes % 60
+        return h > 0 ? h + " h " + (m > 0 ? m + " min" : "") : m + " min"
     }
     function rate(bps) {
         if (bps >= 1048576) return (bps / 1048576).toFixed(1) + " MB/s"
@@ -134,6 +144,55 @@ Window {
         }
     }
 
+    // A "Now" tile: a small graphic, a caption, a value and a detail line.
+    component Tile: Item {
+        id: tile
+        property string caption: ""
+        property string value: ""
+        property string detail: ""
+        default property alias graphic: tileGraphic.data
+        signal clicked()
+        height: 88
+        Rectangle {
+            anchors.fill: parent
+            radius: Theme.radius.medium
+            color: tileMouse.containsMouse ? Theme.c.pressed : Theme.c.hover
+            border.width: 1
+            border.color: Theme.c.border
+            Behavior on color { ColorAnimation { duration: Theme.motion.fast } }
+        }
+        Item { id: tileGraphic; x: 12; y: 12; width: 26; height: 26 }
+        Text {
+            anchors { left: tileGraphic.right; leftMargin: 8; right: parent.right; rightMargin: 10; verticalCenter: tileGraphic.verticalCenter }
+            text: tile.caption
+            color: Theme.c.textSecondary
+            font.pointSize: 8.5
+            elide: Text.ElideRight
+        }
+        Text {
+            x: 12; y: 46
+            width: tile.width - 24
+            text: tile.value
+            color: Theme.c.text
+            font.pointSize: 10.5
+            fontSizeMode: Text.HorizontalFit
+            minimumPointSize: 8
+            font.weight: Font.DemiBold
+            font.features: { "tnum": 1 }
+            elide: Text.ElideRight
+        }
+        Text {
+            x: 12; y: 66
+            width: tile.width - 24
+            text: tile.detail
+            color: Theme.c.textSecondary
+            font.pointSize: 8
+            font.features: { "tnum": 1 }
+            elide: Text.ElideRight
+        }
+        MouseArea { id: tileMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: tile.clicked() }
+    }
+
     // A widget card with a titled header.
     component Card: Item {
         id: card
@@ -190,10 +249,185 @@ Window {
         width: root.width - 24
         spacing: 12
 
+        // ---- Now: the time and date, network, battery ----
+        Item {
+            id: now
+            visible: root.showStatus
+            width: parent.width
+            height: nowBody.height + 32
+            property date time: new Date()
+            Timer {
+                interval: 1000; running: now.visible && root.visible; repeat: true; triggeredOnStart: true
+                onTriggered: now.time = new Date()
+            }
+            Glass { anchors.fill: parent; radius: Theme.radius.large - 2; shadowDepth: 3 }
+
+            Column {
+                id: nowBody
+                x: 16; y: 16
+                width: parent.width - 32
+                spacing: 14
+
+                // the time, the date, and a dial of the passing minute
+                Item {
+                    width: parent.width
+                    height: 62
+                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.calendarRequested() }
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 0
+                        Text {
+                            text: Qt.formatTime(now.time, "HH:mm")
+                            color: Theme.c.text
+                            font.pointSize: 30
+                            font.weight: Font.Light
+                            font.features: { "tnum": 1 }
+                        }
+                        Text {
+                            text: Qt.formatDate(now.time, "dddd, d MMMM")
+                            color: Theme.c.textSecondary
+                            font.pointSize: 9.5
+                        }
+                    }
+                    Canvas {
+                        id: dial
+                        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+                        width: 58; height: 58
+                        property int sec: now.time.getSeconds()
+                        onSecChanged: requestPaint()
+                        Connections { target: Theme; function onChanged() { dial.requestPaint() } }
+                        onPaint: {
+                            const ctx = getContext("2d")
+                            ctx.reset()
+                            const c = width / 2, r = c - 3
+                            ctx.lineWidth = 3
+                            ctx.strokeStyle = Qt.color(Theme.c.border)
+                            ctx.beginPath(); ctx.arc(c, c, r, 0, 2 * Math.PI); ctx.stroke()
+                            const end = -Math.PI / 2 + 2 * Math.PI * (sec / 60)
+                            ctx.lineCap = "round"
+                            ctx.strokeStyle = Qt.color(Theme.c.accent)
+                            ctx.beginPath(); ctx.arc(c, c, r, -Math.PI / 2, end); ctx.stroke()
+                            ctx.fillStyle = Qt.color(Theme.c.accent)
+                            ctx.beginPath(); ctx.arc(c + r * Math.cos(end), c + r * Math.sin(end), 3.5, 0, 2 * Math.PI); ctx.fill()
+                        }
+                        Column {
+                            anchors.centerIn: parent
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: Qt.formatDate(now.time, "ddd").toUpperCase()
+                                color: Theme.c.accent
+                                font.pointSize: 7
+                                font.weight: Font.Bold
+                                font.letterSpacing: 0.8
+                            }
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: now.time.getDate()
+                                color: Theme.c.text
+                                font.pointSize: 14
+                                font.weight: Font.DemiBold
+                            }
+                        }
+                    }
+                }
+
+                Row {
+                    width: parent.width
+                    spacing: 10
+
+                    Tile {
+                        id: netTile
+                        width: (parent.width - 10) / 2
+                        readonly property var st: root.status
+                        readonly property bool online: !!st && st.netType !== "none"
+                        caption: !st ? "Network" : st.netType === "wifi" ? "Wi-Fi" : st.netType === "ethernet" ? "Ethernet" : "Network"
+                        value: st ? st.netLabel : ""
+                        detail: online ? "↓ " + root.rate(root.rxRate) + "   ↑ " + root.rate(root.txRate)
+                                       : "Click to connect"
+                        onClicked: root.controlCenterRequested()
+                        // signal bars (Wi-Fi), or the wired glyph
+                        Row {
+                            visible: !netTile.st || netTile.st.netType !== "ethernet"
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 3
+                            spacing: 2
+                            Repeater {
+                                model: 4
+                                delegate: Rectangle {
+                                    required property int index
+                                    anchors.bottom: parent.bottom
+                                    width: 4; radius: 2
+                                    height: 6 + index * 5
+                                    readonly property int bars: !netTile.online ? 0
+                                        : Math.max(1, Math.ceil((netTile.st.wifiSignal || 0) / 25))
+                                    color: index < bars ? Theme.c.accent : Theme.c.border
+                                    Behavior on color { ColorAnimation { duration: Theme.motion.standard } }
+                                }
+                            }
+                        }
+                        Image {
+                            visible: !!netTile.st && netTile.st.netType === "ethernet"
+                            anchors.centerIn: parent
+                            width: 20; height: 20
+                            sourceSize: Qt.size(40, 40)
+                            source: "image://icon/network-wired-symbolic?color=" + encodeURIComponent(Theme.c.accent)
+                        }
+                    }
+
+                    Tile {
+                        id: powerTile
+                        width: (parent.width - 10) / 2
+                        readonly property var st: root.status
+                        readonly property bool hasBattery: !!st && st.battery >= 0
+                        caption: hasBattery ? (st.charging ? "Charging" : "Battery") : "Power"
+                        value: hasBattery ? st.battery + "%" : "Plugged in"
+                        detail: !hasBattery ? "AC power"
+                              : st.batteryStatus === "Full" ? "Fully charged"
+                              : st.batteryMinutes > 0 ? (st.charging ? "Full in " + root.duration(st.batteryMinutes)
+                                                                     : root.duration(st.batteryMinutes) + " left")
+                              : st.charging ? "Charging" : "On battery"
+                        onClicked: System.run("enclave-settings", ["--page", "power"])
+                        Canvas {
+                            id: ring
+                            visible: powerTile.hasBattery
+                            anchors.fill: parent
+                            readonly property real level: powerTile.hasBattery ? powerTile.st.battery / 100 : 0
+                            readonly property color tone: !powerTile.hasBattery ? Theme.c.accent
+                                : powerTile.st.charging ? Theme.status.success
+                                : level <= 0.15 ? Theme.status.danger : Theme.c.accent
+                            onLevelChanged: requestPaint()
+                            onToneChanged: requestPaint()
+                            onPaint: {
+                                const ctx = getContext("2d")
+                                ctx.reset()
+                                const c = width / 2, r = c - 2.5
+                                ctx.lineWidth = 3.5
+                                ctx.strokeStyle = Qt.color(Theme.c.border)
+                                ctx.beginPath(); ctx.arc(c, c, r, 0, 2 * Math.PI); ctx.stroke()
+                                ctx.lineCap = "round"
+                                ctx.strokeStyle = Qt.color(tone)
+                                ctx.beginPath(); ctx.arc(c, c, r, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * level); ctx.stroke()
+                            }
+                        }
+                        Image {
+                            anchors.centerIn: parent
+                            width: powerTile.hasBattery ? 12 : 20
+                            height: width
+                            sourceSize: Qt.size(40, 40)
+                            source: "image://icon/" + (powerTile.hasBattery
+                                    ? (powerTile.st.charging ? "battery-level-100-charging-symbolic" : "battery-level-100-symbolic")
+                                    : "ac-adapter-symbolic") + "?color=" + encodeURIComponent(ring.tone)
+                        }
+                    }
+                }
+            }
+        }
+
         Card {
+            visible: root.showCards
             icon: "computer-symbolic"
             title: "System Overview"
-            onClicked: Apps.launch("xfce4-taskmanager.desktop")
+            onClicked: System.run("enclave-settings", ["--page", "activity"])
             Column {
                 width: parent.width
                 spacing: 2
@@ -206,56 +440,7 @@ Window {
         }
 
         Card {
-            icon: root.status ? root.status.netIcon : "network-wired-symbolic"
-            title: "Network"
-            onClicked: System.run("nm-connection-editor")
-            Item {
-                width: parent.width
-                height: 64
-                Column {
-                    spacing: 4
-                    Row {
-                        spacing: 6
-                        Rectangle {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 7; height: 7; radius: 3.5
-                            color: root.status && root.status.netType !== "none" ? Theme.status.success : Theme.c.textSecondary
-                        }
-                        Text {
-                            text: root.status ? (root.status.netType !== "none" ? "Connected" : root.status.netLabel) : ""
-                            color: root.status && root.status.netType !== "none" ? Theme.status.success : Theme.c.textSecondary
-                            font.pointSize: 9
-                        }
-                    }
-                    Text {
-                        visible: !!root.status && root.status.netName !== ""
-                        text: root.status ? root.status.netName : ""
-                        color: Theme.c.textSecondary
-                        font.pointSize: 8.5
-                        width: 130
-                        elide: Text.ElideRight
-                    }
-                    Grid {
-                        columns: 2
-                        columnSpacing: 10
-                        rowSpacing: 2
-                        Text { text: "Download"; color: Theme.c.textSecondary; font.pointSize: 8.5 }
-                        Text { text: root.rate(root.rxRate); color: Theme.c.text; font.pointSize: 8.5; font.features: { "tnum": 1 } }
-                        Text { text: "Upload"; color: Theme.c.textSecondary; font.pointSize: 8.5 }
-                        Text { text: root.rate(root.txRate); color: Theme.c.text; font.pointSize: 8.5; font.features: { "tnum": 1 } }
-                    }
-                }
-                Spark {
-                    anchors { right: parent.right; bottom: parent.bottom }
-                    width: 120; height: 46
-                    values: root.rxHistory
-                    max: 1024
-                }
-            }
-        }
-
-        Card {
-            visible: Apps.app("enclave-assistant.desktop").appId !== undefined
+            visible: root.showCards && Apps.app("enclave-assistant.desktop").appId !== undefined
             icon: "starred-symbolic"
             title: "Enclave Assistant"
             onClicked: Apps.launch("enclave-assistant.desktop")
